@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "554482574580",
+    "project_id": "smartbar-v3",
+    "storage_bucket": "smartbar-v3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554482574580:android:bee79def0186885953eaa1",
+        "android_client_info": {
+          "package_name": "com.example.smart_bar_app_v3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaV__3_MHbeYvU2oxNZhGtXah6NP7SaaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

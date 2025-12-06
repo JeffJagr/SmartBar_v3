@@ -1,0 +1,28 @@
+Smart Bar Stock – Project Log
+
+Entries are chronological, newest at bottom.
+
+- Setup: Added Firebase config (Android/iOS/Web) and DefaultFirebaseOptions wired into app init.
+- Auth & Navigation: Implemented role selection, owner/staff login flows, company list/create, and drawer-based Home with theme toggle.
+- Data models: Added Product (with restockHint/flagNeedsRestock), Company, StaffMember, Order, HistoryEntry, Note models.
+- Note model extended with optional priority marker (emoji/color) alongside tag, linked item, author, timestamps; NoteRepository stub supports get/add/delete/markDone and simple filters (TODO Firestore later).
+- State/Services: AppController/AppState with Firebase auth, messaging, Firestore service stubs; FCM foreground/background handlers.
+- Repos/ViewModels (stub): In-memory ProductRepository with restockHint updates; InventoryViewModel; NoteRepository with NotesViewModel. NotesViewModel supports add/mark-done/delete with refresh.
+- Added InventoryRepository abstraction and InMemoryInventoryRepository (stub) with getItems/updateRestockHint/clearRestockHint methods and seeded products.
+- InventoryViewModel now depends on InventoryRepository (stub, in-memory) and exposes update/clear restockHint; UI still uses stub data.
+- Inventory screens (Bar/Warehouse) now show restock hint badge/marker and a “Set restock hint” control per item, keeping hints non-destructive, with inline clear hint action.
+- UI: Drawer sections (Bar, Warehouse, Restock, Orders, History, Statistics, Notes, Tools, Account). Bar/Warehouse show products, quantities, restock hint badge and bottom-sheet slider/number input (non-destructive). Notes screen lists notes (with priority emoji), add-note bottom sheet with tag/product link/priority, TODO notes can be marked done (stamps user/time).
+- Tweaks: Added clear hint action, improved status colors (green/orange/red) based on hint ratio, fixed null-aware hints, and ensured notes “mark done” flow is safe.
+- Firebase Rules: Dev rule allowing authenticated read/write; firebase.json/.firebaserc added. TODO: tighten per-company rules and deploy.
+- Misc: Theme switching (light/dark/system) active; FCM foreground snackbars; placeholder screens for future features; tests removed (TODO to add later).
+- Home now chooses Firestore repos when a company is active (FirestoreInventoryRepository/FirestoreNoteRepository), falling back to in-memory stubs otherwise.
+- Firestore rules tightened: per-company access via ownerIds/staff subcollection; products/notes/staff subcollections guarded; company create requires auth.uid in ownerIds.
+- TODOs in repos/viewmodels to add analytics/logging, low-stock and note notifications, and search/filter enhancements.
+- InventoryViewModel now falls back to sample products when Firestore returns empty, to allow UI testing without seeded data (temporary).
+- Firestore repos are live for inventory and notes; models include minimalStockThreshold/restockHint and note priority/tag/linkedProduct fields; viewmodels stream Firestore data with loading/error handling and snackbars on save.
+- Quantity adjustments added via bottom sheets; updates flow through Firestore/in-memory repos; restock hint and quantity controls now both persist.
+- Notes screen now streams Firestore notes, shows tags/priority, allows add/save, mark done, delete (owner), and refresh; improved layout with timestamp/author.
+- Role-aware UI: staff can set restock hints but see read-only quantities; owners see adjust-qty controls.
+- Firestore access is company-scoped: repositories use companyId from AppController; rules enforce per-company isolation; activeCompany set on login to scope all queries.
+- Permissions propagated to ViewModels (inventory/notes) to gate editing/deleting based on owner vs staff; adjust-qty hidden for staff.
+- TODO placeholders added for supplier management, restock transfers, exports/printing, analytics, notifications, and reporting.

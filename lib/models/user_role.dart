@@ -1,0 +1,4 @@
+enum UserRole {
+  owner,
+  staff,
+}

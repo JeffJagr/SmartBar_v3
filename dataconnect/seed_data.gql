@@ -1,0 +1,74 @@
+mutation CreateSeedData @transaction @auth(level: PUBLIC, insecureReason: "This operation is used to seed the database with initial data, and is safe to expose to the public.") {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      username: "demouser1",
+      email: "demouser1@example.com",
+      password: "password1",
+      role: "admin"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      username: "demouser2",
+      email: "demouser2@example.com",
+      password: "password2",
+      role: "user"
+    }
+  ])
+  product_insertMany(data: [
+    {
+      id: "650e8400-e29b-41d4-a716-446655440002",
+      name: "Product 1",
+      category: "Category 1",
+      unitOfMeasure: "each"
+    },
+    {
+      id: "650e8400-e29b-41d4-a716-446655440003",
+      name: "Product 2",
+      category: "Category 2",
+      unitOfMeasure: "box"
+    }
+  ])
+  inventoryItem_insertMany(data: [
+    {
+      id: "750e8400-e29b-41d4-a716-446655440004",
+      productId: "650e8400-e29b-41d4-a716-446655440002",
+      currentQuantity: 10,
+      location: "Warehouse A"
+    },
+    {
+      id: "750e8400-e29b-41d4-a716-446655440005",
+      productId: "650e8400-e29b-41d4-a716-446655440003",
+      currentQuantity: 5,
+      location: "Warehouse B"
+    }
+  ])
+  order_insertMany(data: [
+    {
+      id: "850e8400-e29b-41d4-a716-446655440006",
+      creatorId: "550e8400-e29b-41d4-a716-446655440000",
+      orderDate: "2024-01-01T00:00:00Z",
+      orderType: "Sales",
+      status: "Pending"
+    },
+    {
+      id: "850e8400-e29b-41d4-a716-446655440007",
+      creatorId: "550e8400-e29b-41d4-a716-446655440001",
+      orderDate: "2024-01-02T00:00:00Z",
+      orderType: "Purchase",
+      status: "Completed"
+    }
+  ])
+  orderItem_insertMany(data: [
+    {
+      orderId: "850e8400-e29b-41d4-a716-446655440006",
+      productId: "650e8400-e29b-41d4-a716-446655440002",
+      orderedQuantity: 2
+    },
+    {
+      orderId: "850e8400-e29b-41d4-a716-446655440007",
+      productId: "650e8400-e29b-41d4-a716-446655440003",
+      orderedQuantity: 3
+    }
+  ])
+}

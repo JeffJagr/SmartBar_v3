@@ -1,0 +1,25 @@
+mutation CreateNewOrder($creatorId: UUID!, $orderType: String!, $status: String!) @auth(level: USER) {
+  order_insert(data: {creatorId: $creatorId, orderDate_expr: "request.time", orderType: $orderType, status: $status})
+}
+
+query ListAvailableProducts @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  products {
+    id
+    name
+    description
+    salePrice
+  }
+}
+
+mutation UpdateProductSalePrice($id: UUID!, $salePrice: Float!) @auth(level: USER) {
+  product_update(key: {id: $id}, data: {salePrice: $salePrice})
+}
+
+query ListOrdersForUser($creatorId: UUID!) @auth(level: USER) {
+  orders(where: {creatorId: {eq: $creatorId}}) {
+    id
+    orderDate
+    orderType
+    status
+  }
+}
