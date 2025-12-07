@@ -60,78 +60,88 @@ class _NotesScreenState extends State<NotesScreen> {
               final timestamp = note.timestamp.toLocal();
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  title: Row(
-                    children: [
-                      if (priorityIcon != null)
-                        Icon(priorityIcon, size: 16, color: priorityColor ?? Colors.orange),
-                      if (priorityIcon != null) const SizedBox(width: 6),
-                      Expanded(child: Text(note.content)),
-                    ],
-                  ),
-                  subtitle: Column(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${note.authorName} • ${timestamp.toString()}',
-                        style: Theme.of(context).textTheme.bodySmall,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                if (priorityIcon != null)
+                                  Icon(priorityIcon,
+                                      size: 16, color: priorityColor ?? Colors.orange),
+                                if (priorityIcon != null) const SizedBox(width: 6),
+                                Expanded(child: Text(note.content)),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${note.authorName} • ${timestamp.toString()}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (note.isDone && note.doneBy != null && note.doneAt != null)
+                              Text(
+                                'Done by ${note.doneBy} on ${note.doneAt}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.green),
+                              ),
+                            if (note.linkedProductId != null)
+                              Text(
+                                'Linked product: ${_productName(vm.products, note.linkedProductId!)}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                          ],
+                        ),
                       ),
-                      if (note.isDone && note.doneBy != null && note.doneAt != null)
-                        Text(
-                          'Done by ${note.doneBy} on ${note.doneAt}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.green),
+                      const SizedBox(width: 12),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 140),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Chip(
+                              label: Text(note.tag),
+                              backgroundColor: _tagColor(note.tag).withValues(alpha: 0.15),
+                              labelStyle: TextStyle(color: _tagColor(note.tag)),
+                            ),
+                            if (!note.isDone && note.tag == 'TODO')
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                ),
+                                onPressed: () async {
+                                  final app = context.read<AppController>();
+                                  final doneBy = app.displayName;
+                                  await context.read<NotesViewModel>().markDone(
+                                        id: note.id,
+                                        doneBy: doneBy,
+                                      );
+                                },
+                                child: const Text('Mark done'),
+                              ),
+                            if (vm.canDeleteNotes)
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                ),
+                                onPressed: () async {
+                                  await context.read<NotesViewModel>().deleteNote(note.id);
+                                },
+                                child: const Text('Delete'),
+                              ),
+                          ],
                         ),
-                      if (note.linkedProductId != null)
-                        Text(
-                          'Linked product: ${_productName(vm.products, note.linkedProductId!)}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
+                      ),
                     ],
-                  ),
-                  trailing: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 140),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Chip(
-                          label: Text(note.tag),
-                          backgroundColor: _tagColor(note.tag).withValues(alpha: 0.15),
-                          labelStyle: TextStyle(color: _tagColor(note.tag)),
-                        ),
-                        if (!note.isDone && note.tag == 'TODO')
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                            ),
-                            onPressed: () async {
-                              final app = context.read<AppController>();
-                              final doneBy = app.displayName;
-                              await context.read<NotesViewModel>().markDone(
-                                    id: note.id,
-                                    doneBy: doneBy,
-                                  );
-                            },
-                            child: const Text('Mark done'),
-                          ),
-                        if (vm.canDeleteNotes)
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                            ),
-                            onPressed: () async {
-                              await context.read<NotesViewModel>().deleteNote(note.id);
-                            },
-                            child: const Text('Delete'),
-                          ),
-                      ],
-                    ),
                   ),
                 ),
               );

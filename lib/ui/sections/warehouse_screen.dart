@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/inventory_view_model.dart';
@@ -113,7 +113,7 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
               final lowSecondary = p.barQuantity < p.barMax;
               return ProductListItem(
                 title: p.name,
-                groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
+                groupText: '${p.group}${p.subgroup != null ? " â€¢ ${p.subgroup}" : ""}',
                 primaryLabel: 'Warehouse',
                 primaryValue: '${p.warehouseQuantity}/${p.warehouseTarget}',
                 secondaryLabel: 'Bar',
@@ -132,6 +132,13 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
                   current: p.warehouseQuantity,
                   max: p.warehouseTarget,
                 ),
+                onTransfer: isOwner
+                    ? () => _showTransferDialog(
+                          context: context,
+                          productId: p.id,
+                          available: p.warehouseQuantity,
+                        )
+                    : null,
                 onAdjust: isOwner
                     ? () => _showAdjustSheet(context, p.id, p.barQuantity, p.warehouseQuantity)
                     : null,
@@ -203,8 +210,56 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Product deleted')));
+  }
+
+  Future<void> _showTransferDialog({
+    required BuildContext context,
+    required String productId,
+    required int available,
+  }) async {
+    final controller = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Transfer to Bar'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Available in warehouse: $available'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Quantity to transfer'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Transfer')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final qty = int.tryParse(controller.text) ?? 0;
+    if (qty <= 0 || qty > available) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid quantity')),
+        );
       }
+      return;
     }
+    await context.read<InventoryViewModel>().transferToBar(
+          productId: productId,
+          quantity: qty,
+        );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Transferred $qty to bar')));
+    }
+  }
+}
   }
 
   Color? _statusColor(int hint, int target) {
@@ -216,3 +271,6 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
   }
 
 }
+
+
+

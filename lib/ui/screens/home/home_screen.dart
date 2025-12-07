@@ -11,7 +11,7 @@ import '../../../viewmodels/notes_view_model.dart';
 import '../../sections/bar_screen.dart';
 import '../../sections/company_settings_screen.dart';
 import '../../sections/history_section_screen.dart';
-import '../../sections/orders_section_screen.dart';
+import '../../sections/orders_screen.dart';
 import '../../sections/print_export_screen.dart';
 import '../../sections/restock_screen.dart';
 import '../../sections/staff_management_screen.dart';
@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case _HomeSection.restock:
         return const RestockScreen();
       case _HomeSection.orders:
-        return const OrdersSectionScreen();
+        return const OrdersScreen();
       case _HomeSection.history:
         return const HistorySectionScreen();
       case _HomeSection.statistics:

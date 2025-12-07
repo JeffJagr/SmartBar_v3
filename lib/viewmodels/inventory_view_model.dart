@@ -106,6 +106,25 @@ class InventoryViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> transferToBar({
+    required String productId,
+    required int quantity,
+  }) async {
+    try {
+      saving = true;
+      notifyListeners();
+      await _repository.transferToBar(itemId: productId, quantity: quantity);
+      products = await _repository.getItems();
+      notifyListeners();
+      // TODO: log stock movement in history repository.
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      saving = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> addProduct(Product product) async {
     try {
       saving = true;

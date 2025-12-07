@@ -4,18 +4,18 @@ class OrderItem {
   const OrderItem({
     required this.productId,
     required this.quantity,
-    required this.unitCost,
+    this.unitCost,
   });
 
   final String productId;
   final int quantity;
-  final double unitCost;
+  final double? unitCost;
 
   factory OrderItem.fromMap(Map<String, dynamic> data) {
     return OrderItem(
       productId: data['productId'] as String? ?? '',
       quantity: (data['quantity'] as num?)?.toInt() ?? 0,
-      unitCost: (data['unitCost'] as num?)?.toDouble() ?? 0,
+      unitCost: (data['unitCost'] as num?)?.toDouble(),
     );
   }
 
@@ -23,7 +23,7 @@ class OrderItem {
     return {
       'productId': productId,
       'quantity': quantity,
-      'unitCost': unitCost,
+      if (unitCost != null) 'unitCost': unitCost,
     };
   }
 }
@@ -38,15 +38,17 @@ class OrderModel {
   const OrderModel({
     required this.id,
     required this.companyId,
-    required this.supplier,
+    required this.createdByUserId,
     required this.status,
     required this.items,
     required this.createdAt,
+    this.supplier,
   });
 
   final String id;
   final String companyId;
-  final String supplier;
+  final String? supplier;
+  final String createdByUserId;
   final OrderStatus status;
   final List<OrderItem> items;
   final DateTime createdAt;
@@ -59,7 +61,8 @@ class OrderModel {
     return OrderModel(
       id: id,
       companyId: data['companyId'] as String? ?? '',
-      supplier: data['supplier'] as String? ?? '',
+      createdByUserId: data['createdByUserId'] as String? ?? '',
+      supplier: data['supplier'] as String?,
       status: _statusFromString(data['status'] as String?),
       items: (data['items'] as List<dynamic>? ?? [])
           .map((e) => OrderItem.fromMap((e as Map).cast<String, dynamic>()))
@@ -71,7 +74,8 @@ class OrderModel {
   Map<String, dynamic> toMap() {
     return {
       'companyId': companyId,
-      'supplier': supplier,
+      'createdByUserId': createdByUserId,
+      if (supplier != null) 'supplier': supplier,
       'status': status.name,
       'items': items.map((e) => e.toMap()).toList(),
       'createdAt': Timestamp.fromDate(createdAt),

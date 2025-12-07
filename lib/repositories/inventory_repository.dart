@@ -15,6 +15,14 @@ abstract class InventoryRepository {
     int? barQuantity,
     int? warehouseQuantity,
   });
+  Future<void> addWarehouseStock({
+    required String itemId,
+    required int delta,
+  });
+  Future<void> transferToBar({
+    required String itemId,
+    required int quantity,
+  });
   Future<void> addProduct(Product product);
   Future<void> updateProduct(String itemId, Map<String, dynamic> data);
   Future<void> deleteProduct(String itemId);
@@ -128,6 +136,39 @@ class InMemoryInventoryRepository implements InventoryRepository {
     _controller.add(_items);
   }
 
+  @override
+  Future<void> transferToBar({
+    required String itemId,
+    required int quantity,
+  }) async {
+    if (quantity <= 0) return;
+    _items = _items.map((p) {
+      if (p.id == itemId) {
+        final newWh = (p.warehouseQuantity - quantity).clamp(0, 1 << 30);
+        final newBar = p.barQuantity + quantity;
+        return p.copyWith(
+          warehouseQuantity: newWh,
+          barQuantity: newBar,
+        );
+      }
+      return p;
+    }).toList();
+    _controller.add(_items);
+  }
+
+  @override
+  Future<void> addWarehouseStock({required String itemId, required int delta}) async {
+    if (delta == 0) return;
+    _items = _items.map((p) {
+      if (p.id == itemId) {
+        final newWh = (p.warehouseQuantity + delta).clamp(0, 1 << 30);
+        return p.copyWith(warehouseQuantity: newWh);
+      }
+      return p;
+    }).toList();
+    _controller.add(_items);
+  }
+
   List<Product> _seed() {
     // TODO: replace with Firestore fetch per company.
     return [
@@ -223,5 +264,38 @@ class FirestoreInventoryRepository implements InventoryRepository {
   @override
   Future<void> deleteProduct(String itemId) {
     return _col.doc(itemId).delete();
+  }
+
+  @override
+  Future<void> addWarehouseStock({required String itemId, required int delta}) async {
+    if (delta == 0) return;
+    await _col.doc(itemId).update({'warehouseQuantity': FieldValue.increment(delta)});
+  }
+
+  @override
+  Future<void> transferToBar({
+    required String itemId,
+    required int quantity,
+  }) async {
+    if (quantity <= 0) return;
+    await _firestore.runTransaction((txn) async {
+      final docRef = _col.doc(itemId);
+      final snap = await txn.get(docRef);
+      if (!snap.exists) {
+        throw StateError('Product not found');
+      }
+      final data = snap.data()!;
+      final currentBar = (data['barQuantity'] as num?)?.toInt() ?? 0;
+      final currentWh = (data['warehouseQuantity'] as num?)?.toInt() ?? 0;
+      if (currentWh < quantity) {
+        throw StateError('Not enough in warehouse');
+      }
+      final newWh = currentWh - quantity;
+      final newBar = currentBar + quantity;
+      txn.update(docRef, {
+        'warehouseQuantity': newWh,
+        'barQuantity': newBar,
+      });
+    });
   }
 }
