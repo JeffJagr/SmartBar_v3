@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/inventory_view_model.dart';
-import '../../models/product.dart';
-import '../widgets/adjust_quantity_sheet.dart';
 import '../widgets/restock_hint_sheet.dart';
 import '../widgets/product_form_sheet.dart';
 
-class WarehouseScreen extends StatelessWidget {
-  const WarehouseScreen({super.key});
+/// Generic inventory list combining bar + warehouse view.
+/// Shows restockHint as a badge (non-destructive suggestion).
+class InventoryListScreen extends StatelessWidget {
+  const InventoryListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,17 +24,18 @@ class WarehouseScreen extends StatelessWidget {
       return const Center(child: Text('No products yet.'));
     }
 
+    final isOwner = vm.canEditQuantities;
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: vm.products.length,
       itemBuilder: (context, index) {
         final p = vm.products[index];
-        final hintValue = p.restockHint ?? 0;
-        final statusColor = _statusColor(hintValue, p.warehouseTarget);
-        final isOwner = vm.canEditQuantities;
+        final hint = p.restockHint ?? 0;
+        final badgeColor = _badgeColor(context, hint, p.barMax);
         return Card(
-          color: statusColor?.withValues(alpha: 0.08),
           margin: const EdgeInsets.only(bottom: 12),
+          color: badgeColor == null ? null : badgeColor.withValues(alpha: 0.08),
           child: ListTile(
             title: Text(p.name),
             subtitle: Column(
@@ -50,11 +51,11 @@ class WarehouseScreen extends StatelessWidget {
                   runSpacing: 4,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    if (hintValue > 0)
+                    if (hint > 0)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: statusColor?.withValues(alpha: 0.2) ??
+                          color: badgeColor?.withValues(alpha: 0.2) ??
                               Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -63,38 +64,25 @@ class WarehouseScreen extends StatelessWidget {
                           children: [
                             const Text('⚠️'),
                             const SizedBox(width: 4),
-                            Text('Hint: $hintValue'),
+                            Text('Hint: $hint'),
                             IconButton(
                               iconSize: 18,
                               padding: EdgeInsets.zero,
                               icon: const Icon(Icons.clear, size: 16),
                               tooltip: 'Clear hint',
-                              onPressed: () =>
-                                  context.read<InventoryViewModel>().clearRestockHint(p.id),
+                              onPressed: () => vm.clearRestockHint(p.id),
                             ),
                           ],
                         ),
                       ),
                     TextButton(
-                      onPressed: () => _showRestockHintSheet(context, p.id, hintValue),
+                      onPressed: () => _openHintSheet(context, p.id, hint),
                       child: const Text('Set restock hint'),
                     ),
                     if (isOwner)
                       TextButton(
-                        onPressed: () =>
-                            _showAdjustSheet(context, p.id, p.barQuantity, p.warehouseQuantity),
-                        child: const Text('Adjust qty'),
-                      ),
-                    if (isOwner)
-                      TextButton(
-                        onPressed: () => _openProductForm(context, p),
+                        onPressed: () => _openEditSheet(context, p),
                         child: const Text('Edit'),
-                      ),
-                    if (isOwner)
-                      IconButton(
-                        tooltip: 'Delete',
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _confirmDelete(context, p.id),
                       ),
                   ],
                 ),
@@ -105,37 +93,21 @@ class WarehouseScreen extends StatelessWidget {
                   ),
               ],
             ),
-            onTap: () => _showRestockHintSheet(context, p.id, hintValue),
+            onTap: () => _openHintSheet(context, p.id, hint),
           ),
         );
       },
     );
   }
 
-  void _showRestockHintSheet(BuildContext context, String productId, int current) {
+  void _openHintSheet(BuildContext context, String productId, int current) {
     showModalBottomSheet(
       context: context,
       builder: (_) => RestockHintSheet(productId: productId, initialValue: current),
     );
   }
 
-  void _showAdjustSheet(
-    BuildContext context,
-    String productId,
-    int barQuantity,
-    int warehouseQuantity,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => AdjustQuantitySheet(
-        productId: productId,
-        barQuantity: barQuantity,
-        warehouseQuantity: warehouseQuantity,
-      ),
-    );
-  }
-
-  void _openProductForm(BuildContext context, Product product) {
+  void _openEditSheet(BuildContext context, product) {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -143,32 +115,11 @@ class WarehouseScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, String productId) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete product'),
-        content: const Text('Are you sure you want to delete this product?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
-        ],
-      ),
-    );
-    if (confirmed == true && context.mounted) {
-      await context.read<InventoryViewModel>().deleteProduct(productId);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Product deleted')));
-      }
-    }
-  }
-
-  Color? _statusColor(int hint, int target) {
+  Color? _badgeColor(BuildContext context, int hint, int target) {
     if (hint <= 0) return null;
     final ratio = target > 0 ? hint / target : 0;
     if (ratio >= 0.66) return Colors.red;
     if (ratio >= 0.33) return Colors.orange;
-    return Colors.green;
+    return Theme.of(context).colorScheme.primary;
   }
 }

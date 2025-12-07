@@ -21,12 +21,15 @@ import '../../sections/staff_management_screen.dart';
 import '../../sections/statistics_screen.dart';
 import '../../sections/warehouse_screen.dart';
 import '../../sections/notes_screen.dart';
+import '../../sections/inventory_list_screen.dart';
+import '../../widgets/product_form_sheet.dart';
 import 'package:smart_bar_app_v3/screens/auth/role_selection_screen.dart';
 import 'package:smart_bar_app_v3/screens/company/company_list_screen.dart';
 
 enum _HomeSection {
   bar,
   warehouse,
+  inventory,
   restock,
   orders,
   history,
@@ -117,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       drawer: _buildDrawer(app, company, isOwner),
       body: _buildBody(),
+      floatingActionButton: _buildFab(isOwner),
     );
   }
 
@@ -126,6 +130,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return const BarScreen();
       case _HomeSection.warehouse:
         return const WarehouseScreen();
+      case _HomeSection.inventory:
+        return const InventoryListScreen();
       case _HomeSection.restock:
         return const RestockScreen();
       case _HomeSection.orders:
@@ -146,6 +152,26 @@ class _HomeScreenState extends State<HomeScreen> {
       case _HomeSection.notes:
         return const NotesScreen();
     }
+  }
+
+  Widget? _buildFab(bool isOwner) {
+    if (!isOwner) return null;
+    if (_selected != _HomeSection.bar &&
+        _selected != _HomeSection.warehouse &&
+        _selected != _HomeSection.inventory) {
+      return null;
+    }
+    return FloatingActionButton.extended(
+      icon: const Icon(Icons.add),
+      label: const Text('Add product'),
+      onPressed: () {
+        showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          builder: (_) => const ProductFormSheet(),
+        );
+      },
+    );
   }
 
   Drawer _buildDrawer(AppController app, Company? company, bool isOwner) {
@@ -204,6 +230,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.warehouse_outlined,
               label: 'Warehouse',
               onTap: () => _selectSection(_HomeSection.warehouse),
+            ),
+            _drawerItem(
+              icon: Icons.list_alt_outlined,
+              label: 'Inventory (combined)',
+              onTap: () => _selectSection(_HomeSection.inventory),
             ),
             _drawerItem(
               icon: Icons.swap_vert,

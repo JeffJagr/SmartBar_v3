@@ -5,6 +5,7 @@ import '../../models/product.dart';
 import '../../viewmodels/inventory_view_model.dart';
 import '../widgets/adjust_quantity_sheet.dart';
 import '../widgets/restock_hint_sheet.dart';
+import '../widgets/product_form_sheet.dart';
 
 class BarScreen extends StatelessWidget {
   const BarScreen({super.key});
@@ -66,7 +67,10 @@ class BarScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     if (hintValue > 0)
                       Container(
@@ -92,7 +96,6 @@ class BarScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                    const Spacer(),
                     TextButton(
                       onPressed: () => _showRestockHintSheet(context, p.id, hintValue),
                       child: const Text('Set restock hint'),
@@ -102,6 +105,17 @@ class BarScreen extends StatelessWidget {
                         onPressed: () =>
                             _showAdjustSheet(context, p.id, p.barQuantity, p.warehouseQuantity),
                         child: const Text('Adjust qty'),
+                      ),
+                    if (isOwner)
+                      TextButton(
+                        onPressed: () => _openProductForm(context, p),
+                        child: const Text('Edit'),
+                      ),
+                    if (isOwner)
+                      IconButton(
+                        tooltip: 'Delete',
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _confirmDelete(context, p.id),
                       ),
                   ],
                 ),
@@ -140,6 +154,35 @@ class BarScreen extends StatelessWidget {
         warehouseQuantity: warehouseQuantity,
       ),
     );
+  }
+
+  void _openProductForm(BuildContext context, Product product) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (_) => ProductFormSheet(product: product),
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, String productId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete product'),
+        content: const Text('Are you sure you want to delete this product?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await context.read<InventoryViewModel>().deleteProduct(productId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Product deleted')));
+      }
+    }
   }
 
   Color? _statusColor(int hint, int max) {
