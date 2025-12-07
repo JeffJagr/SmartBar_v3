@@ -41,3 +41,5 @@ Entries are chronological, newest at bottom.
 - Refactored repeated product tiles into reusable ProductListItem widget to keep screens clean.
 - NotesScreen wrapped in SafeArea+ListView/RefreshIndicator to avoid overflow; cleaned bullet rendering; added override annotations and deprecated color fix.
 - Orders MVP added: Firestore orders repository/viewmodel, Orders screen with list/new-order sheet, mark received (increments warehouse stock), and warehouse→bar transfer flow.
+- Added user/role management scaffolding, history stream/viewmodel, and Users/History screens wiring (owner-only).
+- Low-stock highlighting honors minimalStockThreshold across bar/warehouse/combined lists; warehouse transfer dialog fixed; order samples updated with createdByUserId.

@@ -194,7 +194,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      value: _tag,
+                      initialValue: _tag,
                       decoration: const InputDecoration(labelText: 'Tag'),
                       items: const [
                         DropdownMenuItem(value: 'TODO', child: Text('TODO')),
@@ -209,7 +209,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
-                      value: _linkedProductId,
+                      initialValue: _linkedProductId,
                       decoration: const InputDecoration(labelText: 'Linked product (optional)'),
                       items: [
                         const DropdownMenuItem<String?>(
@@ -227,7 +227,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      value: _priority,
+                      initialValue: _priority,
                       decoration: const InputDecoration(labelText: 'Priority'),
                       items: const [
                         DropdownMenuItem(value: 'Normal', child: Text('Normal')),

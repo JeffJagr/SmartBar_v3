@@ -33,6 +33,7 @@ enum _HomeSection {
   history,
   statistics,
   staffManagement,
+  users,
   companySettings,
   printExport,
   syncRefresh,
@@ -139,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case _HomeSection.statistics:
         return const StatisticsScreen();
       case _HomeSection.users:
-        return const StaffManagementScreen();
+        return const UsersScreen();
       case _HomeSection.companySettings:
         return const CompanySettingsScreen();
       case _HomeSection.printExport:
@@ -280,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (isOwner)
               _drawerItem(
                 icon: Icons.badge_outlined,
-                label: 'Staff Management',
+                label: 'User Management',
                 onTap: () => _selectSection(_HomeSection.users),
               ),
             _drawerItem(

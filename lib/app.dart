@@ -111,7 +111,7 @@ class SmartBarApp extends StatelessWidget {
             return vm;
           },
         ),
-        ProxyProvider<AppController, OrdersRepository>(
+        ProxyProvider<AppController, OrdersRepository?>(
           update: (_, app, __) => app.activeCompany != null
               ? FirestoreOrdersRepository(companyId: app.activeCompany!.id)
               : null,

@@ -113,6 +113,8 @@ class _BarScreenState extends State<BarScreen> {
               final hintValue = p.restockHint ?? 0;
               final statusColor = _statusColor(hintValue, p.barMax);
               final low = _lowStock(p);
+              final threshold = p.minimalStockThreshold ?? 0;
+              final lowBar = threshold > 0 ? p.barQuantity <= threshold : low.bar;
               return ProductListItem(
                 title: p.name,
                 groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
@@ -123,7 +125,7 @@ class _BarScreenState extends State<BarScreen> {
                 primaryBadgeColor: Theme.of(context).colorScheme.primary,
                 hintValue: hintValue,
                 hintStatusColor: statusColor,
-                lowPrimary: low.bar,
+                lowPrimary: lowBar,
                 lowSecondary: low.warehouse,
                 lowPrimaryLabel: 'Low bar stock',
                 lowSecondaryLabel: 'Low WH stock',

@@ -49,7 +49,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String?>(
-                    value: _actionFilter,
+                    initialValue: _actionFilter,
                     decoration: const InputDecoration(labelText: 'Action type'),
                     items: const [
                       DropdownMenuItem(value: null, child: Text('All')),

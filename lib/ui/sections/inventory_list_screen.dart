@@ -109,8 +109,11 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
               final p = filtered[index];
               final hint = p.restockHint ?? 0;
               final badgeColor = _badgeColor(context, hint, p.barMax);
-              final lowPrimary = p.barQuantity < p.barMax;
-              final lowSecondary = p.warehouseQuantity < p.warehouseTarget;
+              final threshold = p.minimalStockThreshold ?? 0;
+              final lowPrimary =
+                  threshold > 0 ? p.barQuantity <= threshold : p.barQuantity < p.barMax;
+              final lowSecondary =
+                  threshold > 0 ? p.warehouseQuantity <= threshold : p.warehouseQuantity < p.warehouseTarget;
               return ProductListItem(
                 title: p.name,
                 groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
@@ -133,6 +136,36 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                   max: p.barMax,
                 ),
                 onEdit: isOwner ? () => _openEditSheet(context, p) : null,
+                onDelete: isOwner
+                    ? () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Delete product'),
+                            content:
+                                const Text('Are you sure you want to delete this product?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true && context.mounted) {
+                          await context.read<InventoryViewModel>().deleteProduct(p.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Product deleted')),
+                            );
+                          }
+                        }
+                      }
+                    : null,
                 showStaffReadOnly: !isOwner,
               );
             },

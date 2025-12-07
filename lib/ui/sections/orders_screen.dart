@@ -5,7 +5,6 @@ import '../../controllers/app_controller.dart';
 import '../../models/order.dart';
 import '../../viewmodels/orders_view_model.dart';
 import '../../viewmodels/inventory_view_model.dart';
-import '../widgets/product_form_sheet.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});

@@ -1,12 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../viewmodels/inventory_view_model.dart';
 import '../../models/product.dart';
+import '../../viewmodels/inventory_view_model.dart';
 import '../widgets/adjust_quantity_sheet.dart';
-import '../widgets/restock_hint_sheet.dart';
 import '../widgets/product_form_sheet.dart';
 import '../widgets/product_list_item.dart';
+import '../widgets/restock_hint_sheet.dart';
 
 class WarehouseScreen extends StatefulWidget {
   const WarehouseScreen({super.key});
@@ -109,11 +109,14 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
               final p = filtered[index];
               final hintValue = p.restockHint ?? 0;
               final statusColor = _statusColor(hintValue, p.warehouseTarget);
-              final lowPrimary = p.warehouseQuantity < p.warehouseTarget;
-              final lowSecondary = p.barQuantity < p.barMax;
+              final threshold = p.minimalStockThreshold ?? 0;
+              final lowPrimary = threshold > 0
+                  ? p.warehouseQuantity <= threshold
+                  : p.warehouseQuantity < p.warehouseTarget;
+              final lowSecondary = threshold > 0 ? p.barQuantity <= threshold : p.barQuantity < p.barMax;
               return ProductListItem(
                 title: p.name,
-                groupText: '${p.group}${p.subgroup != null ? " â€¢ ${p.subgroup}" : ""}',
+                groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
                 primaryLabel: 'Warehouse',
                 primaryValue: '${p.warehouseQuantity}/${p.warehouseTarget}',
                 secondaryLabel: 'Bar',
@@ -210,6 +213,8 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Product deleted')));
+      }
+    }
   }
 
   Future<void> _showTransferDialog({
@@ -259,8 +264,6 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
           .showSnackBar(SnackBar(content: Text('Transferred $qty to bar')));
     }
   }
-}
-  }
 
   Color? _statusColor(int hint, int target) {
     if (hint <= 0) return null;
@@ -269,8 +272,4 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
     if (ratio >= 0.33) return Colors.orange;
     return Colors.green;
   }
-
 }
-
-
-
