@@ -9,28 +9,28 @@ class RestockHintSheet extends StatefulWidget {
   const RestockHintSheet({
     super.key,
     required this.productId,
-    required this.initialValue,
-    this.maxValue = 100,
+    required this.currentQuantity,
+    required this.maxQuantity,
   });
 
   final String productId;
-  final int initialValue;
-  final int maxValue;
+  final int currentQuantity;
+  final int maxQuantity;
 
   @override
   State<RestockHintSheet> createState() => _RestockHintSheetState();
 }
 
 class _RestockHintSheetState extends State<RestockHintSheet> {
-  late int _value;
+  late double _percentFull;
   final _textController = TextEditingController();
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _value = widget.initialValue;
-    _textController.text = _value.toString();
+    _percentFull = _initialPercent();
+    _textController.text = _percentFull.round().toString();
   }
 
   @override
@@ -52,36 +52,36 @@ class _RestockHintSheetState extends State<RestockHintSheet> {
           ),
           const SizedBox(height: 12),
           Slider(
-            value: _value.toDouble(),
+            value: _percentFull,
             min: 0,
-            max: widget.maxValue.toDouble(),
-            divisions: widget.maxValue ~/ 5,
-            label: '$_value',
+            max: 100,
+            divisions: 20,
+            label: '${_percentFull.round()}%',
             onChanged: (v) {
               setState(() {
-                _value = v.toInt();
-                _textController.text = _value.toString();
+                _percentFull = v;
+                _textController.text = _percentFull.round().toString();
               });
             },
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Selected: $_value'),
+              Text('Fullness: ${_percentFull.round()}%'),
               SizedBox(
                 width: 80,
                 child: TextField(
                   controller: _textController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Value',
+                    labelText: '%',
                     isDense: true,
                   ),
                   onChanged: (text) {
                     final parsed = int.tryParse(text) ?? 0;
-                    final clamped = parsed.clamp(0, widget.maxValue);
+                    final clamped = parsed.clamp(0, 100);
                     setState(() {
-                      _value = clamped;
+                      _percentFull = clamped.toDouble();
                     });
                   },
                 ),
@@ -89,20 +89,25 @@ class _RestockHintSheetState extends State<RestockHintSheet> {
             ],
           ),
           Text(
-            'Hint is a suggestion only; it does not change current stock.',
+            'Hint is a suggestion only; it does not change current stock. Slider represents % fullness.',
             style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _hintSummary(),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () {
               // Clearing restock hint sets it to zero; does not alter actual stock.
               setState(() {
-                _value = 0;
-                _textController.text = '0';
+                _percentFull = 100;
+                _textController.text = '100';
               });
               context.read<InventoryViewModel>().updateRestockHint(
                     widget.productId,
-                    _value,
+                    0,
                   );
               Navigator.of(context).pop();
             },
@@ -124,7 +129,7 @@ class _RestockHintSheetState extends State<RestockHintSheet> {
                     try {
                       await context.read<InventoryViewModel>().updateRestockHint(
                             widget.productId,
-                            _value,
+                            _computedMissing(),
                           );
                       if (!mounted) return;
                       Navigator.of(context).pop();
@@ -145,5 +150,28 @@ class _RestockHintSheetState extends State<RestockHintSheet> {
         ],
       ),
     );
+  }
+
+  double _initialPercent() {
+    final max = widget.maxQuantity;
+    if (max <= 0) return 100;
+    final percent = (widget.currentQuantity / max) * 100;
+    return percent.clamp(0, 100);
+  }
+
+  int _computedMissing() {
+    final max = widget.maxQuantity;
+    if (max <= 0) return 0;
+    final missing = max * ((100 - _percentFull) / 100);
+    return missing.round();
+  }
+
+  String _hintSummary() {
+    final max = widget.maxQuantity;
+    if (max <= 0) {
+      return 'Approximate missing: N/A (no target set)';
+    }
+    final missing = _computedMissing();
+    return 'Approximate missing: $missing of $max';
   }
 }

@@ -16,7 +16,7 @@ class _NotesScreenState extends State<NotesScreen> {
   final _contentController = TextEditingController();
   String _tag = 'TODO';
   String _priority = 'Normal';
-  String? _linkedProductId;
+  String� _linkedProductId;
   bool _submitting = false;
 
   @override
@@ -47,21 +47,24 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => vm.init(),
-        child: ListView.builder(
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async => vm.init(),
+          child: ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: vm.notes.length,
           itemBuilder: (context, index) {
             final note = vm.notes[index];
             final priorityIcon = _priorityIcon(note.priority);
+            final priorityColor = _priorityColor(note.priority);
             final timestamp = note.timestamp.toLocal();
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: ListTile(
                 title: Row(
                   children: [
-                    if (priorityIcon != null) Text(priorityIcon),
+                    if (priorityIcon != null)
+                      Icon(priorityIcon, size: 16, color: priorityColor �� Colors.orange),
                     if (priorityIcon != null) const SizedBox(width: 6),
                     Expanded(child: Text(note.content)),
                   ],
@@ -79,7 +82,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall
-                            ?.copyWith(color: Colors.green),
+                            �.copyWith(color: Colors.green),
                       ),
                     if (note.linkedProductId != null)
                       Text(
@@ -88,34 +91,41 @@ class _NotesScreenState extends State<NotesScreen> {
                       ),
                   ],
                 ),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Chip(
-                      label: Text(note.tag),
-                      backgroundColor: _tagColor(note.tag).withValues(alpha: 0.15),
-                      labelStyle: TextStyle(color: _tagColor(note.tag)),
-                    ),
-                    if (!note.isDone && note.tag == 'TODO')
-                      TextButton(
-                        onPressed: () async {
-                          final app = context.read<AppController>();
-                          final doneBy = app.displayName;
-                          await context.read<NotesViewModel>().markDone(
-                                id: note.id,
-                                doneBy: doneBy,
-                              );
-                        },
-                        child: const Text('Mark done'),
+                trailing: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 140),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Chip(
+                        label: Text(note.tag),
+                        backgroundColor: _tagColor(note.tag).withValues(alpha: 0.15),
+                        labelStyle: TextStyle(color: _tagColor(note.tag)),
                       ),
-                    if (vm.canDeleteNotes)
-                      TextButton(
-                        onPressed: () async {
-                          await context.read<NotesViewModel>().deleteNote(note.id);
-                        },
-                        child: const Text('Delete'),
-                      ),
-                  ],
+                      if (!note.isDone && note.tag == 'TODO')
+                        TextButton(
+                          style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                          onPressed: () async {
+                            final app = context.read<AppController>();
+                            final doneBy = app.displayName;
+                            await context.read<NotesViewModel>().markDone(
+                                  id: note.id,
+                                  doneBy: doneBy,
+                                );
+                          },
+                          child: const Text('Mark done'),
+                        ),
+                      if (vm.canDeleteNotes)
+                        TextButton(
+                          style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                          onPressed: () async {
+                            await context.read<NotesViewModel>().deleteNote(note.id);
+                          },
+                          child: const Text('Delete'),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -136,7 +146,7 @@ class _NotesScreenState extends State<NotesScreen> {
       builder: (ctx) {
         final app = ctx.read<AppController>();
         final notesVm = ctx.read<NotesViewModel>();
-        final authorId = app.ownerUser?.uid ?? app.currentStaff?.id ?? 'anon';
+        final authorId = app.ownerUser�.uid �� app.currentStaff�.id �� 'anon';
         final authorName = app.displayName;
         return Padding(
           padding: EdgeInsets.only(
@@ -181,7 +191,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    DropdownButtonFormField<String?>(
+                    DropdownButtonFormField<String�>(
                       initialValue: _linkedProductId,
                       decoration: const InputDecoration(labelText: 'Linked product (optional)'),
                       items: [
@@ -202,11 +212,11 @@ class _NotesScreenState extends State<NotesScreen> {
                     DropdownButtonFormField<String>(
                       initialValue: _priority,
                       decoration: const InputDecoration(labelText: 'Priority'),
-                      items: const [
-                        DropdownMenuItem(value: 'Normal', child: Text('Normal')),
-                        DropdownMenuItem(value: 'Important', child: Text('Important !')),
-                        DropdownMenuItem(value: 'Info', child: Text('Info i')),
-                      ],
+                    items: const [
+                      DropdownMenuItem(value: 'Normal', child: Text('Normal')),
+                      DropdownMenuItem(value: 'Important', child: Text('Important')),
+                      DropdownMenuItem(value: 'Info', child: Text('Info')),
+                    ],
                       onChanged: (value) {
                         if (value != null) setState(() => _priority = value);
                       },
@@ -216,7 +226,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         icon: _submitting
-                            ? const SizedBox(
+                            � const SizedBox(
                                 width: 16,
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
@@ -224,7 +234,7 @@ class _NotesScreenState extends State<NotesScreen> {
                             : const Icon(Icons.save_outlined),
                         label: const Text('Save Note'),
                         onPressed: _submitting
-                            ? null
+                            � null
                             : () async {
                                 setState(() => _submitting = true);
                                 try {
@@ -295,17 +305,35 @@ class _NotesScreenState extends State<NotesScreen> {
     }
   }
 
-  String? _priorityIcon(String? priority) {
+  IconData� _priorityIcon(String� priority) {
     switch (priority) {
       case 'Important':
-        return '!';
+        return Icons.priority_high;
       case 'Info':
-        return 'i';
+        return Icons.info_outline;
+      default:
+        return null;
+    }
+  }
+
+  Color� _priorityColor(String� priority) {
+    switch (priority) {
+      case 'Important':
+        return Colors.red;
+      case 'Info':
+        return Colors.blue;
       default:
         return null;
     }
   }
 }
+
+
+
+
+
+
+
 
 
 

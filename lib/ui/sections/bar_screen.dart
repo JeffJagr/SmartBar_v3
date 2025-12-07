@@ -6,9 +6,20 @@ import '../../viewmodels/inventory_view_model.dart';
 import '../widgets/adjust_quantity_sheet.dart';
 import '../widgets/restock_hint_sheet.dart';
 import '../widgets/product_form_sheet.dart';
+import '../widgets/product_list_item.dart';
 
-class BarScreen extends StatelessWidget {
+class BarScreen extends StatefulWidget {
   const BarScreen({super.key});
+
+  @override
+  State<BarScreen> createState() => _BarScreenState();
+}
+
+class _BarScreenState extends State<BarScreen> {
+  String _search = '';
+  String? _groupFilter;
+  bool _lowOnly = false;
+  bool _hintOnly = false;
 
   @override
   Widget build(BuildContext context) {
@@ -27,116 +38,129 @@ class BarScreen extends StatelessWidget {
     }
 
     final isOwner = vm.canEditQuantities;
+    final groups = vm.products.map((p) => p.group).toSet().toList()..sort();
+    final filtered = vm.products.where((p) {
+      final matchesSearch = _search.isEmpty ||
+          p.name.toLowerCase().contains(_search.toLowerCase()) ||
+          p.group.toLowerCase().contains(_search.toLowerCase());
+      final matchesGroup = _groupFilter == null || p.group == _groupFilter;
+      final low = _lowStock(p);
+      final matchesLow = !_lowOnly || low.bar || low.warehouse;
+      final matchesHint = !_hintOnly || (p.restockHint ?? 0) > 0;
+      return matchesSearch && matchesGroup && matchesLow && matchesHint;
+    }).toList();
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: vm.products.length,
-      itemBuilder: (context, index) {
-        final p = vm.products[index];
-        final hintValue = p.restockHint ?? 0;
-        final statusColor = _statusColor(hintValue, p.barMax);
-        final low = _lowStock(p);
-        return Card(
-          color: statusColor?.withValues(alpha: 0.08),
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            title: Text(p.name),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}'),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text('Bar: ${p.barQuantity}/${p.barMax}'),
-                    if (low.bar)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: _badge(context, 'Low bar stock', Colors.red),
-                      ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text('Warehouse: ${p.warehouseQuantity}/${p.warehouseTarget}'),
-                    if (low.warehouse)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: _badge(context, 'Low WH stock', Colors.orange),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    if (hintValue > 0)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: statusColor?.withValues(alpha: 0.2) ??
-                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('⚠️'),
-                            const SizedBox(width: 4),
-                            Text('Hint: $hintValue'),
-                            IconButton(
-                              iconSize: 18,
-                              padding: EdgeInsets.zero,
-                              icon: const Icon(Icons.clear, size: 16),
-                              tooltip: 'Clear hint',
-                              onPressed: () => vm.clearRestockHint(p.id),
-                            ),
-                          ],
-                        ),
-                      ),
-                    TextButton(
-                      onPressed: () => _showRestockHintSheet(context, p.id, hintValue),
-                      child: const Text('Set restock hint'),
-                    ),
-                    if (isOwner)
-                      TextButton(
-                        onPressed: () =>
-                            _showAdjustSheet(context, p.id, p.barQuantity, p.warehouseQuantity),
-                        child: const Text('Adjust qty'),
-                      ),
-                    if (isOwner)
-                      TextButton(
-                        onPressed: () => _openProductForm(context, p),
-                        child: const Text('Edit'),
-                      ),
-                    if (isOwner)
-                      IconButton(
-                        tooltip: 'Delete',
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _confirmDelete(context, p.id),
-                      ),
-                  ],
-                ),
-                if (!isOwner)
-                  Text(
-                    'Staff: read-only quantities',
-                    style: Theme.of(context).textTheme.bodySmall,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search name or group',
                   ),
-              ],
-            ),
-            onTap: () => _showRestockHintSheet(context, p.id, hintValue),
+                  onChanged: (v) => setState(() => _search = v),
+                ),
+              ),
+              const SizedBox(width: 8),
+              DropdownButton<String?>(
+                value: _groupFilter,
+                hint: const Text('Group'),
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('All'),
+                  ),
+                  ...groups.map(
+                    (g) => DropdownMenuItem<String?>(
+                      value: g,
+                      child: Text(g),
+                    ),
+                  ),
+                ],
+                onChanged: (v) => setState(() => _groupFilter = v),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Wrap(
+            spacing: 12,
+            children: [
+              FilterChip(
+                label: const Text('Low stock'),
+                selected: _lowOnly,
+                onSelected: (v) => setState(() => _lowOnly = v),
+              ),
+              FilterChip(
+                label: const Text('Has restock hint'),
+                selected: _hintOnly,
+                onSelected: (v) => setState(() => _hintOnly = v),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final p = filtered[index];
+              final hintValue = p.restockHint ?? 0;
+              final statusColor = _statusColor(hintValue, p.barMax);
+              final low = _lowStock(p);
+              return ProductListItem(
+                title: p.name,
+                groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
+                primaryLabel: 'Bar',
+                primaryValue: '${p.barQuantity}/${p.barMax}',
+                secondaryLabel: 'Warehouse',
+                secondaryValue: '${p.warehouseQuantity}/${p.warehouseTarget}',
+                primaryBadgeColor: Theme.of(context).colorScheme.primary,
+                hintValue: hintValue,
+                hintStatusColor: statusColor,
+                lowPrimary: low.bar,
+                lowSecondary: low.warehouse,
+                lowPrimaryLabel: 'Low bar stock',
+                lowSecondaryLabel: 'Low WH stock',
+                onClearHint: () => vm.clearRestockHint(p.id),
+                onSetHint: () => _showRestockHintSheet(
+                  context,
+                  product: p,
+                  current: p.barQuantity,
+                  max: p.barMax,
+                ),
+                onAdjust: isOwner
+                    ? () => _showAdjustSheet(context, p.id, p.barQuantity, p.warehouseQuantity)
+                    : null,
+                onEdit: isOwner ? () => _openProductForm(context, p) : null,
+                onDelete: isOwner ? () => _confirmDelete(context, p.id) : null,
+                showStaffReadOnly: !isOwner,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  void _showRestockHintSheet(BuildContext context, String productId, int current) {
+  void _showRestockHintSheet(
+    BuildContext context, {
+    required Product product,
+    required int current,
+    required int max,
+  }) {
     showModalBottomSheet(
       context: context,
-      builder: (_) => RestockHintSheet(productId: productId, initialValue: current),
+      builder: (_) => RestockHintSheet(
+        productId: product.id,
+        currentQuantity: current,
+        maxQuantity: max,
+      ),
     );
   }
 
@@ -201,19 +225,6 @@ class BarScreen extends StatelessWidget {
     );
   }
 
-  Widget _badge(BuildContext context, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(color: color, fontSize: 11),
-      ),
-    );
-  }
 }
 
 class _Low {

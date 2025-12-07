@@ -49,6 +49,7 @@ class InMemoryNoteRepository implements NoteRepository {
     _controller.add(_notes);
   }
 
+  @override
   Future<List<Note>> getNotes() async {
     return List<Note>.unmodifiable(_notes);
   }

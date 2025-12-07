@@ -33,3 +33,10 @@ Entries are chronological, newest at bottom.
 - InventoryListScreen now supports editing existing products via the shared form sheet.
 - Notes add sheet wrapped in SingleChildScrollView to avoid overflows; author line bullet encoding fixed.
 - Product form now validates non-empty name and non-negative numeric fields.
+- Notes trailing buttons constrained to avoid overflow on small screens.
+- Notes priority markers now use stable Material icons/colors instead of emojis.
+- Restock hint slider now works in % fullness (0–100) and shows missing quantity based on targets; saves computed missing amount as hint.
+- Bar vs Warehouse emphasis: primary quantity styled prominently per view; secondary quantity de-emphasized with badges.
+- Large inventory UX: added search/group filters and chips (low stock, has hint) plus primary/secondary emphasis on bar/warehouse across bar, warehouse, and combined inventory screens.
+- Refactored repeated product tiles into reusable ProductListItem widget to keep screens clean.
+- NotesScreen wrapped in SafeArea+ListView/RefreshIndicator to avoid overflow; cleaned bullet rendering; added override annotations and deprecated color fix.

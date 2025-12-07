@@ -20,7 +20,7 @@ import '../../sections/restock_screen.dart';
 import '../../sections/staff_management_screen.dart';
 import '../../sections/statistics_screen.dart';
 import '../../sections/warehouse_screen.dart';
-import '../../sections/notes_screen.dart';
+import 'package:smart_bar_app_v3/ui/sections/notes_screen.dart';
 import '../../sections/inventory_list_screen.dart';
 import '../../widgets/product_form_sheet.dart';
 import 'package:smart_bar_app_v3/screens/auth/role_selection_screen.dart';
