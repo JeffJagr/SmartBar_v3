@@ -16,6 +16,7 @@ import '../../sections/print_export_screen.dart';
 import '../../sections/restock_screen.dart';
 import '../../sections/staff_management_screen.dart';
 import '../../sections/statistics_screen.dart';
+import '../../sections/users_screen.dart';
 import '../../sections/warehouse_screen.dart';
 import 'package:smart_bar_app_v3/ui/sections/notes_screen.dart';
 import '../../sections/inventory_list_screen.dart';
@@ -137,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return const HistorySectionScreen();
       case _HomeSection.statistics:
         return const StatisticsScreen();
-      case _HomeSection.staffManagement:
+      case _HomeSection.users:
         return const StaffManagementScreen();
       case _HomeSection.companySettings:
         return const CompanySettingsScreen();
@@ -280,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _drawerItem(
                 icon: Icons.badge_outlined,
                 label: 'Staff Management',
-                onTap: () => _selectSection(_HomeSection.staffManagement),
+                onTap: () => _selectSection(_HomeSection.users),
               ),
             _drawerItem(
               icon: Icons.logout,
@@ -338,3 +339,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

@@ -5,7 +5,9 @@ import 'controllers/app_controller.dart';
 import 'repositories/history_repository.dart';
 import 'repositories/inventory_repository.dart';
 import 'repositories/note_repository.dart';
+import 'repositories/orders_repository.dart';
 import 'repositories/product_repository.dart';
+import 'repositories/users_repository.dart';
 import 'screens/auth/role_selection_screen.dart';
 import 'screens/company/company_list_screen.dart';
 import 'ui/screens/home/home_screen.dart';
@@ -13,6 +15,9 @@ import 'screens/splash/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'viewmodels/inventory_view_model.dart';
 import 'viewmodels/notes_view_model.dart';
+import 'viewmodels/orders_view_model.dart';
+import 'viewmodels/history_view_model.dart';
+import 'viewmodels/users_view_model.dart';
 
 class SmartBarApp extends StatelessWidget {
   const SmartBarApp({super.key, required this.appState});
@@ -67,6 +72,60 @@ class SmartBarApp extends StatelessWidget {
           update: (ctx, noteRepo, productRepo, vm) {
             vm ??= NotesViewModel(noteRepo, productRepo);
             vm.replaceRepository(noteRepo);
+            return vm;
+          },
+        ),
+        ProxyProvider<AppController, UsersRepository?>(
+          update: (_, app, __) => app.activeCompany != null
+              ? FirestoreUsersRepository(companyId: app.activeCompany!.id)
+              : null,
+        ),
+        ProxyProvider<AppController, HistoryRepository?>(
+          update: (_, app, __) => app.activeCompany != null
+              ? FirestoreHistoryRepository(companyId: app.activeCompany!.id)
+              : null,
+        ),
+        ChangeNotifierProxyProvider<HistoryRepository?, HistoryViewModel?>(
+          create: (ctx) {
+            final repo = ctx.read<HistoryRepository?>();
+            if (repo == null) return null;
+            return HistoryViewModel(repo)..init();
+          },
+          update: (ctx, repo, vm) {
+            if (repo == null) return null;
+            vm ??= HistoryViewModel(repo);
+            vm.init();
+            return vm;
+          },
+        ),
+        ChangeNotifierProxyProvider<UsersRepository?, UsersViewModel?>(
+          create: (ctx) {
+            final repo = ctx.read<UsersRepository?>();
+            if (repo == null) return null;
+            return UsersViewModel(repo)..init();
+          },
+          update: (ctx, repo, vm) {
+            if (repo == null) return null;
+            vm ??= UsersViewModel(repo);
+            vm.init();
+            return vm;
+          },
+        ),
+        ProxyProvider<AppController, OrdersRepository>(
+          update: (_, app, __) => app.activeCompany != null
+              ? FirestoreOrdersRepository(companyId: app.activeCompany!.id)
+              : null,
+        ),
+        ChangeNotifierProxyProvider2<OrdersRepository?, InventoryRepository, OrdersViewModel?>(
+          create: (ctx) {
+            final ordersRepo = ctx.read<OrdersRepository?>();
+            if (ordersRepo == null) return null;
+            return OrdersViewModel(ordersRepo, ctx.read<InventoryRepository>())..init();
+          },
+          update: (ctx, ordersRepo, inventoryRepo, vm) {
+            if (ordersRepo == null) return null;
+            vm ??= OrdersViewModel(ordersRepo, inventoryRepo);
+            vm.init();
             return vm;
           },
         ),
