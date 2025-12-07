@@ -26,3 +26,10 @@ Entries are chronological, newest at bottom.
 - Firestore access is company-scoped: repositories use companyId from AppController; rules enforce per-company isolation; activeCompany set on login to scope all queries.
 - Permissions propagated to ViewModels (inventory/notes) to gate editing/deleting based on owner vs staff; adjust-qty hidden for staff.
 - TODO placeholders added for supplier management, restock transfers, exports/printing, analytics, notifications, and reporting.
+- Fixed warehouse screen to rely on InventoryViewModel permissions (removed AppController generic error) and cleaned hint badge symbols.
+- Added product CRUD UI: FAB on bar/warehouse to add products, edit/delete actions per item, and a shared ProductFormSheet with validation. Rows converted to Wrap to avoid overflows. InventoryViewModel expanded with add/update/delete methods; InMemory repo assigns IDs and updates names/categories.
+- Added combined InventoryListScreen showing products with restock-hint badges and drawer entry; ProductRepository refactored to Firestore + in-memory implementations.
+- FAB now available on the combined Inventory view (owners) to open the add-product form.
+- InventoryListScreen now supports editing existing products via the shared form sheet.
+- Notes add sheet wrapped in SingleChildScrollView to avoid overflows; author line bullet encoding fixed.
+- Product form now validates non-empty name and non-negative numeric fields.
