@@ -14,7 +14,6 @@ import '../../sections/history_section_screen.dart';
 import '../../sections/orders_screen.dart';
 import '../../sections/print_export_screen.dart';
 import '../../sections/restock_screen.dart';
-import '../../sections/staff_management_screen.dart';
 import '../../sections/statistics_screen.dart';
 import '../../sections/users_screen.dart';
 import '../../sections/warehouse_screen.dart';
@@ -32,7 +31,6 @@ enum _HomeSection {
   orders,
   history,
   statistics,
-  staffManagement,
   users,
   companySettings,
   printExport,

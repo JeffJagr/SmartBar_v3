@@ -108,7 +108,7 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<UserRole>(
-                value: role,
+                initialValue: role,
                 items: UserRole.values
                     .map((r) => DropdownMenuItem(
                           value: r,

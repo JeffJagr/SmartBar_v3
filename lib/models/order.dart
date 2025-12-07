@@ -85,6 +85,7 @@ class OrderModel {
   OrderModel copyWith({
     OrderStatus? status,
     List<OrderItem>? items,
+    String? createdByUserId,
   }) {
     return OrderModel(
       id: id,
@@ -93,6 +94,7 @@ class OrderModel {
       status: status ?? this.status,
       items: items ?? this.items,
       createdAt: createdAt,
+      createdByUserId: createdByUserId ?? this.createdByUserId,
     );
   }
 

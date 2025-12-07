@@ -131,7 +131,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           children: [
                             Expanded(
                               child: DropdownButtonFormField<String>(
-                                value: line.productId,
+                                initialValue: line.productId,
                                 items: inventory
                                     .map(
                                       (p) => DropdownMenuItem(
