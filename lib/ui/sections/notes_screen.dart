@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/app_controller.dart';
@@ -147,115 +147,117 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
           child: StatefulBuilder(
             builder: (sheetContext, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Add Note',
-                    style: Theme.of(sheetContext).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _contentController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Content',
-                      hintText: 'Write your note...',
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Add Note',
+                      style: Theme.of(sheetContext).textTheme.titleMedium,
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _tag,
-                    decoration: const InputDecoration(labelText: 'Tag'),
-                    items: const [
-                      DropdownMenuItem(value: 'TODO', child: Text('TODO')),
-                      DropdownMenuItem(value: 'Important', child: Text('Important')),
-                      DropdownMenuItem(value: 'NB', child: Text('NB')),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _tag = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String?>(
-                    initialValue: _linkedProductId,
-                    decoration: const InputDecoration(labelText: 'Linked product (optional)'),
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('General note'),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _contentController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Content',
+                        hintText: 'Write your note...',
                       ),
-                      ...products.map(
-                        (p) => DropdownMenuItem(
-                          value: p.id,
-                          child: Text(p.name),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: _tag,
+                      decoration: const InputDecoration(labelText: 'Tag'),
+                      items: const [
+                        DropdownMenuItem(value: 'TODO', child: Text('TODO')),
+                        DropdownMenuItem(value: 'Important', child: Text('Important')),
+                        DropdownMenuItem(value: 'NB', child: Text('NB')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _tag = value);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String?>(
+                      initialValue: _linkedProductId,
+                      decoration: const InputDecoration(labelText: 'Linked product (optional)'),
+                      items: [
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('General note'),
                         ),
-                      ),
-                    ],
-                    onChanged: (value) => setState(() => _linkedProductId = value),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _priority,
-                    decoration: const InputDecoration(labelText: 'Priority'),
-                    items: const [
-                      DropdownMenuItem(value: 'Normal', child: Text('Normal')),
-                      DropdownMenuItem(value: 'Important', child: Text('Important 🔥')),
-                      DropdownMenuItem(value: 'Info', child: Text('Info ℹ️')),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) setState(() => _priority = value);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: _submitting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.save_outlined),
-                      label: const Text('Save Note'),
-                      onPressed: _submitting
-                          ? null
-                          : () async {
-                              setState(() => _submitting = true);
-                              try {
-                                await notesVm.addNote(
-                                  authorId: authorId,
-                                  authorName: authorName,
-                                  content: _contentController.text.trim(),
-                                  tag: _tag,
-                                  linkedProductId: _linkedProductId,
-                                  priority: _priority,
-                                );
-                                _contentController.clear();
-                                _linkedProductId = null;
-                                _priority = 'Normal';
-                                if (!mounted) return;
-                                Navigator.of(ctx).pop();
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  const SnackBar(content: Text('Note saved')),
-                                );
-                              } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(ctx).showSnackBar(
-                                    SnackBar(content: Text('Failed to save note: $e')),
-                                  );
-                                }
-                              } finally {
-                                if (mounted) setState(() => _submitting = false);
-                              }
-                            },
+                        ...products.map(
+                          (p) => DropdownMenuItem(
+                            value: p.id,
+                            child: Text(p.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() => _linkedProductId = value),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: _priority,
+                      decoration: const InputDecoration(labelText: 'Priority'),
+                      items: const [
+                        DropdownMenuItem(value: 'Normal', child: Text('Normal')),
+                        DropdownMenuItem(value: 'Important', child: Text('Important !')),
+                        DropdownMenuItem(value: 'Info', child: Text('Info i')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) setState(() => _priority = value);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: _submitting
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.save_outlined),
+                        label: const Text('Save Note'),
+                        onPressed: _submitting
+                            ? null
+                            : () async {
+                                setState(() => _submitting = true);
+                                try {
+                                  await notesVm.addNote(
+                                    authorId: authorId,
+                                    authorName: authorName,
+                                    content: _contentController.text.trim(),
+                                    tag: _tag,
+                                    linkedProductId: _linkedProductId,
+                                    priority: _priority,
+                                  );
+                                  _contentController.clear();
+                                  _linkedProductId = null;
+                                  _priority = 'Normal';
+                                  if (!mounted) return;
+                                  Navigator.of(ctx).pop();
+                                  ScaffoldMessenger.of(ctx).showSnackBar(
+                                    const SnackBar(content: Text('Note saved')),
+                                  );
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      SnackBar(content: Text('Failed to save note: $e')),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) setState(() => _submitting = false);
+                                }
+                              },
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -296,11 +298,14 @@ class _NotesScreenState extends State<NotesScreen> {
   String? _priorityIcon(String? priority) {
     switch (priority) {
       case 'Important':
-        return '🔥';
+        return '!';
       case 'Info':
-        return 'ℹ️';
+        return 'i';
       default:
         return null;
     }
   }
 }
+
+
+

@@ -8,7 +8,7 @@ import '../repositories/note_repository.dart';
 import '../repositories/product_repository.dart';
 
 /// ViewModel for notes/comments. Keeps notes separate from UI.
-/// TODO: swap stub repos with Firestore-backed implementations (already supported) and add filtering/search.
+/// Firestore-backed repos stream in real time; in-memory fallback is used only when no company is active.
 class NotesViewModel extends ChangeNotifier {
   NotesViewModel(this._noteRepo, this._productRepo);
 
@@ -127,3 +127,4 @@ class NotesViewModel extends ChangeNotifier {
   }
   // TODO: add filters/search, printing/export of notes, and reporting hooks.
 }
+
