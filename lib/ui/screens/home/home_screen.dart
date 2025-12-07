@@ -6,9 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../../../controllers/app_controller.dart';
 import '../../../models/company.dart';
-import '../../../repositories/product_repository.dart';
-import '../../../repositories/note_repository.dart';
-import '../../../repositories/inventory_repository.dart';
 import '../../../viewmodels/inventory_view_model.dart';
 import '../../../viewmodels/notes_view_model.dart';
 import '../../sections/bar_screen.dart';
