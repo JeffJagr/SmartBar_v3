@@ -16,6 +16,7 @@ class InventoryViewModel extends ChangeNotifier {
   List<Product> products = [];
   bool loading = true;
   String? error;
+  bool saving = false;
   StreamSubscription<List<Product>>? _subscription;
 
   Future<void> init() async {
@@ -57,22 +58,28 @@ class InventoryViewModel extends ChangeNotifier {
   Future<void> updateRestockHint(String productId, int? hint) async {
     // hint is only a suggestion; does not mutate actual quantities.
     try {
+      saving = true;
+      notifyListeners();
       await _repository.updateRestockHint(productId, hint);
       products = await _repository.getItems();
-      notifyListeners();
     } catch (e) {
       error = e.toString();
+    } finally {
+      saving = false;
       notifyListeners();
     }
   }
 
   Future<void> clearRestockHint(String productId) async {
     try {
+      saving = true;
+      notifyListeners();
       await _repository.clearRestockHint(productId);
       products = await _repository.getItems();
-      notifyListeners();
     } catch (e) {
       error = e.toString();
+    } finally {
+      saving = false;
       notifyListeners();
     }
   }
@@ -83,15 +90,63 @@ class InventoryViewModel extends ChangeNotifier {
     int? warehouseQuantity,
   }) async {
     try {
+      saving = true;
+      notifyListeners();
       await _repository.updateQuantities(
         itemId: productId,
         barQuantity: barQuantity,
         warehouseQuantity: warehouseQuantity,
       );
       products = await _repository.getItems();
-      notifyListeners();
     } catch (e) {
       error = e.toString();
+    } finally {
+      saving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> addProduct(Product product) async {
+    try {
+      saving = true;
+      notifyListeners();
+      await _repository.addProduct(product);
+      products = await _repository.getItems();
+      // TODO: append history entry for product creation.
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      saving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateProduct(String productId, Map<String, dynamic> data) async {
+    try {
+      saving = true;
+      notifyListeners();
+      await _repository.updateProduct(productId, data);
+      products = await _repository.getItems();
+      // TODO: log product edits (including restock targets) to history.
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      saving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    try {
+      saving = true;
+      notifyListeners();
+      await _repository.deleteProduct(productId);
+      products = await _repository.getItems();
+      // TODO: add audit log for deletion and consider soft-delete.
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      saving = false;
       notifyListeners();
     }
   }

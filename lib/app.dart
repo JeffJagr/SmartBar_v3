@@ -45,8 +45,13 @@ class SmartBarApp extends StatelessWidget {
             if (repo is InMemoryNoteRepository) repo.dispose();
           },
         ),
-        Provider<ProductRepository>(
-          create: (_) => ProductRepository(),
+        ProxyProvider<AppController, ProductRepository>(
+          update: (_, app, __) => app.activeCompany != null
+              ? FirestoreProductRepository(companyId: app.activeCompany!.id)
+              : InMemoryProductRepository(),
+          dispose: (_, repo) {
+            if (repo is InMemoryProductRepository) repo.dispose();
+          },
         ),
         ChangeNotifierProxyProvider<InventoryRepository, InventoryViewModel>(
           create: (ctx) => InventoryViewModel(ctx.read<InventoryRepository>())..init(),

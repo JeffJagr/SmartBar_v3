@@ -15,6 +15,9 @@ abstract class InventoryRepository {
     int? barQuantity,
     int? warehouseQuantity,
   });
+  Future<void> addProduct(Product product);
+  Future<void> updateProduct(String itemId, Map<String, dynamic> data);
+  Future<void> deleteProduct(String itemId);
   // TODO: add supplier linkage, restock transfer operations, and export support.
 }
 
@@ -64,6 +67,64 @@ class InMemoryInventoryRepository implements InventoryRepository {
       }
       return p;
     }).toList();
+    _controller.add(_items);
+  }
+
+  @override
+  Future<void> addProduct(Product product) async {
+    final id = product.id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : product.id;
+    _items = [
+      ..._items,
+      Product(
+        id: id,
+        companyId: product.companyId,
+        name: product.name,
+        group: product.group,
+        subgroup: product.subgroup,
+        unit: product.unit,
+        barQuantity: product.barQuantity,
+        barMax: product.barMax,
+        warehouseQuantity: product.warehouseQuantity,
+        warehouseTarget: product.warehouseTarget,
+        salePrice: product.salePrice,
+        restockHint: product.restockHint,
+        flagNeedsRestock: product.flagNeedsRestock,
+        minimalStockThreshold: product.minimalStockThreshold,
+      ),
+    ];
+    _controller.add(_items);
+  }
+
+  @override
+  Future<void> updateProduct(String itemId, Map<String, dynamic> data) async {
+    _items = _items.map((p) {
+      if (p.id == itemId) {
+        return Product(
+          id: p.id,
+          companyId: p.companyId,
+          name: (data['name'] as String?) ?? p.name,
+          group: (data['group'] as String?) ?? p.group,
+          subgroup: p.subgroup,
+          unit: (data['unit'] as String?) ?? p.unit,
+          barQuantity: (data['barQuantity'] as int?) ?? p.barQuantity,
+          barMax: (data['barMax'] as int?) ?? p.barMax,
+          warehouseQuantity: (data['warehouseQuantity'] as int?) ?? p.warehouseQuantity,
+          warehouseTarget: (data['warehouseTarget'] as int?) ?? p.warehouseTarget,
+          salePrice: p.salePrice,
+          restockHint: (data['restockHint'] as int?) ?? p.restockHint,
+          flagNeedsRestock: p.flagNeedsRestock,
+          minimalStockThreshold:
+              (data['minimalStockThreshold'] as int?) ?? p.minimalStockThreshold,
+        );
+      }
+      return p;
+    }).toList();
+    _controller.add(_items);
+  }
+
+  @override
+  Future<void> deleteProduct(String itemId) async {
+    _items = _items.where((p) => p.id != itemId).toList();
     _controller.add(_items);
   }
 
@@ -147,5 +208,20 @@ class FirestoreInventoryRepository implements InventoryRepository {
     if (barQuantity != null) data['barQuantity'] = barQuantity;
     if (warehouseQuantity != null) data['warehouseQuantity'] = warehouseQuantity;
     return _col.doc(itemId).update(data);
+  }
+
+  @override
+  Future<void> addProduct(Product product) {
+    return _col.add(product.toMap());
+  }
+
+  @override
+  Future<void> updateProduct(String itemId, Map<String, dynamic> data) {
+    return _col.doc(itemId).update(data);
+  }
+
+  @override
+  Future<void> deleteProduct(String itemId) {
+    return _col.doc(itemId).delete();
   }
 }
