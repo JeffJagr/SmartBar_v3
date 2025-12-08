@@ -18,11 +18,21 @@ service cloud.firestore {
       return isSignedIn() && userDoc(request.auth.uid).exists
         && (userRole(request.auth.uid) in ['owner','manager']);
     }
+    function isStaff() {
+      return isSignedIn() && userDoc(request.auth.uid).exists
+        && userRole(request.auth.uid) == 'staff';
+    }
 
     match /companies/{companyId} {
       allow create: if isOwner();            // only owner can create companies
       allow read: if isSignedIn();
       allow update, delete: if isOwner();
+
+      // Layouts (bar/warehouse). Only owner/manager can write; all signed-in can read.
+      match /layouts/{layoutId} {
+        allow read: if isSignedIn();
+        allow create, update, delete: if isManagerOrOwner();
+      }
 
       match /users/{userId} {
         allow read: if isSignedIn();
