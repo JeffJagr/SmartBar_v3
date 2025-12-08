@@ -33,7 +33,12 @@ class PermissionService {
     required AppState app,
     Map<String, bool> explicitFlags = const {},
   }) {
-    final rawRole = app.currentStaffMember?.role.toLowerCase() ?? '';
+    // If AppState is an AppController it may expose currentStaffMember; otherwise use currentStaff.
+    final rawRole = (app is AppController
+            ? app.currentStaffMember?.role
+            : app.currentStaff?.role)
+        ?.toLowerCase() ??
+        '';
     final derivedRole = app.isOwner
         ? UserRole.owner
         : rawRole.contains('manager')
