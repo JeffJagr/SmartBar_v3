@@ -38,6 +38,7 @@ class AppState extends ChangeNotifier {
   List<OrderModel> orders = [];
   List<HistoryEntry> history = [];
   Map<String, bool> currentUserPermissions = {};
+  String? currentUserRole;
 
   ThemeMode themeMode = ThemeMode.system;
   bool isBootstrapped = false;
@@ -49,12 +50,20 @@ class AppState extends ChangeNotifier {
 
   bool get isAuthenticated => ownerUser != null || staffSession != null;
   bool get isOwner => ownerUser != null;
-  UserRole get role => isOwner ? UserRole.owner : UserRole.staff;
-  String get roleLabel => isOwner
-      ? 'owner'
-      : currentStaff?.role.isNotEmpty == true
-          ? currentStaff!.role
-          : 'staff';
+  UserRole get role {
+    if (isOwner) return UserRole.owner;
+    final roleLower = (currentUserRole ?? currentStaff?.role ?? '').toLowerCase();
+    if (roleLower.contains('manager')) return UserRole.manager;
+    if (roleLower.contains('owner')) return UserRole.owner;
+    return UserRole.staff;
+  }
+
+  String get roleLabel {
+    if (isOwner) return 'owner';
+    if (currentUserRole != null && currentUserRole!.isNotEmpty) return currentUserRole!;
+    if (currentStaff?.role.isNotEmpty == true) return currentStaff!.role;
+    return 'staff';
+  }
   String get displayName =>
       ownerUser?.email ?? staffSession?.displayName ?? 'Guest';
 
@@ -77,6 +86,9 @@ class AppState extends ChangeNotifier {
         return;
       }
       ownerUser = user;
+      if (ownerUser != null) {
+        await _loadUserProfile(ownerUser!.uid);
+      }
       // Staff auth is not driven by FirebaseAuth so we keep staffSession intact.
       if (ownerUser == null) {
         companies = [];
@@ -119,31 +131,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> signInOwner(String email, String password) async {
     await _authService.signInOwner(email: email, password: password);
-    // Try to load permissions from /users/{uid}; fallback to full owner rights.
-    try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid != null) {
-        final doc =
-            await FirebaseFirestore.instance.collection('users').doc(uid).get();
-        if (doc.exists) {
-          final data = doc.data() ?? {};
-          currentUserPermissions =
-              (data['permissions'] as Map?)?.cast<String, bool>() ?? {};
-        }
-      }
-    } catch (_) {
-      currentUserPermissions = {
-        'editProducts': true,
-        'createOrders': true,
-        'confirmOrders': true,
-        'receiveOrders': true,
-        'manageUsers': true,
-        'viewHistory': true,
-        'setRestockHint': true,
-        'transferStock': true,
-        'addNotes': true,
-      };
-    }
+    await _loadUserProfile(FirebaseAuth.instance.currentUser?.uid);
     // Auth listener will populate companies and active company.
   }
 
@@ -217,6 +205,8 @@ class AppState extends ChangeNotifier {
     staffSession = null;
     currentStaff = null;
     ownerUser = null;
+    currentUserPermissions = {};
+    currentUserRole = null;
     await _closeCompanyStreams();
     companies = [];
     products = [];
@@ -432,6 +422,25 @@ class AppState extends ChangeNotifier {
       debugPrint('Staff lookup failed for $companyId');
     }
     return null;
+  }
+
+  Future<void> _loadUserProfile(String? uid) async {
+    if (uid == null) return;
+    try {
+      final doc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists) {
+        final data = doc.data() ?? {};
+        currentUserPermissions =
+            (data['permissions'] as Map?)?.cast<String, bool>() ?? {};
+        currentUserRole = data['role'] as String?;
+      } else {
+        currentUserPermissions = {};
+        currentUserRole = null;
+      }
+    } catch (_) {
+      // ignore profile load errors
+    }
   }
 
   @override
