@@ -90,5 +90,11 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update, delete: if request.auth != null && request.auth.uid == uid;
     }
+
+    // Central staffPins lookup (PIN->company) used during staff login; requires any signed-in session (including anonymous).
+    match /staffPins/{pinId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
   }
 }

@@ -37,6 +37,10 @@ class AuthService {
     required String companyCode,
     required String pin,
   }) async {
+    // Ensure we have an auth context for rules; anonymous is sufficient for lookup.
+    if (_auth.currentUser == null || !_auth.currentUser!.isAnonymous) {
+      await _auth.signInAnonymously();
+    }
     // TODO: Move this to a callable cloud function for better security.
     final snapshot = await _firestore
         .collection('staffPins')
