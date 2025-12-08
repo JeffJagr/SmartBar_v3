@@ -5,10 +5,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function companyDoc(companyId) {
-      return get(/databases/$(database)/documents/companies/$(companyId));
-    }
-
     function userDoc(uid) {
       return get(/databases/$(database)/documents/users/$(uid));
     }
@@ -20,6 +16,10 @@ service cloud.firestore {
     function hasRole(roles) {
       return isSignedIn() && userDoc(request.auth.uid).exists
         && userRole(request.auth.uid) in roles;
+    }
+
+    function companyDoc(companyId) {
+      return get(/databases/$(database)/documents/companies/$(companyId));
     }
 
     function isOwner(companyId) {
@@ -40,74 +40,72 @@ service cloud.firestore {
             || isStaffSession(companyId));
     }
 
-    function canAccess(companyId) {
-      return isOwner(companyId) || isStaff(companyId) || hasRole(['owner', 'manager', 'staff']);
+    function isInCompany(companyId) {
+      return isOwner(companyId) || isStaff(companyId) || isStaffSession(companyId);
     }
 
-    // Top-level collections (legacy) filtered by companyId field.
+    // Legacy/root collections using companyId field
     match /products/{productId} {
-      allow read: if isSignedIn() && canAccess(request.resource.data.companyId);
-      allow create, update, delete: if isSignedIn() && canAccess(request.resource.data.companyId);
+      allow read: if isSignedIn() && isInCompany(request.resource.data.companyId);
+      allow create, update, delete: if isSignedIn() && isInCompany(request.resource.data.companyId) && hasRole(['owner', 'manager']);
     }
 
     match /orders/{orderId} {
-      allow read: if isSignedIn() && canAccess(request.resource.data.companyId);
-      allow create, update, delete: if isSignedIn() && canAccess(request.resource.data.companyId);
+      allow read: if isSignedIn() && isInCompany(request.resource.data.companyId);
+      allow create, update, delete: if isSignedIn() && isInCompany(request.resource.data.companyId) && hasRole(['owner', 'manager']);
     }
 
     match /history/{historyId} {
-      allow read: if isSignedIn() && canAccess(request.resource.data.companyId);
-      allow create: if isSignedIn() && canAccess(request.resource.data.companyId);
+      allow read: if isSignedIn() && isInCompany(request.resource.data.companyId);
+      allow create: if isSignedIn() && isInCompany(request.resource.data.companyId);
     }
 
     match /companies/{companyId} {
-      // Owners and staff can read company meta; only owners can update/delete.
-      allow read: if isOwner(companyId) || isStaff(companyId);
-      // Allow any authenticated user to create a company; the app writes ownerIds containing the creator.
-      allow create: if isSignedIn();
-      allow update, delete: if isOwner(companyId);
+      allow read: if isInCompany(companyId);
+      allow create: if isSignedIn(); // app writes ownerIds including creator
+      allow update, delete: if isOwner(companyId) || (hasRole(['owner','manager']) && request.auth.uid in request.resource.data.ownerIds);
 
       match /products/{productId} {
-        allow read: if canAccess(companyId);
-        // Allow owners/staff to write inventory fields; tighten fields as needed.
-        allow create, update, delete: if canAccess(companyId);
+        allow read: if isInCompany(companyId);
+        allow create, update, delete: if isInCompany(companyId) && hasRole(['owner','manager']);
       }
 
       match /notes/{noteId} {
-        allow read: if canAccess(companyId);
-        allow create: if canAccess(companyId);
-        allow update, delete: if canAccess(companyId);
+        allow read: if isInCompany(companyId);
+        allow create, update, delete: if isInCompany(companyId);
       }
 
       match /staff/{staffId} {
         allow read: if isOwner(companyId) || (isStaff(companyId) && staffId == request.auth.uid);
-        allow create, update, delete: if isOwner(companyId);
+        allow create, update, delete: if isOwner(companyId) || hasRole(['owner','manager']);
       }
 
-      // Staff session docs created after PIN login mapped to auth.uid.
       match /staffSessions/{sessionId} {
         allow create, update: if isSignedIn()
           && request.auth.uid == sessionId
           && request.resource.data.companyId == companyId;
         allow read: if isOwner(companyId) || (isStaffSession(companyId) && request.auth.uid == sessionId);
-        // No delete needed; can be cleaned by owner.
       }
 
-      // Optional per-company users subcollection (if used).
       match /users/{userId} {
         allow read: if isOwner(companyId) || userId == request.auth.uid;
-        allow create, update, delete: if isOwner(companyId) || hasRole(['owner', 'manager']);
+        allow create, update, delete: if isOwner(companyId) || hasRole(['owner','manager']);
+      }
+
+      match /orders/{orderId} {
+        allow read: if isInCompany(companyId);
+        allow create, update, delete: if isInCompany(companyId) && hasRole(['owner','manager']);
       }
     }
 
     // Global users collection for roles/permissions lookup.
     match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
+      allow read: if isSignedIn() && request.auth.uid == uid;
       allow create: if isSignedIn() && request.auth.uid == uid;
-      allow update, delete: if request.auth != null && request.auth.uid == uid;
+      allow update, delete: if isSignedIn() && request.auth.uid == uid;
     }
 
-    // Central staffPins lookup (PIN->company) used during staff login; requires any signed-in session (including anonymous).
+    // Staff PIN lookup; needs auth (anon ok) to read, no writes.
     match /staffPins/{pinId} {
       allow read: if isSignedIn();
       allow write: if false;
