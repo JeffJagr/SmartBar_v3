@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../controllers/app_controller.dart';
 import '../../ui/screens/home/home_screen.dart';
@@ -35,6 +36,13 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
         companyCode: _companyCodeController.text.trim(),
         pin: _pinController.text.trim(),
       );
+      // Ensure auth is present after login.
+      if (FirebaseAuth.instance.currentUser == null) {
+        throw FirebaseAuthException(
+          code: 'no-auth',
+          message: 'Authentication failed; please try again.',
+        );
+      }
       // After staff login, go straight into the app for that company.
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
