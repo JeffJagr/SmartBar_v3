@@ -109,9 +109,17 @@ class ProductListItem extends StatelessWidget {
                       color: Colors.blue.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      'Orders: $activeOrderQty',
-                      style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.shopping_cart_outlined, size: 16, color: Colors.blue),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$activeOrderQty in orders',
+                          style:
+                              const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
                   ),
                 if (hintValue > 0)

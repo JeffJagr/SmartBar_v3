@@ -8,6 +8,7 @@ import '../../../controllers/app_controller.dart';
 import '../../../models/company.dart';
 import '../../../viewmodels/inventory_view_model.dart';
 import '../../../viewmodels/notes_view_model.dart';
+import '../../../viewmodels/orders_view_model.dart';
 import '../../sections/bar_screen.dart';
 import '../../sections/company_settings_screen.dart';
 import '../../sections/history_section_screen.dart';
@@ -112,6 +113,41 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             onPressed: app.toggleThemeMode,
             tooltip: 'Toggle theme',
+          ),
+          Consumer<OrdersViewModel?>(
+            builder: (context, vm, _) {
+              final activeCount = vm?.orders
+                      .where((o) =>
+                          o.status == OrderStatus.pending || o.status == OrderStatus.confirmed)
+                      .length ??
+                  0;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    tooltip: 'Orders',
+                    onPressed: () => _selectSection(_HomeSection.orders),
+                    icon: const Icon(Icons.shopping_cart_outlined),
+                  ),
+                  if (activeCount > 0)
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          activeCount.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 11),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
