@@ -99,6 +99,11 @@ class InventoryViewModel extends ChangeNotifier {
     int? barQuantity,
     int? warehouseQuantity,
   }) async {
+    if ((barQuantity ?? 0) < 0 || (warehouseQuantity ?? 0) < 0) {
+      error = 'Quantities cannot be negative.';
+      notifyListeners();
+      return;
+    }
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canAdjustQuantities(_permissionSnapshot!)) {

@@ -76,7 +76,8 @@ class _AdjustQuantitySheetState extends State<AdjustQuantitySheet> {
                 : () async {
                     setState(() => _saving = true);
                     try {
-                      final changed = _barQty != widget.barQuantity || _whQty != widget.warehouseQuantity;
+                      final changed =
+                          _barQty != widget.barQuantity || _whQty != widget.warehouseQuantity;
                       var proceed = true;
                       if (changed) {
                         proceed = await showDialog<bool>(
