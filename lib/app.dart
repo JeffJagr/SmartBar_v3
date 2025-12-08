@@ -132,13 +132,13 @@ class SmartBarApp extends StatelessWidget {
               ? FirestoreOrdersRepository(companyId: app.activeCompany!.id)
               : null,
         ),
-        ChangeNotifierProxyProvider3<OrdersRepository?, InventoryRepository,
-            AppController, OrdersViewModel?>(
+        ChangeNotifierProxyProvider4<OrdersRepository?, InventoryRepository,
+            HistoryRepository?, AppController, OrdersViewModel?>(
           create: (ctx) {
             final ordersRepo = ctx.read<OrdersRepository?>();
             if (ordersRepo == null) return null;
             final vm =
-                OrdersViewModel(ordersRepo, ctx.read<InventoryRepository>())..init();
+                OrdersViewModel(ordersRepo, ctx.read<InventoryRepository>(), historyRepo: ctx.read<HistoryRepository?>())..init();
             vm.applyPermissionContext(
               snapshot: ctx.read<AppController>().permissionSnapshot(
                     ctx.read<AppController>().permissions,
@@ -147,9 +147,9 @@ class SmartBarApp extends StatelessWidget {
             );
             return vm;
           },
-          update: (ctx, ordersRepo, inventoryRepo, app, vm) {
+          update: (ctx, ordersRepo, inventoryRepo, historyRepo, app, vm) {
             if (ordersRepo == null) return null;
-            vm ??= OrdersViewModel(ordersRepo, inventoryRepo);
+            vm ??= OrdersViewModel(ordersRepo, inventoryRepo, historyRepo: historyRepo);
             vm.init();
             vm.applyPermissionContext(
               snapshot: app.permissionSnapshot(app.permissions),

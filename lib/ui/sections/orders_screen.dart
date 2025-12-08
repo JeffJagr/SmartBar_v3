@@ -163,7 +163,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                   if (order.status != OrderStatus.delivered && canReceive)
                     TextButton(
-                      onPressed: () => vm.markReceived(order),
+                      onPressed: () async {
+                        await vm.markReceived(order);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Warehouse updated from ${_orderLabel(order)}'),
+                            ),
+                          );
+                        }
+                      },
                       child: const Text('Mark received'),
                     ),
                 ],

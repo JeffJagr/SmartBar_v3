@@ -3,15 +3,19 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../models/order.dart';
+import '../models/history_entry.dart';
 import '../repositories/orders_repository.dart';
 import '../repositories/inventory_repository.dart';
+import '../repositories/history_repository.dart';
 import '../services/permission_service.dart';
 
 class OrdersViewModel extends ChangeNotifier {
-  OrdersViewModel(this._ordersRepo, this._inventoryRepo);
+  OrdersViewModel(this._ordersRepo, this._inventoryRepo, {HistoryRepository? historyRepo})
+      : _historyRepo = historyRepo;
 
   final OrdersRepository _ordersRepo;
   final InventoryRepository _inventoryRepo;
+  final HistoryRepository? _historyRepo;
   PermissionSnapshot? _permissionSnapshot;
   PermissionService? _permissionService;
 
@@ -91,6 +95,25 @@ class OrdersViewModel extends ChangeNotifier {
             itemId: item.productId,
             delta: item.quantityOrdered,
           );
+          if (_historyRepo != null) {
+            await _historyRepo!.addEntry(
+              HistoryEntry(
+                id: '',
+                companyId: order.companyId,
+                actionType: 'order_received',
+                itemName: item.productNameSnapshot ?? item.productId,
+                description:
+                    'Received ${item.quantityOrdered} units from order ${_orderLabel(order)}',
+                performedBy: _permissionSnapshot?.roleLabel ?? 'user',
+                timestamp: DateTime.now(),
+                details: {
+                  'productId': item.productId,
+                  'quantity': item.quantityOrdered,
+                  'orderId': order.id,
+                },
+              ),
+            );
+          }
         }
       }
       await _ordersRepo.updateStatus(
@@ -133,6 +156,13 @@ class OrdersViewModel extends ChangeNotifier {
   }) {
     _permissionSnapshot = snapshot;
     _permissionService = service;
+  }
+
+  String _orderLabel(OrderModel order) {
+    if (order.orderNumber > 0) {
+      return '#${order.orderNumber.toString().padLeft(4, '0')}';
+    }
+    return order.id.isEmpty ? 'order' : order.id;
   }
 
   @override
