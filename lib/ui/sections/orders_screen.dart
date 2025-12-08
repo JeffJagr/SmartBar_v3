@@ -55,25 +55,25 @@ class _OrdersScreenState extends State<OrdersScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: DropdownButtonFormField<OrderStatus?>(
-                    decoration: const InputDecoration(labelText: 'Status'),
-                    value: _statusFilter,
-                    items: const [
-                      DropdownMenuItem(value: null, child: Text('All')),
-                      DropdownMenuItem(value: OrderStatus.pending, child: Text('Pending')),
-                      DropdownMenuItem(value: OrderStatus.confirmed, child: Text('Confirmed')),
-                      DropdownMenuItem(value: OrderStatus.delivered, child: Text('Delivered')),
-                    ],
-                    onChanged: (v) => setState(() => _statusFilter = v),
-                  ),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    _statusChipFilter(null, 'All'),
+                    _statusChipFilter(OrderStatus.pending, 'Pending'),
+                    _statusChipFilter(OrderStatus.confirmed, 'Confirmed'),
+                    _statusChipFilter(OrderStatus.delivered, 'Delivered'),
+                  ],
                 ),
-                IconButton(
-                  tooltip: _sortDescending ? 'Newest first' : 'Oldest first',
-                  onPressed: () => setState(() => _sortDescending = !_sortDescending),
-                  icon: Icon(_sortDescending ? Icons.arrow_downward : Icons.arrow_upward),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    tooltip: _sortDescending ? 'Newest first' : 'Oldest first',
+                    onPressed: () => setState(() => _sortDescending = !_sortDescending),
+                    icon: Icon(_sortDescending ? Icons.arrow_downward : Icons.arrow_upward),
+                  ),
                 ),
               ],
             ),
@@ -192,6 +192,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
       return '#$padded';
     }
     return order.id.isEmpty ? 'Order (new)' : 'Order ${order.id}';
+  }
+
+  Widget _statusChipFilter(OrderStatus? status, String label) {
+    final selected = _statusFilter == status;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => setState(() => _statusFilter = status),
+    );
   }
 
   void _openNewOrderSheet({
