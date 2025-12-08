@@ -52,3 +52,5 @@ Entries are chronological, newest at bottom.
 - Reorder: Bar & Warehouse product rows now show Order/Reorder when permission allows; quick order sheet pre-fills qty=1, enforces createOrders permission, and orders save to Firestore.
 
 - Orders UX: product rows now show shopping-cart badge with qty in active orders; AppBar shows red badge for pending/confirmed orders and navigates to Orders on tap. Snackbars after order creation were already in place.
+
+- Order receive flow: marking an order as received now increments warehouse quantities, shows a snackbar, and writes history entries (order_received) per product. OrdersViewModel accepts optional HistoryRepository; DI updated.
