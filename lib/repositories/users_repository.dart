@@ -8,6 +8,7 @@ abstract class UsersRepository {
   Future<void> updateRole(String userId, UserRole role);
   Future<void> deactivate(String userId, bool active);
   Future<void> updatePermissions(String userId, Map<String, bool> permissions);
+  Future<void> deleteUser(String userId);
 }
 
 class FirestoreUsersRepository implements UsersRepository {
@@ -47,5 +48,10 @@ class FirestoreUsersRepository implements UsersRepository {
   @override
   Future<void> updatePermissions(String userId, Map<String, bool> permissions) {
     return _col.doc(userId).update({'permissions': permissions});
+  }
+
+  @override
+  Future<void> deleteUser(String userId) {
+    return _col.doc(userId).delete();
   }
 }

@@ -104,16 +104,26 @@ class SmartBarApp extends StatelessWidget {
             return vm;
           },
         ),
-        ChangeNotifierProxyProvider<UsersRepository?, UsersViewModel?>(
+        ChangeNotifierProxyProvider2<UsersRepository?, AppController, UsersViewModel?>(
           create: (ctx) {
             final repo = ctx.read<UsersRepository?>();
             if (repo == null) return null;
-            return UsersViewModel(repo)..init();
+            final app = ctx.read<AppController>();
+            final vm = UsersViewModel(repo)..init();
+            vm.applyPermissionContext(
+              snapshot: app.permissionSnapshot(app.permissions),
+              service: app.permissions,
+            );
+            return vm;
           },
-          update: (ctx, repo, vm) {
+          update: (ctx, repo, app, vm) {
             if (repo == null) return null;
             vm ??= UsersViewModel(repo);
             vm.init();
+            vm.applyPermissionContext(
+              snapshot: app.permissionSnapshot(app.permissions),
+              service: app.permissions,
+            );
             return vm;
           },
         ),

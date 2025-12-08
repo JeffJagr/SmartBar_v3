@@ -25,7 +25,9 @@ class _UsersScreenState extends State<UsersScreen> {
   Widget build(BuildContext context) {
     final vm = context.watch<UsersViewModel>();
     final app = context.watch<AppController>();
-    if (!app.isOwner) {
+    final canManage = app.permissions
+        .canManageUsers(app.permissionSnapshot(app.permissions));
+    if (!canManage) {
       return const Center(child: Text('Access denied'));
     }
     if (vm.loading && vm.users.isEmpty) {
@@ -61,6 +63,23 @@ class _UsersScreenState extends State<UsersScreen> {
                       orElse: () => UserRole.staff,
                     );
                     await vm.updateRole(user.id, role);
+                  } else if (value == 'delete') {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Delete user'),
+                        content: Text('Delete ${user.displayName}?'),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('Cancel')),
+                          TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text('Delete')),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) await vm.deleteUser(user.id);
                   }
                 },
                 itemBuilder: (ctx) => [
@@ -71,6 +90,7 @@ class _UsersScreenState extends State<UsersScreen> {
                     const PopupMenuItem(value: 'deactivate', child: Text('Deactivate'))
                   else
                     const PopupMenuItem(value: 'activate', child: Text('Activate')),
+                  const PopupMenuItem(value: 'delete', child: Text('Delete')),
                 ],
               ),
             ),
@@ -117,7 +137,7 @@ class _UsersScreenState extends State<UsersScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: pinCtrl,
-                decoration: const InputDecoration(labelText: 'PIN / Password'),
+                decoration: const InputDecoration(labelText: 'PIN / Password (required)'),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<UserRole>(
@@ -152,10 +172,17 @@ class _UsersScreenState extends State<UsersScreen> {
                           .showSnackBar(const SnackBar(content: Text('Name required')));
                       return;
                     }
+                    final pin = pinCtrl.text.trim();
+                    if (pin.isEmpty || pin.length < 4) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('PIN/password required (min 4 chars)')),
+                      );
+                      return;
+                    }
                     await vm.addUser(
                       displayName: nameCtrl.text.trim(),
                       role: role,
-                      pin: pinCtrl.text.trim().isNotEmpty ? pinCtrl.text.trim() : null,
+                      pin: pin,
                       permissions: permissions,
                     );
                     if (ctx.mounted) Navigator.pop(ctx);

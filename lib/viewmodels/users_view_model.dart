@@ -4,11 +4,14 @@ import 'package:flutter/foundation.dart';
 
 import '../models/user_account.dart';
 import '../repositories/users_repository.dart';
+import '../services/permission_service.dart';
 
 class UsersViewModel extends ChangeNotifier {
   UsersViewModel(this._repo);
 
   final UsersRepository _repo;
+  PermissionSnapshot? _permissionSnapshot;
+  PermissionService? _permissionService;
 
   List<UserAccount> users = [];
   bool loading = true;
@@ -37,6 +40,13 @@ class UsersViewModel extends ChangeNotifier {
     String? pin,
     Map<String, bool> permissions = const {},
   }) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canManageUsers(_permissionSnapshot!)) {
+      error = 'You do not have permission to manage users.';
+      notifyListeners();
+      return;
+    }
     try {
       loading = true;
       notifyListeners();
@@ -59,11 +69,44 @@ class UsersViewModel extends ChangeNotifier {
   }
 
   Future<void> updateRole(String userId, UserRole role) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canManageUsers(_permissionSnapshot!)) {
+      error = 'You do not have permission to manage users.';
+      notifyListeners();
+      return;
+    }
     await _repo.updateRole(userId, role);
   }
 
   Future<void> setActive(String userId, bool active) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canManageUsers(_permissionSnapshot!)) {
+      error = 'You do not have permission to manage users.';
+      notifyListeners();
+      return;
+    }
     await _repo.deactivate(userId, active);
+  }
+
+  Future<void> deleteUser(String userId) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canManageUsers(_permissionSnapshot!)) {
+      error = 'You do not have permission to manage users.';
+      notifyListeners();
+      return;
+    }
+    await _repo.deleteUser(userId);
+  }
+
+  void applyPermissionContext({
+    required PermissionSnapshot snapshot,
+    PermissionService? service,
+  }) {
+    _permissionSnapshot = snapshot;
+    _permissionService = service;
   }
 
   @override
