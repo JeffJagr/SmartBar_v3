@@ -9,6 +9,8 @@ class UserAccount {
     required this.displayName,
     required this.role,
     required this.active,
+    this.pin,
+    this.permissions = const {},
   });
 
   final String id;
@@ -16,6 +18,8 @@ class UserAccount {
   final String displayName;
   final UserRole role;
   final bool active;
+  final String? pin;
+  final Map<String, bool> permissions;
 
   factory UserAccount.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     return UserAccount.fromMap(doc.id, doc.data() ?? {});
@@ -28,6 +32,8 @@ class UserAccount {
       displayName: data['displayName'] as String? ?? '',
       role: _roleFromString(data['role'] as String?),
       active: data['active'] as bool? ?? true,
+      pin: data['pin'] as String?,
+      permissions: (data['permissions'] as Map?)?.cast<String, bool>() ?? {},
     );
   }
 
@@ -37,6 +43,8 @@ class UserAccount {
       'displayName': displayName,
       'role': role.name,
       'active': active,
+      if (pin != null) 'pin': pin,
+      if (permissions.isNotEmpty) 'permissions': permissions,
     };
   }
 

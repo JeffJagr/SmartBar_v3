@@ -86,7 +86,15 @@ class _UsersScreenState extends State<UsersScreen> {
 
   void _openAddUser(BuildContext context) {
     final nameCtrl = TextEditingController();
+    final pinCtrl = TextEditingController();
     UserRole role = UserRole.staff;
+    final permissions = <String, bool>{
+      'editProducts': false,
+      'createOrders': false,
+      'confirmOrders': false,
+      'manageUsers': false,
+      'viewHistory': false,
+    };
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -107,6 +115,11 @@ class _UsersScreenState extends State<UsersScreen> {
                 decoration: const InputDecoration(labelText: 'Display name'),
               ),
               const SizedBox(height: 8),
+              TextField(
+                controller: pinCtrl,
+                decoration: const InputDecoration(labelText: 'PIN / Password'),
+              ),
+              const SizedBox(height: 8),
               DropdownButtonFormField<UserRole>(
                 initialValue: role,
                 items: UserRole.values
@@ -118,6 +131,18 @@ class _UsersScreenState extends State<UsersScreen> {
                 onChanged: (v) => role = v ?? UserRole.staff,
               ),
               const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: permissions.keys.map((key) {
+                  return FilterChip(
+                    label: Text(key),
+                    selected: permissions[key] ?? false,
+                    onSelected: (v) => permissions[key] = v,
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -127,7 +152,12 @@ class _UsersScreenState extends State<UsersScreen> {
                           .showSnackBar(const SnackBar(content: Text('Name required')));
                       return;
                     }
-                    await vm.addUser(displayName: nameCtrl.text.trim(), role: role);
+                    await vm.addUser(
+                      displayName: nameCtrl.text.trim(),
+                      role: role,
+                      pin: pinCtrl.text.trim().isNotEmpty ? pinCtrl.text.trim() : null,
+                      permissions: permissions,
+                    );
                     if (ctx.mounted) Navigator.pop(ctx);
                   },
                   child: const Text('Add user'),

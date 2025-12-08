@@ -34,6 +34,8 @@ class UsersViewModel extends ChangeNotifier {
   Future<void> addUser({
     required String displayName,
     required UserRole role,
+    String? pin,
+    Map<String, bool> permissions = const {},
   }) async {
     try {
       loading = true;
@@ -44,6 +46,8 @@ class UsersViewModel extends ChangeNotifier {
         displayName: displayName,
         role: role,
         active: true,
+        pin: pin,
+        permissions: permissions,
       );
       await _repo.addUser(user);
     } catch (e) {

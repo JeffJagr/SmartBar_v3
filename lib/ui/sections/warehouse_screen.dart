@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/product.dart';
 import '../../viewmodels/inventory_view_model.dart';
 import '../widgets/adjust_quantity_sheet.dart';
+import '../../viewmodels/orders_view_model.dart';
 import '../widgets/product_form_sheet.dart';
 import '../widgets/product_list_item.dart';
 import '../widgets/restock_hint_sheet.dart';
@@ -107,6 +108,8 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final p = filtered[index];
+              final ordersVm = context.watch<OrdersViewModel?>();
+              final activeOrderQty = _activeOrderQtyForProduct(ordersVm, p.id);
               final hintValue = p.restockHint ?? 0;
               final statusColor = _statusColor(hintValue, p.warehouseTarget);
               final threshold = p.minimalStockThreshold ?? 0;
@@ -124,6 +127,7 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
                 primaryBadgeColor: Theme.of(context).colorScheme.primary,
                 hintValue: hintValue,
                 hintStatusColor: statusColor,
+                activeOrderQty: activeOrderQty > 0 ? activeOrderQty : null,
                 lowPrimary: lowPrimary,
                 lowSecondary: lowSecondary,
                 lowPrimaryLabel: 'Low WH stock',
@@ -273,4 +277,5 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
     return Colors.green;
   }
 }
+
 

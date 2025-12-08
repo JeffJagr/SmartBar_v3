@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/app_controller.dart';
 import '../../models/order.dart';
-import '../../viewmodels/orders_view_model.dart';
+import '../../models/product.dart';
 import '../../viewmodels/inventory_view_model.dart';
+import '../../viewmodels/orders_view_model.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -14,6 +15,9 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
+  OrderStatus? _statusFilter;
+  bool _sortDescending = true;
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +31,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final vm = context.watch<OrdersViewModel>();
     final app = context.watch<AppController>();
     final company = app.activeCompany;
-    final productLookup = context.watch<InventoryViewModel>().products;
+    final products = context.watch<InventoryViewModel>().products;
 
     if (vm.loading && vm.orders.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -36,55 +40,117 @@ class _OrdersScreenState extends State<OrdersScreen> {
       return Center(child: Text('Error: ${vm.error}'));
     }
 
+    final orders = vm.orders
+        .where((o) => _statusFilter == null || o.status == _statusFilter)
+        .toList()
+      ..sort((a, b) => _sortDescending
+          ? b.createdAt.compareTo(a.createdAt)
+          : a.createdAt.compareTo(b.createdAt));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Orders'),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: vm.orders.length,
-        itemBuilder: (context, index) {
-          final order = vm.orders[index];
-          String itemLine(OrderItem item) {
-            final name = item.productNameSnapshot ??
-                productLookup.firstWhere(
-                  (p) => p.id == item.productId,
-                  orElse: () => Product(
-                    id: item.productId,
-                    companyId: '',
-                    name: 'Deleted product',
-                    group: '',
-                    unit: '',
-                    barQuantity: 0,
-                    barMax: 0,
-                    warehouseQuantity: 0,
-                    warehouseTarget: 0,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<OrderStatus?>(
+                    decoration: const InputDecoration(labelText: 'Status'),
+                    value: _statusFilter,
+                    items: const [
+                      DropdownMenuItem(value: null, child: Text('All')),
+                      DropdownMenuItem(value: OrderStatus.pending, child: Text('Pending')),
+                      DropdownMenuItem(value: OrderStatus.confirmed, child: Text('Confirmed')),
+                      DropdownMenuItem(value: OrderStatus.delivered, child: Text('Delivered')),
+                    ],
+                    onChanged: (v) => setState(() => _statusFilter = v),
                   ),
-                ).name;
-            return '$name × ${item.quantityOrdered}';
-          }
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              title: Text('Order ${order.id.isEmpty ? '(pending)' : order.id}'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                IconButton(
+                  tooltip: _sortDescending ? 'Newest first' : 'Oldest first',
+                  onPressed: () => setState(() => _sortDescending = !_sortDescending),
+                  icon: Icon(_sortDescending ? Icons.arrow_downward : Icons.arrow_upward),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                return _orderCard(context, order, app, vm, products);
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: company == null
+            ? null
+            : () => _openNewOrderSheet(
+                  context: context,
+                  companyId: company.id,
+                  createdBy: app.ownerUser?.uid ?? app.currentStaff?.id ?? 'anon',
+                  createdByName: app.displayName,
+                ),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _orderCard(BuildContext context, OrderModel order, AppController app,
+      OrdersViewModel vm, List<Product> products) {
+    String itemLine(OrderItem item) {
+      final name = item.productNameSnapshot ??
+          products.firstWhere(
+            (p) => p.id == item.productId,
+            orElse: () => Product(
+              id: item.productId,
+              companyId: '',
+              name: 'Deleted product',
+              group: '',
+              unit: '',
+              barQuantity: 0,
+              barMax: 0,
+              warehouseQuantity: 0,
+              warehouseTarget: 0,
+            ),
+          ).name;
+      return '$name × ${item.quantityOrdered}';
+    }
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        title: Row(
+          children: [
+            _statusChip(order.status),
+            const SizedBox(width: 8),
+            Text(order.id.isEmpty ? 'Order (new)' : 'Order ${order.id}'),
+          ],
+        ),
+        subtitle: Text('Created: ${order.createdAt}'),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...order.items.map((item) => Text(
+                    '• ${itemLine(item)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )),
+              if (order.confirmedAt != null) Text('Confirmed: ${order.confirmedAt}'),
+              if (order.deliveredAt != null) Text('Delivered: ${order.deliveredAt}'),
+              Row(
                 children: [
-                  Text('Status: ${order.status.name}'),
-                  Text('Created: ${order.createdAt}'),
-                  if (order.confirmedAt != null) Text('Confirmed: ${order.confirmedAt}'),
-                  if (order.deliveredAt != null) Text('Delivered: ${order.deliveredAt}'),
-                  const SizedBox(height: 6),
-                  ...order.items.map((item) => Text(
-                        '• ${itemLine(item)}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      )),
-                ],
-              ),
-              trailing: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (order.status == OrderStatus.pending)
+                  if (order.status == OrderStatus.pending && app.isOwner)
                     TextButton(
                       onPressed: () => vm.confirmOrder(
                         order,
@@ -99,19 +165,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                 ],
               ),
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: company == null
-            ? null
-            : () => _openNewOrderSheet(
-                  context: context,
-                  companyId: company.id,
-                  createdBy: app.ownerUser?.uid ?? app.currentStaff?.id ?? 'anon',
-                ),
-        child: const Icon(Icons.add),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -120,6 +176,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     required BuildContext context,
     required String companyId,
     required String createdBy,
+    required String createdByName,
   }) {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -142,9 +199,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           );
         }
 
-        if (inventory.isNotEmpty) {
-          addLine();
-        }
+        if (inventory.isNotEmpty) addLine();
 
         return StatefulBuilder(
           builder: (sheetCtx, setState) {
@@ -165,8 +220,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       style: Theme.of(sheetCtx).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
-                    if (items.isEmpty)
-                      const Text('No products available to order'),
+                    if (items.isEmpty) const Text('No products available to order'),
                     ...List.generate(items.length, (i) {
                       final line = items[i];
                       return Padding(
@@ -228,11 +282,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       );
                     }),
                     TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          addLine();
-                        });
-                      },
+                      onPressed: () => setState(addLine),
                       icon: const Icon(Icons.add),
                       label: const Text('Add product'),
                     ),
@@ -243,8 +293,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         icon: const Icon(Icons.save),
                         label: const Text('Create order'),
                         onPressed: () async {
-                          final filteredItems =
-                              items.where((e) => e.quantityOrdered > 0 && e.productId.isNotEmpty).toList();
+                          final filteredItems = items
+                              .where((e) => e.quantityOrdered > 0 && e.productId.isNotEmpty)
+                              .toList();
                           if (filteredItems.isEmpty) {
                             ScaffoldMessenger.of(ctx).showSnackBar(
                               const SnackBar(content: Text('Add at least one item with quantity')),
@@ -254,6 +305,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           await vm.createOrder(
                             companyId: companyId,
                             createdByUserId: createdBy,
+                            createdByName: createdByName,
                             items: filteredItems,
                           );
                           if (ctx.mounted) Navigator.pop(ctx);
@@ -267,6 +319,30 @@ class _OrdersScreenState extends State<OrdersScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _statusChip(OrderStatus status) {
+    Color color;
+    String label;
+    switch (status) {
+      case OrderStatus.pending:
+        color = Colors.orange;
+        label = 'Pending';
+        break;
+      case OrderStatus.confirmed:
+        color = Colors.blue;
+        label = 'Confirmed';
+        break;
+      case OrderStatus.delivered:
+        color = Colors.green;
+        label = 'Received';
+        break;
+    }
+    return Chip(
+      label: Text(label),
+      backgroundColor: color.withValues(alpha: 0.15),
+      labelStyle: TextStyle(color: color, fontWeight: FontWeight.w600),
     );
   }
 }

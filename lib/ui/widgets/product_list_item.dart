@@ -18,6 +18,7 @@ class ProductListItem extends StatelessWidget {
     this.onDelete,
     this.onTransfer,
     this.onReorder,
+    this.activeOrderQty,
     this.primaryBadgeColor,
     this.hintStatusColor,
     this.showStaffReadOnly = false,
@@ -42,6 +43,7 @@ class ProductListItem extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onTransfer;
   final VoidCallback? onReorder;
+  final int? activeOrderQty;
   final Color? primaryBadgeColor;
   final Color? hintStatusColor;
   final bool showStaffReadOnly;
@@ -100,6 +102,18 @@ class ProductListItem extends StatelessWidget {
               runSpacing: 4,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                if ((activeOrderQty ?? 0) > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Orders: ${activeOrderQty}',
+                      style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+                    ),
+                  ),
                 if (hintValue > 0)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

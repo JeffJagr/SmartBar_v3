@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/product.dart';
 import '../../viewmodels/inventory_view_model.dart';
+import '../../viewmodels/orders_view_model.dart';
 import '../widgets/adjust_quantity_sheet.dart';
 import '../widgets/restock_hint_sheet.dart';
 import '../widgets/product_form_sheet.dart';
@@ -24,6 +25,7 @@ class _BarScreenState extends State<BarScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<InventoryViewModel>();
+    final ordersVm = context.watch<OrdersViewModel?>();
 
     if (vm.loading) {
       return const Center(child: CircularProgressIndicator());
@@ -110,6 +112,7 @@ class _BarScreenState extends State<BarScreen> {
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final p = filtered[index];
+              final activeOrderQty = _activeOrderQtyForProduct(ordersVm, p.id);
               final hintValue = p.restockHint ?? 0;
               final statusColor = _statusColor(hintValue, p.barMax);
               final low = _lowStock(p);
@@ -125,6 +128,7 @@ class _BarScreenState extends State<BarScreen> {
                 primaryBadgeColor: Theme.of(context).colorScheme.primary,
                 hintValue: hintValue,
                 hintStatusColor: statusColor,
+                activeOrderQty: activeOrderQty > 0 ? activeOrderQty : null,
                 lowPrimary: lowBar,
                 lowSecondary: low.warehouse,
                 lowPrimaryLabel: 'Low bar stock',
@@ -263,9 +267,30 @@ class _BarScreenState extends State<BarScreen> {
                       );
                       return;
                     }
+                    final existingQty = _activeOrderQtyForProduct(vm, product.id);
+                    if (existingQty > 0) {
+                      final proceed = await showDialog<bool>(
+                        context: ctx,
+                        builder: (dCtx) => AlertDialog(
+                          title: const Text('Existing order found'),
+                          content: Text(
+                              'There are already $existingQty units of ${product.name} in pending/confirmed orders. Add another $qty?'),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(dCtx, false),
+                                child: const Text('Cancel')),
+                            TextButton(
+                                onPressed: () => Navigator.pop(dCtx, true),
+                                child: const Text('Add anyway')),
+                          ],
+                        ),
+                      );
+                      if (proceed != true) return;
+                    }
                     await vm.createOrder(
                       companyId: company.id,
                       createdByUserId: app.ownerUser?.uid ?? app.currentStaff?.id ?? 'anon',
+                      createdByName: app.displayName,
                       items: [
                         OrderItem(
                           productId: product.id,
@@ -290,6 +315,15 @@ class _BarScreenState extends State<BarScreen> {
         );
       },
     );
+  }
+
+  int _activeOrderQtyForProduct(OrdersViewModel? vm, String productId) {
+    if (vm == null) return 0;
+    return vm.orders
+        .where((o) => o.status == OrderStatus.pending || o.status == OrderStatus.confirmed)
+        .expand((o) => o.items)
+        .where((i) => i.productId == productId)
+        .fold<int>(0, (sum, item) => sum + item.quantityOrdered);
   }
 }
   }
