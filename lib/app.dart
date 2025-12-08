@@ -7,6 +7,7 @@ import 'repositories/inventory_repository.dart';
 import 'repositories/note_repository.dart';
 import 'repositories/orders_repository.dart';
 import 'repositories/product_repository.dart';
+import 'repositories/layout_repository.dart';
 import 'repositories/users_repository.dart';
 import 'screens/auth/role_selection_screen.dart';
 import 'screens/company/company_list_screen.dart';
@@ -18,6 +19,7 @@ import 'viewmodels/notes_view_model.dart';
 import 'viewmodels/orders_view_model.dart';
 import 'viewmodels/history_view_model.dart';
 import 'viewmodels/users_view_model.dart';
+import 'viewmodels/layout_view_model.dart';
 
 class SmartBarApp extends StatelessWidget {
   const SmartBarApp({super.key, required this.appState});
@@ -86,6 +88,11 @@ class SmartBarApp extends StatelessWidget {
               ? FirestoreUsersRepository(companyId: app.activeCompany!.id)
               : null,
         ),
+        ProxyProvider<AppController, LayoutRepository?>(
+          update: (_, app, __) => app.activeCompany != null
+              ? FirestoreLayoutRepository(companyId: app.activeCompany!.id)
+              : null,
+        ),
         ProxyProvider<AppController, HistoryRepository?>(
           update: (_, app, __) => app.activeCompany != null
               ? FirestoreHistoryRepository(companyId: app.activeCompany!.id)
@@ -151,6 +158,29 @@ class SmartBarApp extends StatelessWidget {
             if (ordersRepo == null) return null;
             vm ??= OrdersViewModel(ordersRepo, inventoryRepo, historyRepo: historyRepo);
             vm.init();
+            vm.applyPermissionContext(
+              snapshot: app.permissionSnapshot(app.permissions),
+              service: app.permissions,
+            );
+            return vm;
+          },
+        ),
+        ChangeNotifierProxyProvider2<LayoutRepository?, AppController, LayoutViewModel?>(
+          create: (ctx) {
+            final repo = ctx.read<LayoutRepository?>();
+            if (repo == null) return null;
+            final app = ctx.read<AppController>();
+            final vm = LayoutViewModel(repo)..init(scope: 'bar');
+            vm.applyPermissionContext(
+              snapshot: app.permissionSnapshot(app.permissions),
+              service: app.permissions,
+            );
+            return vm;
+          },
+          update: (ctx, repo, app, vm) {
+            if (repo == null) return null;
+            vm ??= LayoutViewModel(repo);
+            vm.init(scope: 'bar');
             vm.applyPermissionContext(
               snapshot: app.permissionSnapshot(app.permissions),
               service: app.permissions,
