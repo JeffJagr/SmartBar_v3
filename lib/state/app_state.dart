@@ -119,17 +119,31 @@ class AppState extends ChangeNotifier {
 
   Future<void> signInOwner(String email, String password) async {
     await _authService.signInOwner(email: email, password: password);
-    currentUserPermissions = {
-      'editProducts': true,
-      'createOrders': true,
-      'confirmOrders': true,
-      'receiveOrders': true,
-      'manageUsers': true,
-      'viewHistory': true,
-      'setRestockHint': true,
-      'transferStock': true,
-      'addNotes': true,
-    };
+    // Try to load permissions from /users/{uid}; fallback to full owner rights.
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        final doc =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        if (doc.exists) {
+          final data = doc.data() ?? {};
+          currentUserPermissions =
+              (data['permissions'] as Map?)?.cast<String, bool>() ?? {};
+        }
+      }
+    } catch (_) {
+      currentUserPermissions = {
+        'editProducts': true,
+        'createOrders': true,
+        'confirmOrders': true,
+        'receiveOrders': true,
+        'manageUsers': true,
+        'viewHistory': true,
+        'setRestockHint': true,
+        'transferStock': true,
+        'addNotes': true,
+      };
+    }
     // Auth listener will populate companies and active company.
   }
 
@@ -174,6 +188,25 @@ class AppState extends ChangeNotifier {
         'permissions': currentStaff!.permissions,
         'createdAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+    }
+    // Try to hydrate permissions from session doc (in case staff record has flags).
+    try {
+      if (anonUid.isNotEmpty && companyId.isNotEmpty) {
+        final sessionDoc = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(companyId)
+            .collection('staffSessions')
+            .doc(anonUid)
+            .get();
+        if (sessionDoc.exists) {
+          final data = sessionDoc.data() ?? {};
+          currentUserPermissions =
+              (data['permissions'] as Map?)?.cast<String, bool>() ??
+                  currentUserPermissions;
+        }
+      }
+    } catch (_) {
+      // keep defaults
     }
     await _attachCompanyStreams(companyId);
     notifyListeners();
