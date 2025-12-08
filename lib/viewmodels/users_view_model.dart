@@ -43,6 +43,11 @@ class UsersViewModel extends ChangeNotifier {
     String? pin,
     Map<String, bool> permissions = const {},
   }) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      error = 'Not authenticated. Please sign in again.';
+      notifyListeners();
+      return;
+    }
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canManageUsers(_permissionSnapshot!)) {
@@ -79,6 +84,11 @@ class UsersViewModel extends ChangeNotifier {
   }
 
   Future<void> updateRole(String userId, UserRole role) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      error = 'Not authenticated. Please sign in again.';
+      notifyListeners();
+      return;
+    }
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canManageUsers(_permissionSnapshot!)) {
@@ -90,6 +100,11 @@ class UsersViewModel extends ChangeNotifier {
   }
 
   Future<void> setActive(String userId, bool active) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      error = 'Not authenticated. Please sign in again.';
+      notifyListeners();
+      return;
+    }
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canManageUsers(_permissionSnapshot!)) {
@@ -101,6 +116,11 @@ class UsersViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteUser(String userId) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      error = 'Not authenticated. Please sign in again.';
+      notifyListeners();
+      return;
+    }
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canManageUsers(_permissionSnapshot!)) {

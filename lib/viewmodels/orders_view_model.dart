@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/order.dart';
 import '../models/history_entry.dart';
@@ -47,6 +48,7 @@ class OrdersViewModel extends ChangeNotifier {
     required List<OrderItem> items,
     String? createdByName,
   }) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canCreateOrders(_permissionSnapshot!)) {
@@ -78,6 +80,7 @@ class OrdersViewModel extends ChangeNotifier {
   }
 
   Future<void> markReceived(OrderModel order) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canReceiveOrders(_permissionSnapshot!)) {
@@ -130,6 +133,7 @@ class OrdersViewModel extends ChangeNotifier {
   }
 
   Future<void> confirmOrder(OrderModel order, {required String confirmedBy}) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canConfirmOrders(_permissionSnapshot!)) {
@@ -156,6 +160,15 @@ class OrdersViewModel extends ChangeNotifier {
   }) {
     _permissionSnapshot = snapshot;
     _permissionService = service;
+  }
+
+  bool _requireAuth() {
+    if (FirebaseAuth.instance.currentUser == null) {
+      error = 'Not authenticated. Please sign in again.';
+      notifyListeners();
+      return false;
+    }
+    return true;
   }
 
   String _orderLabel(OrderModel order) {

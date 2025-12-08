@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/product.dart';
 import '../repositories/inventory_repository.dart';
@@ -59,6 +60,7 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> updateRestockHint(String productId, int? hint) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canSetRestockHint(_permissionSnapshot!)) {
@@ -81,6 +83,7 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> clearRestockHint(String productId) async {
+    if (!_requireAuth()) return;
     try {
       saving = true;
       notifyListeners();
@@ -99,6 +102,7 @@ class InventoryViewModel extends ChangeNotifier {
     int? barQuantity,
     int? warehouseQuantity,
   }) async {
+    if (!_requireAuth()) return;
     if ((barQuantity ?? 0) < 0 || (warehouseQuantity ?? 0) < 0) {
       error = 'Quantities cannot be negative.';
       notifyListeners();
@@ -132,6 +136,7 @@ class InventoryViewModel extends ChangeNotifier {
     required String productId,
     required int quantity,
   }) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canTransferStock(_permissionSnapshot!)) {
@@ -155,6 +160,7 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canEditProducts(_permissionSnapshot!)) {
@@ -177,6 +183,7 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> updateProduct(String productId, Map<String, dynamic> data) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canEditProducts(_permissionSnapshot!)) {
@@ -199,6 +206,7 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteProduct(String productId) async {
+    if (!_requireAuth()) return;
     if (_permissionService != null &&
         _permissionSnapshot != null &&
         !_permissionService!.canEditProducts(_permissionSnapshot!)) {
@@ -233,6 +241,15 @@ class InventoryViewModel extends ChangeNotifier {
     _permissionService = service;
     canEditQuantities = service?.canAdjustQuantities(snapshot) ?? canEditQuantities;
     notifyListeners();
+  }
+
+  bool _requireAuth() {
+    if (FirebaseAuth.instance.currentUser == null) {
+      error = 'Not authenticated. Please sign in again.';
+      notifyListeners();
+      return false;
+    }
+    return true;
   }
 
   @override
