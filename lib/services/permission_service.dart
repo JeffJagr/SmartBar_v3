@@ -1,3 +1,4 @@
+import '../controllers/app_controller.dart';
 import '../state/app_state.dart';
 import '../models/user_account.dart';
 
@@ -33,7 +34,7 @@ class PermissionService {
     required AppState app,
     Map<String, bool> explicitFlags = const {},
   }) {
-    // If AppState is an AppController it may expose currentStaffMember; otherwise use currentStaff.
+    // If AppState is an AppController it exposes currentStaffMember; otherwise use currentStaff.
     final rawRole = (app is AppController
             ? app.currentStaffMember?.role
             : app.currentStaff?.role)

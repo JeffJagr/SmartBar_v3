@@ -110,7 +110,7 @@ class ProductListItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Orders: ${activeOrderQty}',
+                      'Orders: $activeOrderQty',
                       style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
                     ),
                   ),
