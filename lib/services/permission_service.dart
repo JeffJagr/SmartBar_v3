@@ -1,4 +1,4 @@
-import '../controllers/app_controller.dart';
+import '../state/app_state.dart';
 import '../models/user_account.dart';
 
 /// Snapshot of the current user's permission context.
@@ -30,7 +30,7 @@ class PermissionService {
   /// Build a snapshot from the current app controller state and optional
   /// explicit flags pulled from a user document.
   PermissionSnapshot fromApp({
-    required AppController app,
+    required AppState app,
     Map<String, bool> explicitFlags = const {},
   }) {
     final rawRole = app.currentStaffMember?.role.toLowerCase() ?? '';
@@ -94,4 +94,3 @@ class PermissionService {
       snapshot.isManager ||
       snapshot.flag('addNotes', defaultValue: true);
 }
-

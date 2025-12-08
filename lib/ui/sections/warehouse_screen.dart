@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../controllers/app_controller.dart';
+import '../../models/order.dart';
 import '../../models/product.dart';
 import '../../viewmodels/inventory_view_model.dart';
-import '../widgets/adjust_quantity_sheet.dart';
 import '../../viewmodels/orders_view_model.dart';
+import '../widgets/adjust_quantity_sheet.dart';
 import '../widgets/product_form_sheet.dart';
 import '../widgets/product_list_item.dart';
 import '../widgets/restock_hint_sheet.dart';
@@ -25,6 +27,7 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<InventoryViewModel>();
+    final ordersVm = context.watch<OrdersViewModel?>();
 
     if (vm.loading) {
       return const Center(child: CircularProgressIndicator());
@@ -108,7 +111,6 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final p = filtered[index];
-              final ordersVm = context.watch<OrdersViewModel?>();
               final activeOrderQty = _activeOrderQtyForProduct(ordersVm, p.id);
               final hintValue = p.restockHint ?? 0;
               final statusColor = _statusColor(hintValue, p.warehouseTarget);
@@ -116,10 +118,11 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
               final lowPrimary = threshold > 0
                   ? p.warehouseQuantity <= threshold
                   : p.warehouseQuantity < p.warehouseTarget;
-              final lowSecondary = threshold > 0 ? p.barQuantity <= threshold : p.barQuantity < p.barMax;
+              final lowSecondary =
+                  threshold > 0 ? p.barQuantity <= threshold : p.barQuantity < p.barMax;
               return ProductListItem(
                 title: p.name,
-                groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
+                groupText: '${p.group}${p.subgroup != null ? " · ${p.subgroup}" : ""}',
                 primaryLabel: 'Warehouse',
                 primaryValue: '${p.warehouseQuantity}/${p.warehouseTarget}',
                 secondaryLabel: 'Bar',
@@ -151,7 +154,10 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
                     : null,
                 onEdit: isOwner ? () => _openProductForm(context, p) : null,
                 onDelete: isOwner ? () => _confirmDelete(context, p.id) : null,
-                onReorder: isOwner ? () => _openQuickOrder(context: context, product: p) : null,\n                showStaffReadOnly: !isOwner,
+                onReorder: isOwner
+                    ? () => _openQuickOrder(context: context, product: p)
+                    : null,
+                showStaffReadOnly: !isOwner,
               );
             },
           ),
@@ -269,6 +275,113 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
     }
   }
 
+  void _openQuickOrder({
+    required BuildContext context,
+    required Product product,
+  }) {
+    final qtyCtrl = TextEditingController();
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) {
+        final vm = ctx.read<OrdersViewModel?>();
+        final app = ctx.read<AppController>();
+        final company = app.activeCompany;
+        if (vm == null || company == null) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Orders unavailable (no company active).'),
+          );
+        }
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Order ${product.name}', style: Theme.of(ctx).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              TextField(
+                controller: qtyCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Quantity'),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final qty = int.tryParse(qtyCtrl.text) ?? 0;
+                    if (qty <= 0) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Enter a quantity')),
+                      );
+                      return;
+                    }
+                    final existingQty = _activeOrderQtyForProduct(vm, product.id);
+                    if (existingQty > 0) {
+                      final proceed = await showDialog<bool>(
+                        context: ctx,
+                        builder: (dCtx) => AlertDialog(
+                          title: const Text('Existing order found'),
+                          content: Text(
+                              'There are already $existingQty units of ${product.name} in pending/confirmed orders. Add another $qty?'),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(dCtx, false),
+                                child: const Text('Cancel')),
+                            TextButton(
+                                onPressed: () => Navigator.pop(dCtx, true),
+                                child: const Text('Add anyway')),
+                          ],
+                        ),
+                      );
+                      if (proceed != true) return;
+                    }
+                    await vm.createOrder(
+                      companyId: company.id,
+                      createdByUserId: app.ownerUser?.uid ?? app.currentStaff?.id ?? 'anon',
+                      createdByName: app.displayName,
+                      items: [
+                        OrderItem(
+                          productId: product.id,
+                          productNameSnapshot: product.name,
+                          quantityOrdered: qty,
+                          unitCost: null,
+                        )
+                      ],
+                    );
+                    if (ctx.mounted) Navigator.pop(ctx);
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        SnackBar(content: Text('Order placed for ${product.name} ($qty)')),
+                      );
+                    }
+                  },
+                  child: const Text('Place order'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  int _activeOrderQtyForProduct(OrdersViewModel? vm, String productId) {
+    if (vm == null) return 0;
+    return vm.orders
+        .where((o) => o.status == OrderStatus.pending || o.status == OrderStatus.confirmed)
+        .expand((o) => o.items)
+        .where((i) => i.productId == productId)
+        .fold<int>(0, (sum, item) => sum + item.quantityOrdered);
+  }
+
   Color? _statusColor(int hint, int target) {
     if (hint <= 0) return null;
     final ratio = target > 0 ? hint / target : 0;
@@ -277,5 +390,3 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
     return Colors.green;
   }
 }
-
-

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../controllers/app_controller.dart';
+import '../../models/order.dart';
 import '../../models/product.dart';
 import '../../viewmodels/inventory_view_model.dart';
 import '../../viewmodels/orders_view_model.dart';
 import '../widgets/adjust_quantity_sheet.dart';
-import '../widgets/restock_hint_sheet.dart';
 import '../widgets/product_form_sheet.dart';
 import '../widgets/product_list_item.dart';
+import '../widgets/restock_hint_sheet.dart';
 
 class BarScreen extends StatefulWidget {
   const BarScreen({super.key});
@@ -30,11 +32,9 @@ class _BarScreenState extends State<BarScreen> {
     if (vm.loading) {
       return const Center(child: CircularProgressIndicator());
     }
-
     if (vm.error != null) {
       return Center(child: Text('Error: ${vm.error}'));
     }
-
     if (vm.products.isEmpty) {
       return const Center(child: Text('No products yet.'));
     }
@@ -120,7 +120,7 @@ class _BarScreenState extends State<BarScreen> {
               final lowBar = threshold > 0 ? p.barQuantity <= threshold : low.bar;
               return ProductListItem(
                 title: p.name,
-                groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
+                groupText: '${p.group}${p.subgroup != null ? " · ${p.subgroup}" : ""}',
                 primaryLabel: 'Bar',
                 primaryValue: '${p.barQuantity}/${p.barMax}',
                 secondaryLabel: 'Warehouse',
@@ -217,6 +217,8 @@ class _BarScreenState extends State<BarScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Product deleted')));
+      }
+    }
   }
 
   void _openQuickOrder({
@@ -325,8 +327,6 @@ class _BarScreenState extends State<BarScreen> {
         .where((i) => i.productId == productId)
         .fold<int>(0, (sum, item) => sum + item.quantityOrdered);
   }
-}
-  }
 
   Color? _statusColor(int hint, int max) {
     if (hint <= 0) return null;
@@ -343,7 +343,6 @@ class _BarScreenState extends State<BarScreen> {
       warehouse: threshold > 0 && p.warehouseQuantity < threshold,
     );
   }
-
 }
 
 class _Low {
