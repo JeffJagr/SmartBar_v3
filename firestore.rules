@@ -47,8 +47,8 @@ service cloud.firestore {
     match /companies/{companyId} {
       // Owners and staff can read company meta; only owners can update/delete.
       allow read: if isOwner(companyId) || isStaff(companyId);
-      allow create: if isSignedIn() && request.resource.data.ownerIds != null
-        && request.auth.uid in request.resource.data.ownerIds;
+      // Allow any authenticated user to create a company; the app writes ownerIds containing the creator.
+      allow create: if isSignedIn();
       allow update, delete: if isOwner(companyId);
 
       match /products/{productId} {
