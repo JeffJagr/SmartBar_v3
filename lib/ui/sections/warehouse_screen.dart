@@ -147,7 +147,7 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
                     : null,
                 onEdit: isOwner ? () => _openProductForm(context, p) : null,
                 onDelete: isOwner ? () => _confirmDelete(context, p.id) : null,
-                showStaffReadOnly: !isOwner,
+                onReorder: isOwner ? () => _openQuickOrder(context: context, product: p) : null,\n                showStaffReadOnly: !isOwner,
               );
             },
           ),
@@ -273,3 +273,4 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
     return Colors.green;
   }
 }
+

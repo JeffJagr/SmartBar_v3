@@ -17,6 +17,7 @@ class ProductListItem extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onTransfer,
+    this.onReorder,
     this.primaryBadgeColor,
     this.hintStatusColor,
     this.showStaffReadOnly = false,
@@ -40,6 +41,7 @@ class ProductListItem extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onTransfer;
+  final VoidCallback? onReorder;
   final Color? primaryBadgeColor;
   final Color? hintStatusColor;
   final bool showStaffReadOnly;
@@ -126,6 +128,11 @@ class ProductListItem extends StatelessWidget {
                   onPressed: onSetHint,
                   child: const Text('Set restock hint'),
                 ),
+                if (onReorder != null)
+                  TextButton(
+                    onPressed: onReorder,
+                    child: const Text('Order / Reorder'),
+                  ),
                 if (onTransfer != null)
                   TextButton(
                     onPressed: onTransfer,

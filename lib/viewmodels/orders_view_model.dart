@@ -38,6 +38,7 @@ class OrdersViewModel extends ChangeNotifier {
     required String createdByUserId,
     String? supplier,
     required List<OrderItem> items,
+    String? createdByName,
   }) async {
     try {
       loading = true;
@@ -46,6 +47,7 @@ class OrdersViewModel extends ChangeNotifier {
         id: '',
         companyId: companyId,
         createdByUserId: createdByUserId,
+        createdByName: createdByName,
         supplier: supplier,
         status: OrderStatus.pending,
         items: items,
@@ -66,15 +68,36 @@ class OrdersViewModel extends ChangeNotifier {
       notifyListeners();
       // Increment warehouse stock for each item.
       for (final item in order.items) {
-        if (item.quantity > 0) {
-          await _inventoryRepo.addWarehouseStock(itemId: item.productId, delta: item.quantity);
+        if (item.quantityOrdered > 0) {
+          await _inventoryRepo.addWarehouseStock(
+            itemId: item.productId,
+            delta: item.quantityOrdered,
+          );
         }
       }
-      await _ordersRepo.updateStatus(order.id, OrderStatus.delivered);
+      await _ordersRepo.updateStatus(
+        order.id,
+        OrderStatus.delivered,
+        deliveredAt: DateTime.now(),
+      );
     } catch (e) {
       error = e.toString();
     } finally {
       loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> confirmOrder(OrderModel order, {required String confirmedBy}) async {
+    try {
+      await _ordersRepo.updateStatus(
+        order.id,
+        OrderStatus.confirmed,
+        confirmedAt: DateTime.now(),
+        confirmedBy: confirmedBy,
+      );
+    } catch (e) {
+      error = e.toString();
       notifyListeners();
     }
   }

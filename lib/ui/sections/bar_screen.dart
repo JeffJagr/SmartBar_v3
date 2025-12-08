@@ -141,6 +141,12 @@ class _BarScreenState extends State<BarScreen> {
                     : null,
                 onEdit: isOwner ? () => _openProductForm(context, p) : null,
                 onDelete: isOwner ? () => _confirmDelete(context, p.id) : null,
+                onReorder: isOwner
+                    ? () => _openQuickOrder(
+                          context: context,
+                          product: p,
+                        )
+                    : null,
                 showStaffReadOnly: !isOwner,
               );
             },
@@ -207,8 +213,85 @@ class _BarScreenState extends State<BarScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Product deleted')));
-      }
-    }
+  }
+
+  void _openQuickOrder({
+    required BuildContext context,
+    required Product product,
+  }) {
+    final qtyCtrl = TextEditingController();
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) {
+        final vm = ctx.read<OrdersViewModel?>();
+        final app = ctx.read<AppController>();
+        final company = app.activeCompany;
+        if (vm == null || company == null) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Orders unavailable (no company active).'),
+          );
+        }
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Order ${product.name}', style: Theme.of(ctx).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              TextField(
+                controller: qtyCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Quantity'),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final qty = int.tryParse(qtyCtrl.text) ?? 0;
+                    if (qty <= 0) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Enter a quantity')),
+                      );
+                      return;
+                    }
+                    await vm.createOrder(
+                      companyId: company.id,
+                      createdByUserId: app.ownerUser?.uid ?? app.currentStaff?.id ?? 'anon',
+                      items: [
+                        OrderItem(
+                          productId: product.id,
+                          productNameSnapshot: product.name,
+                          quantityOrdered: qty,
+                          unitCost: null,
+                        )
+                      ],
+                    );
+                    if (ctx.mounted) Navigator.pop(ctx);
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        SnackBar(content: Text('Order placed for ${product.name} ($qty)')),
+                      );
+                    }
+                  },
+                  child: const Text('Place order'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
   }
 
   Color? _statusColor(int hint, int max) {

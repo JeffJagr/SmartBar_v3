@@ -5,7 +5,14 @@ import '../models/order.dart';
 abstract class OrdersRepository {
   Stream<List<OrderModel>> watchOrders();
   Future<void> createOrder(OrderModel order);
-  Future<void> updateStatus(String orderId, OrderStatus status);
+  Future<void> updateStatus(
+    String orderId,
+    OrderStatus status, {
+    String? confirmedBy,
+    DateTime? confirmedAt,
+    String? deliveredBy,
+    DateTime? deliveredAt,
+  });
 }
 
 class FirestoreOrdersRepository implements OrdersRepository {
@@ -33,7 +40,21 @@ class FirestoreOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<void> updateStatus(String orderId, OrderStatus status) {
-    return _col.doc(orderId).update({'status': status.name});
+  Future<void> updateStatus(
+    String orderId,
+    OrderStatus status, {
+    String? confirmedBy,
+    DateTime? confirmedAt,
+    String? deliveredBy,
+    DateTime? deliveredAt,
+  }) {
+    final data = <String, dynamic>{
+      'status': status.name,
+    };
+    if (confirmedBy != null) data['confirmedBy'] = confirmedBy;
+    if (confirmedAt != null) data['confirmedAt'] = Timestamp.fromDate(confirmedAt);
+    if (deliveredBy != null) data['deliveredBy'] = deliveredBy;
+    if (deliveredAt != null) data['deliveredAt'] = Timestamp.fromDate(deliveredAt);
+    return _col.doc(orderId).update(data);
   }
 }

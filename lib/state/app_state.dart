@@ -277,7 +277,12 @@ class AppState extends ChangeNotifier {
         supplier: 'Local Brewery',
         status: OrderStatus.pending,
         items: const [
-          OrderItem(productId: 'p1', quantity: 4, unitCost: 120),
+          OrderItem(
+            productId: 'p1',
+            productNameSnapshot: 'House Lager',
+            quantityOrdered: 4,
+            unitCost: 120,
+          ),
         ],
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
@@ -288,7 +293,12 @@ class AppState extends ChangeNotifier {
         supplier: 'Spirits Co',
         status: OrderStatus.delivered,
         items: const [
-          OrderItem(productId: 'p2', quantity: 6, unitCost: 22),
+          OrderItem(
+            productId: 'p2',
+            productNameSnapshot: 'Gin Bottle',
+            quantityOrdered: 6,
+            unitCost: 22,
+          ),
         ],
         createdAt: DateTime.now().subtract(const Duration(days: 3)),
       ),

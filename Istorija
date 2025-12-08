@@ -43,3 +43,4 @@ Entries are chronological, newest at bottom.
 - Orders MVP added: Firestore orders repository/viewmodel, Orders screen with list/new-order sheet, mark received (increments warehouse stock), and warehouse→bar transfer flow.
 - Added user/role management scaffolding, history stream/viewmodel, and Users/History screens wiring (owner-only).
 - Low-stock highlighting honors minimalStockThreshold across bar/warehouse/combined lists; warehouse transfer dialog fixed; order samples updated with createdByUserId.
+- Orders updated with product name snapshots and quantityOrdered, quick reorder from product lists, and lifecycle timestamps/confirm/receive actions.

@@ -27,6 +27,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final vm = context.watch<OrdersViewModel>();
     final app = context.watch<AppController>();
     final company = app.activeCompany;
+    final productLookup = context.watch<InventoryViewModel>().products;
 
     if (vm.loading && vm.orders.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -44,6 +45,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
         itemCount: vm.orders.length,
         itemBuilder: (context, index) {
           final order = vm.orders[index];
+          String itemLine(OrderItem item) {
+            final name = item.productNameSnapshot ??
+                productLookup.firstWhere(
+                  (p) => p.id == item.productId,
+                  orElse: () => Product(
+                    id: item.productId,
+                    companyId: '',
+                    name: 'Deleted product',
+                    group: '',
+                    unit: '',
+                    barQuantity: 0,
+                    barMax: 0,
+                    warehouseQuantity: 0,
+                    warehouseTarget: 0,
+                  ),
+                ).name;
+            return '$name × ${item.quantityOrdered}';
+          }
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
@@ -53,19 +72,33 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 children: [
                   Text('Status: ${order.status.name}'),
                   Text('Created: ${order.createdAt}'),
+                  if (order.confirmedAt != null) Text('Confirmed: ${order.confirmedAt}'),
+                  if (order.deliveredAt != null) Text('Delivered: ${order.deliveredAt}'),
                   const SizedBox(height: 6),
                   ...order.items.map((item) => Text(
-                        '• ${item.productId} x ${item.quantity}',
+                        '• ${itemLine(item)}',
                         style: Theme.of(context).textTheme.bodySmall,
                       )),
                 ],
               ),
-              trailing: order.status != OrderStatus.delivered
-                  ? TextButton(
+              trailing: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (order.status == OrderStatus.pending)
+                    TextButton(
+                      onPressed: () => vm.confirmOrder(
+                        order,
+                        confirmedBy: app.displayName,
+                      ),
+                      child: const Text('Confirm'),
+                    ),
+                  if (order.status != OrderStatus.delivered)
+                    TextButton(
                       onPressed: () => vm.markReceived(order),
                       child: const Text('Mark received'),
-                    )
-                  : const SizedBox.shrink(),
+                    ),
+                ],
+              ),
             ),
           );
         },
@@ -99,10 +132,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
         void addLine() {
           controllers.add(TextEditingController());
-          items.add(OrderItem(productId: inventory.first.id, quantity: 0, unitCost: null));
+          items.add(
+            OrderItem(
+              productId: inventory.isNotEmpty ? inventory.first.id : '',
+              productNameSnapshot: inventory.isNotEmpty ? inventory.first.name : '',
+              quantityOrdered: 0,
+              unitCost: null,
+            ),
+          );
         }
 
-        addLine();
+        if (inventory.isNotEmpty) {
+          addLine();
+        }
 
         return StatefulBuilder(
           builder: (sheetCtx, setState) {
@@ -123,6 +165,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       style: Theme.of(sheetCtx).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
+                    if (items.isEmpty)
+                      const Text('No products available to order'),
                     ...List.generate(items.length, (i) {
                       final line = items[i];
                       return Padding(
@@ -131,7 +175,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           children: [
                             Expanded(
                               child: DropdownButtonFormField<String>(
-                                initialValue: line.productId,
+                                initialValue: line.productId.isNotEmpty
+                                    ? line.productId
+                                    : (inventory.isNotEmpty ? inventory.first.id : null),
                                 items: inventory
                                     .map(
                                       (p) => DropdownMenuItem(
@@ -143,9 +189,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 onChanged: (v) {
                                   if (v == null) return;
                                   setState(() {
+                                    final prod = inventory.firstWhere(
+                                      (p) => p.id == v,
+                                      orElse: () => inventory.first,
+                                    );
                                     items[i] = OrderItem(
                                       productId: v,
-                                      quantity: line.quantity,
+                                      productNameSnapshot: prod.name,
+                                      quantityOrdered: line.quantityOrdered,
                                       unitCost: line.unitCost,
                                     );
                                   });
@@ -164,7 +215,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   setState(() {
                                     items[i] = OrderItem(
                                       productId: line.productId,
-                                      quantity: qty,
+                                      productNameSnapshot: line.productNameSnapshot,
+                                      quantityOrdered: qty,
                                       unitCost: line.unitCost,
                                     );
                                   });
@@ -192,7 +244,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         label: const Text('Create order'),
                         onPressed: () async {
                           final filteredItems =
-                              items.where((e) => e.quantity > 0 && e.productId.isNotEmpty).toList();
+                              items.where((e) => e.quantityOrdered > 0 && e.productId.isNotEmpty).toList();
                           if (filteredItems.isEmpty) {
                             ScaffoldMessenger.of(ctx).showSnackBar(
                               const SnackBar(content: Text('Add at least one item with quantity')),
