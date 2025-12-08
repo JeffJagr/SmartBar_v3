@@ -1,8 +1,57 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+    function userRole(uid) {
+      return userDoc(uid).data.role;
+    }
+    function isOwner() {
+      return isSignedIn() && userDoc(request.auth.uid).exists
+        && userRole(request.auth.uid) == 'owner';
+    }
+    function isManagerOrOwner() {
+      return isSignedIn() && userDoc(request.auth.uid).exists
+        && (userRole(request.auth.uid) in ['owner','manager']);
+    }
+
+    match /companies/{companyId} {
+      allow create: if isOwner();            // only owner can create companies
+      allow read: if isSignedIn();
+      allow update, delete: if isOwner();
+
+      match /users/{userId} {
+        allow read: if isSignedIn();
+        allow create, update, delete: if isManagerOrOwner();
+      }
+
+      match /products/{productId} {
+        allow read: if isSignedIn();
+        allow create, update, delete: if isManagerOrOwner();
+      }
+
+      match /orders/{orderId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();              // staff can create orders
+        allow update, delete: if isManagerOrOwner(); // status changes restricted
+      }
+
+      match /notes/{noteId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if isManagerOrOwner();
+      }
+    }
+
+    // Global users collection for roles/permissions lookup.
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if isSignedIn() && request.auth.uid == uid;
     }
   }
 }

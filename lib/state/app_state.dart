@@ -87,7 +87,7 @@ class AppState extends ChangeNotifier {
       }
       ownerUser = user;
       if (ownerUser != null) {
-        await _loadUserProfile(ownerUser!.uid);
+        await _ensureUserProfile(ownerUser!.uid, fallbackRole: 'owner');
       }
       // Staff auth is not driven by FirebaseAuth so we keep staffSession intact.
       if (ownerUser == null) {
@@ -131,7 +131,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> signInOwner(String email, String password) async {
     await _authService.signInOwner(email: email, password: password);
-    await _loadUserProfile(FirebaseAuth.instance.currentUser?.uid);
+    await _ensureUserProfile(FirebaseAuth.instance.currentUser?.uid,
+        fallbackRole: 'owner');
     // Auth listener will populate companies and active company.
   }
 
@@ -424,7 +425,8 @@ class AppState extends ChangeNotifier {
     return null;
   }
 
-  Future<void> _loadUserProfile(String? uid) async {
+  Future<void> _ensureUserProfile(String? uid,
+      {String fallbackRole = 'staff'}) async {
     if (uid == null) return;
     try {
       final ref = FirebaseFirestore.instance.collection('users').doc(uid);
@@ -433,10 +435,14 @@ class AppState extends ChangeNotifier {
         final data = doc.data() ?? {};
         currentUserPermissions =
             (data['permissions'] as Map?)?.cast<String, bool>() ?? {};
-        currentUserRole = data['role'] as String?;
+        currentUserRole = data['role'] as String? ?? fallbackRole;
       } else {
+        await ref.set({
+          'role': fallbackRole,
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
         currentUserPermissions = {};
-        currentUserRole = null;
+        currentUserRole = fallbackRole;
       }
     } catch (_) {
       // ignore profile load errors
