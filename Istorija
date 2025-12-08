@@ -50,3 +50,5 @@ Entries are chronological, newest at bottom.
 - Orders: Added orderNumber counter (#0001, #0002…), transactional Firestore counter; UI shows padded number; permissions now gate confirm/receive actions; Order model/repo/viewmodel updated with lifecycle metadata. Open TODO: migrate legacy orders with missing orderNumber.
 
 - Reorder: Bar & Warehouse product rows now show Order/Reorder when permission allows; quick order sheet pre-fills qty=1, enforces createOrders permission, and orders save to Firestore.
+
+- Orders UX: product rows now show shopping-cart badge with qty in active orders; AppBar shows red badge for pending/confirmed orders and navigates to Orders on tap. Snackbars after order creation were already in place.
