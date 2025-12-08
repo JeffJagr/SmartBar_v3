@@ -26,6 +26,9 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final app = context.watch<AppController>();
+    final perm = app.currentPermissionSnapshot;
+    final canOrder = app.permissions.canCreateOrders(perm);
     final vm = context.watch<InventoryViewModel>();
     final ordersVm = context.watch<OrdersViewModel?>();
 
@@ -154,7 +157,7 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
                     : null,
                 onEdit: isOwner ? () => _openProductForm(context, p) : null,
                 onDelete: isOwner ? () => _confirmDelete(context, p.id) : null,
-                onReorder: isOwner
+                onReorder: canOrder
                     ? () => _openQuickOrder(context: context, product: p)
                     : null,
                 showStaffReadOnly: !isOwner,
@@ -279,13 +282,20 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
     required BuildContext context,
     required Product product,
   }) {
-    final qtyCtrl = TextEditingController();
+    final qtyCtrl = TextEditingController(text: '1');
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       builder: (ctx) {
         final vm = ctx.read<OrdersViewModel?>();
         final app = ctx.read<AppController>();
+        final perm = app.currentPermissionSnapshot;
+        if (!app.permissions.canCreateOrders(perm)) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('You do not have permission to create orders.'),
+          );
+        }
         final company = app.activeCompany;
         if (vm == null || company == null) {
           return const Padding(
