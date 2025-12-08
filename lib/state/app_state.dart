@@ -427,8 +427,8 @@ class AppState extends ChangeNotifier {
   Future<void> _loadUserProfile(String? uid) async {
     if (uid == null) return;
     try {
-      final doc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final ref = FirebaseFirestore.instance.collection('users').doc(uid);
+      final doc = await ref.get();
       if (doc.exists) {
         final data = doc.data() ?? {};
         currentUserPermissions =
