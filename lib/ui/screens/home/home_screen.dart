@@ -81,6 +81,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final app = context.watch<AppController>();
     final company = app.activeCompany;
+    final permSnapshot = app.currentPermissionSnapshot;
+    final canManageProducts = app.permissions.canEditProducts(permSnapshot);
     final isOwner = app.isOwner;
     // Update permissions for VMs based on role.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -154,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       drawer: _buildDrawer(app, company, isOwner),
       body: _buildBody(),
-      floatingActionButton: _buildFab(isOwner),
+      floatingActionButton: _buildFab(canManageProducts),
     );
   }
 
@@ -188,8 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget? _buildFab(bool isOwner) {
-    if (!isOwner) return null;
+  Widget? _buildFab(bool canManageProducts) {
+    if (!canManageProducts) return null;
     if (_selected != _HomeSection.bar &&
         _selected != _HomeSection.warehouse &&
         _selected != _HomeSection.inventory) {
