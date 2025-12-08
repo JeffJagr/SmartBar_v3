@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/product.dart';
 import '../repositories/inventory_repository.dart';
+import '../services/permission_service.dart';
 
 /// ViewModel for inventory screens.
 /// TODO: replace stub repository with Firestore-backed implementation while keeping this interface.
@@ -12,6 +13,8 @@ class InventoryViewModel extends ChangeNotifier {
 
   InventoryRepository _repository;
   bool canEditQuantities = false;
+  PermissionSnapshot? _permissionSnapshot;
+  PermissionService? _permissionService;
 
   List<Product> products = [];
   bool loading = true;
@@ -56,6 +59,13 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> updateRestockHint(String productId, int? hint) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canSetRestockHint(_permissionSnapshot!)) {
+      error = 'You do not have permission to set restock hints.';
+      notifyListeners();
+      return;
+    }
     // hint is only a suggestion; does not mutate actual quantities.
     try {
       saving = true;
@@ -89,6 +99,13 @@ class InventoryViewModel extends ChangeNotifier {
     int? barQuantity,
     int? warehouseQuantity,
   }) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canAdjustQuantities(_permissionSnapshot!)) {
+      error = 'Insufficient permissions to adjust quantities.';
+      notifyListeners();
+      return;
+    }
     try {
       saving = true;
       notifyListeners();
@@ -110,6 +127,13 @@ class InventoryViewModel extends ChangeNotifier {
     required String productId,
     required int quantity,
   }) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canTransferStock(_permissionSnapshot!)) {
+      error = 'You do not have permission to transfer stock.';
+      notifyListeners();
+      return;
+    }
     try {
       saving = true;
       notifyListeners();
@@ -126,6 +150,13 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canEditProducts(_permissionSnapshot!)) {
+      error = 'You do not have permission to add products.';
+      notifyListeners();
+      return;
+    }
     try {
       saving = true;
       notifyListeners();
@@ -141,6 +172,13 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> updateProduct(String productId, Map<String, dynamic> data) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canEditProducts(_permissionSnapshot!)) {
+      error = 'You do not have permission to edit products.';
+      notifyListeners();
+      return;
+    }
     try {
       saving = true;
       notifyListeners();
@@ -156,6 +194,13 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteProduct(String productId) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canEditProducts(_permissionSnapshot!)) {
+      error = 'You do not have permission to delete products.';
+      notifyListeners();
+      return;
+    }
     try {
       saving = true;
       notifyListeners();
@@ -172,6 +217,16 @@ class InventoryViewModel extends ChangeNotifier {
 
   void setPermissions({required bool isOwner}) {
     canEditQuantities = isOwner;
+    notifyListeners();
+  }
+
+  void applyPermissionContext({
+    required PermissionSnapshot snapshot,
+    PermissionService? service,
+  }) {
+    _permissionSnapshot = snapshot;
+    _permissionService = service;
+    canEditQuantities = service?.canAdjustQuantities(snapshot) ?? canEditQuantities;
     notifyListeners();
   }
 

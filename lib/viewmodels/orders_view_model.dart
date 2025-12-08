@@ -5,12 +5,15 @@ import 'package:flutter/foundation.dart';
 import '../models/order.dart';
 import '../repositories/orders_repository.dart';
 import '../repositories/inventory_repository.dart';
+import '../services/permission_service.dart';
 
 class OrdersViewModel extends ChangeNotifier {
   OrdersViewModel(this._ordersRepo, this._inventoryRepo);
 
   final OrdersRepository _ordersRepo;
   final InventoryRepository _inventoryRepo;
+  PermissionSnapshot? _permissionSnapshot;
+  PermissionService? _permissionService;
 
   List<OrderModel> orders = [];
   bool loading = true;
@@ -40,6 +43,13 @@ class OrdersViewModel extends ChangeNotifier {
     required List<OrderItem> items,
     String? createdByName,
   }) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canCreateOrders(_permissionSnapshot!)) {
+      error = 'You do not have permission to create orders.';
+      notifyListeners();
+      return;
+    }
     try {
       loading = true;
       notifyListeners();
@@ -63,6 +73,13 @@ class OrdersViewModel extends ChangeNotifier {
   }
 
   Future<void> markReceived(OrderModel order) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canReceiveOrders(_permissionSnapshot!)) {
+      error = 'You do not have permission to receive orders.';
+      notifyListeners();
+      return;
+    }
     try {
       loading = true;
       notifyListeners();
@@ -89,6 +106,13 @@ class OrdersViewModel extends ChangeNotifier {
   }
 
   Future<void> confirmOrder(OrderModel order, {required String confirmedBy}) async {
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canConfirmOrders(_permissionSnapshot!)) {
+      error = 'You do not have permission to confirm orders.';
+      notifyListeners();
+      return;
+    }
     try {
       await _ordersRepo.updateStatus(
         order.id,
@@ -100,6 +124,14 @@ class OrdersViewModel extends ChangeNotifier {
       error = e.toString();
       notifyListeners();
     }
+  }
+
+  void applyPermissionContext({
+    required PermissionSnapshot snapshot,
+    PermissionService? service,
+  }) {
+    _permissionSnapshot = snapshot;
+    _permissionService = service;
   }
 
   @override

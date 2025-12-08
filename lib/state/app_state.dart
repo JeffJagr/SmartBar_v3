@@ -14,6 +14,7 @@ import '../models/user_role.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../services/messaging_service.dart';
+import '../services/permission_service.dart';
 
 class AppState extends ChangeNotifier {
   AppState({
@@ -36,6 +37,7 @@ class AppState extends ChangeNotifier {
   List<Product> products = [];
   List<OrderModel> orders = [];
   List<HistoryEntry> history = [];
+  Map<String, bool> currentUserPermissions = {};
 
   ThemeMode themeMode = ThemeMode.system;
   bool isBootstrapped = false;
@@ -50,6 +52,11 @@ class AppState extends ChangeNotifier {
   UserRole get role => isOwner ? UserRole.owner : UserRole.staff;
   String get displayName =>
       ownerUser?.email ?? staffSession?.displayName ?? 'Guest';
+
+  PermissionSnapshot permissionSnapshot(PermissionService service) {
+    // TODO: fetch and hydrate explicit permissions from user/company docs.
+    return service.fromApp(app: this, explicitFlags: currentUserPermissions);
+  }
 
   Future<void> bootstrap() async {
     await _messagingService.init();

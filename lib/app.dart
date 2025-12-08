@@ -58,11 +58,17 @@ class SmartBarApp extends StatelessWidget {
             if (repo is InMemoryProductRepository) repo.dispose();
           },
         ),
-        ChangeNotifierProxyProvider<InventoryRepository, InventoryViewModel>(
-          create: (ctx) => InventoryViewModel(ctx.read<InventoryRepository>())..init(),
-          update: (ctx, repo, vm) {
+        ChangeNotifierProxyProvider2<InventoryRepository, AppController,
+            InventoryViewModel>(
+          create: (ctx) =>
+              InventoryViewModel(ctx.read<InventoryRepository>())..init(),
+          update: (ctx, repo, app, vm) {
             vm ??= InventoryViewModel(repo);
             vm.replaceRepository(repo);
+            vm.applyPermissionContext(
+              snapshot: app.permissionSnapshot(app.permissions),
+              service: app.permissions,
+            );
             return vm;
           },
         ),
@@ -116,16 +122,29 @@ class SmartBarApp extends StatelessWidget {
               ? FirestoreOrdersRepository(companyId: app.activeCompany!.id)
               : null,
         ),
-        ChangeNotifierProxyProvider2<OrdersRepository?, InventoryRepository, OrdersViewModel?>(
+        ChangeNotifierProxyProvider3<OrdersRepository?, InventoryRepository,
+            AppController, OrdersViewModel?>(
           create: (ctx) {
             final ordersRepo = ctx.read<OrdersRepository?>();
             if (ordersRepo == null) return null;
-            return OrdersViewModel(ordersRepo, ctx.read<InventoryRepository>())..init();
+            final vm =
+                OrdersViewModel(ordersRepo, ctx.read<InventoryRepository>())..init();
+            vm.applyPermissionContext(
+              snapshot: ctx.read<AppController>().permissionSnapshot(
+                    ctx.read<AppController>().permissions,
+                  ),
+              service: ctx.read<AppController>().permissions,
+            );
+            return vm;
           },
-          update: (ctx, ordersRepo, inventoryRepo, vm) {
+          update: (ctx, ordersRepo, inventoryRepo, app, vm) {
             if (ordersRepo == null) return null;
             vm ??= OrdersViewModel(ordersRepo, inventoryRepo);
             vm.init();
+            vm.applyPermissionContext(
+              snapshot: app.permissionSnapshot(app.permissions),
+              service: app.permissions,
+            );
             return vm;
           },
         ),

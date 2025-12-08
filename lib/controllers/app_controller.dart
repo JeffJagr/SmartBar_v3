@@ -4,6 +4,7 @@ import '../models/staff_member.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../services/messaging_service.dart';
+import '../services/permission_service.dart';
 import '../state/app_state.dart';
 
 /// AppController wraps the shared AppState and exposes semantic getters
@@ -16,6 +17,10 @@ class AppController extends AppState {
           messagingService: MessagingService(),
         );
 
+  final PermissionService permissions = const PermissionService();
+
   User? get currentUser => ownerUser;
   StaffMember? get currentStaffMember => currentStaff;
+  PermissionSnapshot get currentPermissionSnapshot =>
+      permissionSnapshot(permissions);
 }
