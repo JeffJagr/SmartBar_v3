@@ -7,6 +7,7 @@ class StaffMember {
     required this.name,
     required this.pin,
     required this.role,
+    this.permissions = const {},
   });
 
   final String id;
@@ -14,6 +15,7 @@ class StaffMember {
   final String name;
   final String pin;
   final String role;
+  final Map<String, bool> permissions;
 
   factory StaffMember.fromMap(String id, Map<String, dynamic> data) {
     return StaffMember(
@@ -22,6 +24,7 @@ class StaffMember {
       name: data['name'] as String? ?? '',
       pin: data['pin'] as String? ?? '',
       role: data['role'] as String? ?? 'Worker',
+      permissions: (data['permissions'] as Map?)?.cast<String, bool>() ?? const {},
     );
   }
 
@@ -35,6 +38,7 @@ class StaffMember {
       'name': name,
       'pin': pin,
       'role': role,
+      if (permissions.isNotEmpty) 'permissions': permissions,
     };
   }
 }

@@ -15,10 +15,16 @@ service cloud.firestore {
         && request.auth.uid in companyDoc(companyId).data.ownerIds;
     }
 
-    function isStaff(companyId) {
-      // Assumes a staff doc exists with auth.uid under the company.
+    function isStaffSession(companyId) {
       return isSignedIn()
-        && exists(/databases/$(database)/documents/companies/$(companyId)/staff/$(request.auth.uid));
+        && exists(/databases/$(database)/documents/companies/$(companyId)/staffSessions/$(request.auth.uid))
+        && get(/databases/$(database)/documents/companies/$(companyId)/staffSessions/$(request.auth.uid)).data.companyId == companyId;
+    }
+
+    function isStaff(companyId) {
+      return isSignedIn()
+        && (exists(/databases/$(database)/documents/companies/$(companyId)/staff/$(request.auth.uid))
+            || isStaffSession(companyId));
     }
 
     function canAccess(companyId) {
@@ -47,6 +53,15 @@ service cloud.firestore {
       match /staff/{staffId} {
         allow read: if isOwner(companyId) || (isStaff(companyId) && staffId == request.auth.uid);
         allow create, update, delete: if isOwner(companyId);
+      }
+
+      // Staff session docs created after PIN login mapped to auth.uid.
+      match /staffSessions/{sessionId} {
+        allow create, update: if isSignedIn()
+          && request.auth.uid == sessionId
+          && request.resource.data.companyId == companyId;
+        allow read: if isOwner(companyId) || (isStaffSession(companyId) && request.auth.uid == sessionId);
+        // No delete needed; can be cleaned by owner.
       }
     }
   }

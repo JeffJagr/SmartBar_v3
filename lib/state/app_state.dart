@@ -132,16 +132,32 @@ class AppState extends ChangeNotifier {
     final companyId = (staffSession?.companyId.isNotEmpty ?? false)
         ? staffSession!.companyId
         : activeCompany?.id ?? '';
-    // Ensure Firestore security rules work for staff sessions.
-    await FirebaseAuth.instance.signInAnonymously();
+    final anonCred = await FirebaseAuth.instance.signInAnonymously();
+    final anonUid = anonCred.user?.uid ?? '';
     currentStaff = await _fetchStaffMember(companyId, pin) ??
         StaffMember(
-          id: staffSession?.staffId ?? 'staff',
+          id: staffSession?.staffId ?? anonUid,
           companyId: companyId,
           name: staffSession?.displayName ?? 'Staff',
           pin: pin,
           role: 'Worker',
         );
+    currentUserPermissions = currentStaff?.permissions ?? {};
+    // Persist a session doc keyed by auth.uid so Firestore rules can validate staff access.
+    if (anonUid.isNotEmpty && companyId.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('staffSessions')
+          .doc(anonUid)
+          .set({
+        'companyId': companyId,
+        'staffId': currentStaff!.id,
+        'role': currentStaff!.role,
+        'permissions': currentStaff!.permissions,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
     await _attachCompanyStreams(companyId);
     notifyListeners();
   }
