@@ -44,6 +44,22 @@ service cloud.firestore {
       return isOwner(companyId) || isStaff(companyId) || hasRole(['owner', 'manager', 'staff']);
     }
 
+    // Top-level collections (legacy) filtered by companyId field.
+    match /products/{productId} {
+      allow read: if isSignedIn() && canAccess(request.resource.data.companyId);
+      allow create, update, delete: if isSignedIn() && canAccess(request.resource.data.companyId);
+    }
+
+    match /orders/{orderId} {
+      allow read: if isSignedIn() && canAccess(request.resource.data.companyId);
+      allow create, update, delete: if isSignedIn() && canAccess(request.resource.data.companyId);
+    }
+
+    match /history/{historyId} {
+      allow read: if isSignedIn() && canAccess(request.resource.data.companyId);
+      allow create: if isSignedIn() && canAccess(request.resource.data.companyId);
+    }
+
     match /companies/{companyId} {
       // Owners and staff can read company meta; only owners can update/delete.
       allow read: if isOwner(companyId) || isStaff(companyId);
