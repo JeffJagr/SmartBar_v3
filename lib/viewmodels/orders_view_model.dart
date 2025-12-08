@@ -56,6 +56,7 @@ class OrdersViewModel extends ChangeNotifier {
       final order = OrderModel(
         id: '',
         companyId: companyId,
+        orderNumber: 0, // Will be assigned in repository transaction.
         createdByUserId: createdByUserId,
         createdByName: createdByName,
         supplier: supplier,

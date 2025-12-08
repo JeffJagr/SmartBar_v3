@@ -106,6 +106,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Widget _orderCard(BuildContext context, OrderModel order, AppController app,
       OrdersViewModel vm, List<Product> products) {
+    final perm = app.currentPermissionSnapshot;
+    final canConfirm = app.permissions.canConfirmOrders(perm);
+    final canReceive = app.permissions.canReceiveOrders(perm);
     String itemLine(OrderItem item) {
       final name = item.productNameSnapshot ??
           products.firstWhere(
@@ -133,7 +136,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           children: [
             _statusChip(order.status),
             const SizedBox(width: 8),
-            Text(order.id.isEmpty ? 'Order (new)' : 'Order ${order.id}'),
+            Text(_orderLabel(order)),
           ],
         ),
         subtitle: Text('Created: ${order.createdAt}'),
@@ -150,7 +153,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               if (order.deliveredAt != null) Text('Delivered: ${order.deliveredAt}'),
               Row(
                 children: [
-                  if (order.status == OrderStatus.pending && app.isOwner)
+                  if (order.status == OrderStatus.pending && canConfirm)
                     TextButton(
                       onPressed: () => vm.confirmOrder(
                         order,
@@ -158,7 +161,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                       child: const Text('Confirm'),
                     ),
-                  if (order.status != OrderStatus.delivered)
+                  if (order.status != OrderStatus.delivered && canReceive)
                     TextButton(
                       onPressed: () => vm.markReceived(order),
                       child: const Text('Mark received'),
@@ -170,6 +173,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ],
       ),
     );
+  }
+
+  String _orderLabel(OrderModel order) {
+    final number = order.orderNumber;
+    if (number > 0) {
+      final padded = number.toString().padLeft(4, '0');
+      return '#$padded';
+    }
+    return order.id.isEmpty ? 'Order (new)' : 'Order ${order.id}';
   }
 
   void _openNewOrderSheet({

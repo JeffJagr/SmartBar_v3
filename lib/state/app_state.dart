@@ -280,6 +280,7 @@ class AppState extends ChangeNotifier {
       OrderModel(
         id: 'o1',
         companyId: companyId,
+        orderNumber: 1,
         createdByUserId: 'demo',
         supplier: 'Local Brewery',
         status: OrderStatus.pending,
@@ -296,6 +297,7 @@ class AppState extends ChangeNotifier {
       OrderModel(
         id: 'o2',
         companyId: companyId,
+        orderNumber: 2,
         createdByUserId: 'demo',
         supplier: 'Spirits Co',
         status: OrderStatus.delivered,

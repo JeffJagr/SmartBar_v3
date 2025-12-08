@@ -24,6 +24,11 @@ class FirestoreOrdersRepository implements OrdersRepository {
 
   CollectionReference<Map<String, dynamic>> get _col =>
       _firestore.collection('companies').doc(companyId).collection('orders');
+  DocumentReference<Map<String, dynamic>> get _counterDoc => _firestore
+      .collection('companies')
+      .doc(companyId)
+      .collection('meta')
+      .doc('orders_counter');
 
   @override
   Stream<List<OrderModel>> watchOrders() {
@@ -34,9 +39,17 @@ class FirestoreOrdersRepository implements OrdersRepository {
 
   @override
   Future<void> createOrder(OrderModel order) {
-    final data = order.toMap();
-    data['companyId'] = companyId;
-    return _col.add(data);
+    return _firestore.runTransaction((txn) async {
+      final counterSnap = await txn.get(_counterDoc);
+      final last = (counterSnap.data()?['last'] as num?)?.toInt() ?? 0;
+      final next = last + 1;
+      txn.set(_counterDoc, {'last': next});
+
+      final data = order.copyWith(orderNumber: next).toMap();
+      data['companyId'] = companyId;
+      final newDoc = _col.doc();
+      txn.set(newDoc, data);
+    });
   }
 
   @override

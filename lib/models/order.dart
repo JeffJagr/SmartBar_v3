@@ -45,6 +45,7 @@ class OrderModel {
   const OrderModel({
     required this.id,
     required this.companyId,
+    required this.orderNumber,
     required this.createdByUserId,
     required this.status,
     required this.items,
@@ -59,6 +60,7 @@ class OrderModel {
 
   final String id;
   final String companyId;
+  final int orderNumber;
   final String? supplier;
   final String createdByUserId;
   final String? createdByName;
@@ -78,6 +80,7 @@ class OrderModel {
     return OrderModel(
       id: id,
       companyId: data['companyId'] as String? ?? '',
+      orderNumber: (data['orderNumber'] as num?)?.toInt() ?? 0,
       createdByUserId: data['createdByUserId'] as String? ?? '',
       supplier: data['supplier'] as String?,
       createdByName: data['createdByName'] as String?,
@@ -96,6 +99,7 @@ class OrderModel {
   Map<String, dynamic> toMap() {
     return {
       'companyId': companyId,
+      'orderNumber': orderNumber,
       'createdByUserId': createdByUserId,
       if (createdByName != null) 'createdByName': createdByName,
       if (supplier != null) 'supplier': supplier,
@@ -113,6 +117,7 @@ class OrderModel {
     OrderStatus? status,
     List<OrderItem>? items,
     String? createdByUserId,
+    int? orderNumber,
     String? supplier,
     String? confirmedBy,
     DateTime? confirmedAt,
@@ -122,6 +127,7 @@ class OrderModel {
     return OrderModel(
       id: id,
       companyId: companyId,
+      orderNumber: orderNumber ?? this.orderNumber,
       supplier: supplier ?? this.supplier,
       status: status ?? this.status,
       items: items ?? this.items,
