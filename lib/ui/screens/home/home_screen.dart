@@ -89,6 +89,11 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<InventoryViewModel>().setPermissions(isOwner: isOwner);
       context.read<NotesViewModel>().setPermissions(isOwner: isOwner);
     });
+    if (company == null) {
+      // No active company; redirect to company selection/creation flow.
+      return const CompanyListScreen();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Column(
