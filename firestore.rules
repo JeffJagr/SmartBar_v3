@@ -9,6 +9,19 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/companies/$(companyId));
     }
 
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function userRole(uid) {
+      return userDoc(uid).data.role;
+    }
+
+    function hasRole(roles) {
+      return isSignedIn() && userDoc(request.auth.uid).exists
+        && userRole(request.auth.uid) in roles;
+    }
+
     function isOwner(companyId) {
       return isSignedIn()
         && exists(/databases/$(database)/documents/companies/$(companyId))
@@ -28,7 +41,7 @@ service cloud.firestore {
     }
 
     function canAccess(companyId) {
-      return isOwner(companyId) || isStaff(companyId);
+      return isOwner(companyId) || isStaff(companyId) || hasRole(['owner', 'manager', 'staff']);
     }
 
     match /companies/{companyId} {
@@ -63,6 +76,19 @@ service cloud.firestore {
         allow read: if isOwner(companyId) || (isStaffSession(companyId) && request.auth.uid == sessionId);
         // No delete needed; can be cleaned by owner.
       }
+
+      // Optional per-company users subcollection (if used).
+      match /users/{userId} {
+        allow read: if isOwner(companyId) || userId == request.auth.uid;
+        allow create, update, delete: if isOwner(companyId) || hasRole(['owner', 'manager']);
+      }
+    }
+
+    // Global users collection for roles/permissions lookup.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if request.auth != null && request.auth.uid == uid;
     }
   }
 }
