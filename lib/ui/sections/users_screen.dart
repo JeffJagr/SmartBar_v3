@@ -23,12 +23,15 @@ class _UsersScreenState extends State<UsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<UsersViewModel>();
+    final vm = context.watch<UsersViewModel?>();
     final app = context.watch<AppController>();
     final canManage = app.permissions
         .canManageUsers(app.permissionSnapshot(app.permissions));
     if (!canManage) {
       return const Center(child: Text('Access denied'));
+    }
+    if (vm == null) {
+      return const Center(child: Text('Users module unavailable (no company selected).'));
     }
     if (vm.loading && vm.users.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -121,7 +124,13 @@ class _UsersScreenState extends State<UsersScreen> {
       isScrollControlled: true,
       context: context,
       builder: (ctx) {
-        final vm = ctx.read<UsersViewModel>();
+        final vm = ctx.read<UsersViewModel?>();
+        if (vm == null) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Users module unavailable (no active company).'),
+          );
+        }
         return Padding(
           padding: EdgeInsets.only(
             left: 16,
