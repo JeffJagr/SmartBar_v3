@@ -46,3 +46,5 @@ Entries are chronological, newest at bottom.
 - Orders updated with product name snapshots and quantityOrdered, quick reorder from product lists, and lifecycle timestamps/confirm/receive actions.
 
 - Added centralized PermissionService and snapshot builder; AppController exposes currentPermissionSnapshot. Inventory/Orders viewmodels now gate create/edit/delete/transfer/confirm/receive actions via permission checks to avoid UI-scattered logic. TODO: hydrate explicit flags from user docs and enforce in repositories/services.
+
+- Orders: Added orderNumber counter (#0001, #0002…), transactional Firestore counter; UI shows padded number; permissions now gate confirm/receive actions; Order model/repo/viewmodel updated with lifecycle metadata. Open TODO: migrate legacy orders with missing orderNumber.
