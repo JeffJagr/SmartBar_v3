@@ -9,6 +9,7 @@ import '../../../models/company.dart';
 import '../../../viewmodels/inventory_view_model.dart';
 import '../../../viewmodels/notes_view_model.dart';
 import '../../../viewmodels/orders_view_model.dart';
+import '../../../models/order.dart';
 import '../../sections/bar_screen.dart';
 import '../../sections/company_settings_screen.dart';
 import '../../sections/history_section_screen.dart';

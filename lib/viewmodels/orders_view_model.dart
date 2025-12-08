@@ -96,7 +96,7 @@ class OrdersViewModel extends ChangeNotifier {
             delta: item.quantityOrdered,
           );
           if (_historyRepo != null) {
-            await _historyRepo!.addEntry(
+            await _historyRepo?.logEntry(
               HistoryEntry(
                 id: '',
                 companyId: order.companyId,
