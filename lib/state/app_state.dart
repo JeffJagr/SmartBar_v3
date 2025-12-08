@@ -50,6 +50,11 @@ class AppState extends ChangeNotifier {
   bool get isAuthenticated => ownerUser != null || staffSession != null;
   bool get isOwner => ownerUser != null;
   UserRole get role => isOwner ? UserRole.owner : UserRole.staff;
+  String get roleLabel => isOwner
+      ? 'owner'
+      : currentStaff?.role.isNotEmpty == true
+          ? currentStaff!.role
+          : 'staff';
   String get displayName =>
       ownerUser?.email ?? staffSession?.displayName ?? 'Guest';
 
@@ -114,6 +119,17 @@ class AppState extends ChangeNotifier {
 
   Future<void> signInOwner(String email, String password) async {
     await _authService.signInOwner(email: email, password: password);
+    currentUserPermissions = {
+      'editProducts': true,
+      'createOrders': true,
+      'confirmOrders': true,
+      'receiveOrders': true,
+      'manageUsers': true,
+      'viewHistory': true,
+      'setRestockHint': true,
+      'transferStock': true,
+      'addNotes': true,
+    };
     // Auth listener will populate companies and active company.
   }
 
@@ -141,6 +157,7 @@ class AppState extends ChangeNotifier {
           name: staffSession?.displayName ?? 'Staff',
           pin: pin,
           role: 'Worker',
+          permissions: const {},
         );
     currentUserPermissions = currentStaff?.permissions ?? {};
     // Persist a session doc keyed by auth.uid so Firestore rules can validate staff access.
