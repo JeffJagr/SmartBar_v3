@@ -10,6 +10,7 @@ import '../widgets/adjust_quantity_sheet.dart';
 import '../widgets/product_form_sheet.dart';
 import '../widgets/product_list_item.dart';
 import '../widgets/restock_hint_sheet.dart';
+import '../widgets/layout_grid_panel.dart';
 
 class WarehouseScreen extends StatefulWidget {
   const WarehouseScreen({super.key});
@@ -54,115 +55,134 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
       return matchesSearch && matchesGroup && matchesLow && matchesHint;
     }).toList();
 
-    return Column(
+    return Row(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.search),
-                    hintText: 'Search name or group',
-                  ),
-                  onChanged: (v) => setState(() => _search = v),
-                ),
-              ),
-              const SizedBox(width: 8),
-              DropdownButton<String?>(
-                value: _groupFilter,
-                hint: const Text('Group'),
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('All'),
-                  ),
-                  ...groups.map(
-                    (g) => DropdownMenuItem<String?>(
-                      value: g,
-                      child: Text(g),
-                    ),
-                  ),
-                ],
-                onChanged: (v) => setState(() => _groupFilter = v),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Wrap(
-            spacing: 12,
-            children: [
-              FilterChip(
-                label: const Text('Low stock'),
-                selected: _lowOnly,
-                onSelected: (v) => setState(() => _lowOnly = v),
-              ),
-              FilterChip(
-                label: const Text('Has restock hint'),
-                selected: _hintOnly,
-                onSelected: (v) => setState(() => _hintOnly = v),
-              ),
-            ],
-          ),
-        ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
-              final p = filtered[index];
-              final activeOrderQty = _activeOrderQtyForProduct(ordersVm, p.id);
-              final hintValue = p.restockHint ?? 0;
-              final statusColor = _statusColor(hintValue, p.warehouseTarget);
-              final threshold = p.minimalStockThreshold ?? 0;
-              final lowPrimary = threshold > 0
-                  ? p.warehouseQuantity <= threshold
-                  : p.warehouseQuantity < p.warehouseTarget;
-              final lowSecondary =
-                  threshold > 0 ? p.barQuantity <= threshold : p.barQuantity < p.barMax;
-              return ProductListItem(
-                title: p.name,
-                groupText: '${p.group}${p.subgroup != null ? " · ${p.subgroup}" : ""}',
-                primaryLabel: 'Warehouse',
-                primaryValue: '${p.warehouseQuantity}/${p.warehouseTarget}',
-                secondaryLabel: 'Bar',
-                secondaryValue: '${p.barQuantity}/${p.barMax}',
-                primaryBadgeColor: Theme.of(context).colorScheme.primary,
-                hintValue: hintValue,
-                hintStatusColor: statusColor,
-                activeOrderQty: activeOrderQty > 0 ? activeOrderQty : null,
-                lowPrimary: lowPrimary,
-                lowSecondary: lowSecondary,
-                lowPrimaryLabel: 'Low WH stock',
-                lowSecondaryLabel: 'Low bar stock',
-                onClearHint: () => context.read<InventoryViewModel>().clearRestockHint(p.id),
-                onSetHint: () => _showRestockHintSheet(
-                  context,
-                  product: p,
-                  current: p.warehouseQuantity,
-                  max: p.warehouseTarget,
+          flex: 2,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.search),
+                          hintText: 'Search name or group',
+                        ),
+                        onChanged: (v) => setState(() => _search = v),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    DropdownButton<String?>(
+                      value: _groupFilter,
+                      hint: const Text('Group'),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All'),
+                        ),
+                        ...groups.map(
+                          (g) => DropdownMenuItem<String?>(
+                            value: g,
+                            child: Text(g),
+                          ),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => _groupFilter = v),
+                    ),
+                  ],
                 ),
-                onTransfer: isOwner
-                    ? () => _showTransferDialog(
-                          context: context,
-                          productId: p.id,
-                          available: p.warehouseQuantity,
-                        )
-                    : null,
-                onAdjust: isOwner
-                    ? () => _showAdjustSheet(context, p.id, p.barQuantity, p.warehouseQuantity)
-                    : null,
-                onEdit: isOwner ? () => _openProductForm(context, p) : null,
-                onDelete: isOwner ? () => _confirmDelete(context, p.id) : null,
-                onReorder: canOrder
-                    ? () => _openQuickOrder(context: context, product: p)
-                    : null,
-                showStaffReadOnly: !isOwner,
-              );
-            },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Wrap(
+                  spacing: 12,
+                  children: [
+                    FilterChip(
+                      label: const Text('Low stock'),
+                      selected: _lowOnly,
+                      onSelected: (v) => setState(() => _lowOnly = v),
+                    ),
+                    FilterChip(
+                      label: const Text('Has restock hint'),
+                      selected: _hintOnly,
+                      onSelected: (v) => setState(() => _hintOnly = v),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final p = filtered[index];
+                    final activeOrderQty = _activeOrderQtyForProduct(ordersVm, p.id);
+                    final hintValue = p.restockHint ?? 0;
+                    final statusColor = _statusColor(hintValue, p.warehouseTarget);
+                    final threshold = p.minimalStockThreshold ?? 0;
+                    final lowPrimary = threshold > 0
+                        ? p.warehouseQuantity <= threshold
+                        : p.warehouseQuantity < p.warehouseTarget;
+                    final lowSecondary =
+                        threshold > 0 ? p.barQuantity <= threshold : p.barQuantity < p.barMax;
+                    return ProductListItem(
+                      title: p.name,
+                      groupText: '${p.group}${p.subgroup != null ? " · ${p.subgroup}" : ""}',
+                      primaryLabel: 'Warehouse',
+                      primaryValue: '${p.warehouseQuantity}/${p.warehouseTarget}',
+                      secondaryLabel: 'Bar',
+                      secondaryValue: '${p.barQuantity}/${p.barMax}',
+                      primaryBadgeColor: Theme.of(context).colorScheme.primary,
+                      hintValue: hintValue,
+                      hintStatusColor: statusColor,
+                      activeOrderQty: activeOrderQty > 0 ? activeOrderQty : null,
+                      lowPrimary: lowPrimary,
+                      lowSecondary: lowSecondary,
+                      lowPrimaryLabel: 'Low WH stock',
+                      lowSecondaryLabel: 'Low bar stock',
+                      onClearHint: () => context.read<InventoryViewModel>().clearRestockHint(p.id),
+                      onSetHint: () => _showRestockHintSheet(
+                        context,
+                        product: p,
+                        current: p.warehouseQuantity,
+                        max: p.warehouseTarget,
+                      ),
+                      onTransfer: isOwner
+                          ? () => _showTransferDialog(
+                                context: context,
+                                productId: p.id,
+                                available: p.warehouseQuantity,
+                              )
+                          : null,
+                      onAdjust: isOwner
+                          ? () =>
+                              _showAdjustSheet(context, p.id, p.barQuantity, p.warehouseQuantity)
+                          : null,
+                      onEdit: isOwner ? () => _openProductForm(context, p) : null,
+                      onDelete: isOwner ? () => _confirmDelete(context, p.id) : null,
+                      onReorder: canOrder
+                          ? () => _openQuickOrder(context: context, product: p)
+                          : null,
+                      showStaffReadOnly: !isOwner,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const VerticalDivider(width: 1),
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: LayoutGridPanel(
+              title: 'Warehouse layout',
+              products: filtered,
+            ),
           ),
         ),
       ],
