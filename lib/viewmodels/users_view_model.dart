@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/user_account.dart';
 import '../repositories/users_repository.dart';
@@ -37,6 +38,8 @@ class UsersViewModel extends ChangeNotifier {
   Future<void> addUser({
     required String displayName,
     required UserRole role,
+    required String email,
+    required String password,
     String? pin,
     Map<String, bool> permissions = const {},
   }) async {
@@ -50,13 +53,20 @@ class UsersViewModel extends ChangeNotifier {
     try {
       loading = true;
       notifyListeners();
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      final uid = credential.user?.uid ?? '';
+      if (uid.isEmpty) {
+        throw Exception('Failed to create auth user');
+      }
       final user = UserAccount(
-        id: '',
+        id: uid,
         companyId: '',
         displayName: displayName,
         role: role,
         active: true,
         pin: pin,
+        email: email,
         permissions: permissions,
       );
       await _repo.addUser(user);

@@ -106,6 +106,8 @@ class _UsersScreenState extends State<UsersScreen> {
 
   void _openAddUser(BuildContext context) {
     final nameCtrl = TextEditingController();
+    final emailCtrl = TextEditingController();
+    final passwordCtrl = TextEditingController();
     final pinCtrl = TextEditingController();
     UserRole role = UserRole.staff;
     final permissions = <String, bool>{
@@ -133,6 +135,18 @@ class _UsersScreenState extends State<UsersScreen> {
               TextField(
                 controller: nameCtrl,
                 decoration: const InputDecoration(labelText: 'Display name'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: emailCtrl,
+                decoration: const InputDecoration(labelText: 'Email (required)'),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: passwordCtrl,
+                decoration: const InputDecoration(labelText: 'Password (min 6 chars)'),
+                obscureText: true,
               ),
               const SizedBox(height: 8),
               TextField(
@@ -172,6 +186,19 @@ class _UsersScreenState extends State<UsersScreen> {
                           .showSnackBar(const SnackBar(content: Text('Name required')));
                       return;
                     }
+                    final email = emailCtrl.text.trim();
+                    final password = passwordCtrl.text;
+                    if (email.isEmpty || !email.contains('@')) {
+                      ScaffoldMessenger.of(ctx)
+                          .showSnackBar(const SnackBar(content: Text('Valid email required')));
+                      return;
+                    }
+                    if (password.length < 6) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Password must be at least 6 characters')),
+                      );
+                      return;
+                    }
                     final pin = pinCtrl.text.trim();
                     if (pin.isEmpty || pin.length < 4) {
                       ScaffoldMessenger.of(ctx).showSnackBar(
@@ -182,6 +209,8 @@ class _UsersScreenState extends State<UsersScreen> {
                     await vm.addUser(
                       displayName: nameCtrl.text.trim(),
                       role: role,
+                      email: email,
+                      password: password,
                       pin: pin,
                       permissions: permissions,
                     );

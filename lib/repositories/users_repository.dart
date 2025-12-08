@@ -29,10 +29,23 @@ class FirestoreUsersRepository implements UsersRepository {
   }
 
   @override
-  Future<void> addUser(UserAccount user) {
+  Future<void> addUser(UserAccount user) async {
     final data = user.toMap();
     data['companyId'] = companyId;
-    return _col.add(data);
+    final id = user.id.isNotEmpty ? user.id : null;
+    if (id != null) {
+      await _col.doc(id).set(data);
+      await _firestore.collection('users').doc(id).set({
+        'companyId': companyId,
+        'displayName': user.displayName,
+        'role': user.role.name,
+        'active': user.active,
+        if (user.email != null) 'email': user.email,
+        if (user.permissions.isNotEmpty) 'permissions': user.permissions,
+      });
+    } else {
+      await _col.add(data);
+    }
   }
 
   @override
