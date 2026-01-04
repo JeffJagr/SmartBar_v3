@@ -6,12 +6,14 @@ class OrderItem {
     required this.quantityOrdered,
     this.productNameSnapshot,
     this.unitCost,
+    this.supplierName,
   });
 
   final String productId;
   final int quantityOrdered;
   final String? productNameSnapshot;
   final double? unitCost;
+  final String? supplierName;
 
   factory OrderItem.fromMap(Map<String, dynamic> data) {
     return OrderItem(
@@ -20,6 +22,7 @@ class OrderItem {
           (data['quantityOrdered'] as num?)?.toInt() ?? (data['quantity'] as num?)?.toInt() ?? 0,
       productNameSnapshot: data['productNameSnapshot'] as String?,
       unitCost: (data['unitCost'] as num?)?.toDouble(),
+      supplierName: data['supplierName'] as String?,
     );
   }
 
@@ -31,6 +34,7 @@ class OrderItem {
       // Write legacy key for backward compatibility.
       'quantity': quantityOrdered,
       if (unitCost != null) 'unitCost': unitCost,
+      if (supplierName != null) 'supplierName': supplierName,
     };
   }
 }
@@ -39,24 +43,27 @@ enum OrderStatus {
   pending,
   confirmed,
   delivered,
+  canceled,
 }
 
 class OrderModel {
-  const OrderModel({
+  OrderModel({
     required this.id,
     required this.companyId,
     required this.orderNumber,
     required this.createdByUserId,
     required this.status,
     required this.items,
-    required this.createdAt,
+    DateTime? createdAt,
     this.supplier,
     this.createdByName,
     this.confirmedAt,
     this.confirmedBy,
     this.deliveredAt,
     this.deliveredBy,
-  });
+    this.deliveredQuantities,
+    this.deliveredNote,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   final String id;
   final String companyId;
@@ -71,6 +78,8 @@ class OrderModel {
   final String? confirmedBy;
   final DateTime? deliveredAt;
   final String? deliveredBy;
+  final Map<String, int>? deliveredQuantities;
+  final String? deliveredNote;
 
   factory OrderModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     return OrderModel.fromMap(doc.id, doc.data() ?? {});
@@ -93,6 +102,9 @@ class OrderModel {
       confirmedBy: data['confirmedBy'] as String?,
       deliveredAt: (data['deliveredAt'] as Timestamp?)?.toDate(),
       deliveredBy: data['deliveredBy'] as String?,
+      deliveredQuantities: (data['deliveredQuantities'] as Map<String, dynamic>?)
+          ?.map((k, v) => MapEntry(k, (v as num).toInt())),
+      deliveredNote: data['deliveredNote'] as String?,
     );
   }
 
@@ -110,6 +122,8 @@ class OrderModel {
       if (confirmedBy != null) 'confirmedBy': confirmedBy,
       if (deliveredAt != null) 'deliveredAt': Timestamp.fromDate(deliveredAt!),
       if (deliveredBy != null) 'deliveredBy': deliveredBy,
+      if (deliveredQuantities != null) 'deliveredQuantities': deliveredQuantities,
+      if (deliveredNote != null) 'deliveredNote': deliveredNote,
     };
   }
 
@@ -123,6 +137,8 @@ class OrderModel {
     DateTime? confirmedAt,
     String? deliveredBy,
     DateTime? deliveredAt,
+    Map<String, int>? deliveredQuantities,
+    String? deliveredNote,
   }) {
     return OrderModel(
       id: id,
@@ -138,6 +154,8 @@ class OrderModel {
       confirmedAt: confirmedAt ?? this.confirmedAt,
       deliveredBy: deliveredBy ?? this.deliveredBy,
       deliveredAt: deliveredAt ?? this.deliveredAt,
+      deliveredQuantities: deliveredQuantities ?? this.deliveredQuantities,
+      deliveredNote: deliveredNote ?? this.deliveredNote,
     );
   }
 
@@ -147,6 +165,8 @@ class OrderModel {
         return OrderStatus.confirmed;
       case 'delivered':
         return OrderStatus.delivered;
+      case 'canceled':
+        return OrderStatus.canceled;
       default:
         return OrderStatus.pending;
     }

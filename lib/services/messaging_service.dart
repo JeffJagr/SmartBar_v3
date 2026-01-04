@@ -48,4 +48,27 @@ class MessagingService {
       debugPrint('Foreground notification: ${message.notification?.title}');
     });
   }
+
+  /// Subscribe/unsubscribe to company-scoped topics based on the current
+  /// notification preferences. Each key becomes a topic formatted as
+  ///   c_{companyId}_{preferenceKey}
+  Future<void> syncTopics({
+    required String companyId,
+    required Map<String, bool> preferences,
+  }) async {
+    final sanitizedCompany =
+        companyId.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    for (final entry in preferences.entries) {
+      final topic = 'c_${sanitizedCompany}_${entry.key}';
+      try {
+        if (entry.value) {
+          await _messaging.subscribeToTopic(topic);
+        } else {
+          await _messaging.unsubscribeFromTopic(topic);
+        }
+      } catch (e) {
+        debugPrint('Topic sync failed for $topic: $e');
+      }
+    }
+  }
 }

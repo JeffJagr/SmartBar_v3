@@ -12,6 +12,7 @@ class Layout {
     this.zones = const [],
     this.cells = const [],
     this.updatedAt,
+    this.lastUpdatedBy,
   });
 
   final String id;
@@ -22,6 +23,7 @@ class Layout {
   final List<LayoutZone> zones;
   final List<LayoutCell> cells;
   final DateTime? updatedAt;
+  final String? lastUpdatedBy;
 
   factory Layout.fromMap(String id, Map<String, dynamic> data) {
     return Layout(
@@ -37,6 +39,7 @@ class Layout {
           .map((e) => LayoutCell.fromMap((e as Map).cast<String, dynamic>()))
           .toList(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      lastUpdatedBy: data['lastUpdatedBy'] as String?,
     );
   }
 
@@ -49,6 +52,7 @@ class Layout {
       if (zones.isNotEmpty) 'zones': zones.map((z) => z.toMap()).toList(),
       if (cells.isNotEmpty) 'cells': cells.map((c) => c.toMap()).toList(),
       if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
+      if (lastUpdatedBy != null) 'lastUpdatedBy': lastUpdatedBy,
     };
   }
 }
@@ -60,6 +64,7 @@ class LayoutZone {
     this.color,
     this.description,
     this.cellIds = const [],
+    this.type,
   });
 
   final String id;
@@ -67,6 +72,7 @@ class LayoutZone {
   final String? color;
   final String? description;
   final List<String> cellIds;
+  final String? type;
 
   factory LayoutZone.fromMap(Map<String, dynamic> data) {
     return LayoutZone(
@@ -75,6 +81,7 @@ class LayoutZone {
       color: data['color'] as String?,
       description: data['description'] as String?,
       cellIds: (data['cellIds'] as List<dynamic>? ?? []).cast<String>(),
+      type: data['type'] as String?,
     );
   }
 
@@ -85,6 +92,7 @@ class LayoutZone {
       if (color != null) 'color': color,
       if (description != null) 'description': description,
       if (cellIds.isNotEmpty) 'cellIds': cellIds,
+      if (type != null) 'type': type,
     };
   }
 }
@@ -159,6 +167,18 @@ class CellItemPlacement {
       productId: data['productId'] as String? ?? '',
       quantity: (data['quantity'] as num?)?.toInt() ?? 0,
       status: data['status'] as String?,
+    );
+  }
+
+  CellItemPlacement copyWith({
+    String? productId,
+    int? quantity,
+    String? status,
+  }) {
+    return CellItemPlacement(
+      productId: productId ?? this.productId,
+      quantity: quantity ?? this.quantity,
+      status: status ?? this.status,
     );
   }
 

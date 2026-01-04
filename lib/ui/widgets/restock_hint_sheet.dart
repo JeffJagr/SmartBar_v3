@@ -41,111 +41,137 @@ class _RestockHintSheetState extends State<RestockHintSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Set restock hint',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Slider(
-            value: _percentFull,
-            min: 0,
-            max: 100,
-            divisions: 20,
-            label: '${_percentFull.round()}%',
-            onChanged: (v) {
-              setState(() {
-                _percentFull = v;
-                _textController.text = _percentFull.round().toString();
-              });
-            },
-          ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Fullness: ${_percentFull.round()}%'),
-              SizedBox(
-                width: 80,
-                child: TextField(
-                  controller: _textController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '%',
-                    isDense: true,
-                  ),
-                  onChanged: (text) {
-                    final parsed = int.tryParse(text) ?? 0;
-                    final clamped = parsed.clamp(0, 100);
-                    setState(() {
-                      _percentFull = clamped.toDouble();
-                    });
-                  },
-                ),
+              Icon(Icons.lightbulb_outline, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Restock hint',
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
-          Text(
-            'Hint is a suggestion only; it does not change current stock. Slider represents % fullness.',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _hintSummary(),
-            style: Theme.of(context).textTheme.bodyMedium,
+          const SizedBox(height: 12),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text('Fullness', style: theme.textTheme.bodyMedium),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 54,
+                              child: TextField(
+                                controller: _textController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: InputBorder.none,
+                                ),
+                                style: theme.textTheme.titleMedium,
+                                onChanged: (text) {
+                                  final parsed = int.tryParse(text) ?? 0;
+                                  final clamped = parsed.clamp(0, 100);
+                                  setState(() {
+                                    _percentFull = clamped.toDouble();
+                                  });
+                                },
+                              ),
+                            ),
+                            Text('%', style: theme.textTheme.bodyMedium),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 6,
+                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
+                    ),
+                    child: Slider(
+                      value: _percentFull,
+                      min: 0,
+                      max: 100,
+                      divisions: 20,
+                      label: '${_percentFull.round()}%',
+                      onChanged: (v) {
+                        setState(() {
+                          _percentFull = v;
+                          _textController.text = _percentFull.round().toString();
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Hint is a suggestion; it does not change stock.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  _hintChips(theme),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 12),
-          TextButton(
-            onPressed: () {
-              // Clearing restock hint sets it to zero; does not alter actual stock.
-              setState(() {
-                _percentFull = 100;
-                _textController.text = '100';
-              });
-              context.read<InventoryViewModel>().updateRestockHint(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.clear),
+                label: const Text('Clear hint'),
+                onPressed: () async {
+                  final inv = Provider.of<InventoryViewModel>(context, listen: false);
+                  final navigator = Navigator.of(context);
+                  setState(() {
+                    _percentFull = 100;
+                    _textController.text = '100';
+                  });
+                  await inv.updateRestockHint(
                     widget.productId,
                     0,
                   );
-              Navigator.of(context).pop();
-            },
-            child: const Text('Clear hint'),
-          ),
-          ElevatedButton.icon(
-            icon: _saving
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.save_outlined),
-            label: const Text('Save hint'),
-            onPressed: _saving
-                ? null
-                : () async {
-                    setState(() => _saving = true);
-                    try {
-                      await context.read<InventoryViewModel>().updateRestockHint(
-                            widget.productId,
-                            _computedMissing(),
-                          );
-                      if (!mounted) return;
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Restock hint saved')),
-                      );
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to save: $e')),
-                        );
-                      }
-                    } finally {
-                      if (mounted) setState(() => _saving = false);
-                    }
-                  },
+                  if (!mounted) return;
+                  navigator.pop();
+                },
+              ),
+              ElevatedButton.icon(
+                icon: _saving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.save_outlined),
+                label: const Text('Save hint'),
+                onPressed: _saving ? null : _saveHint,
+              ),
+            ],
           ),
         ],
       ),
@@ -166,12 +192,56 @@ class _RestockHintSheetState extends State<RestockHintSheet> {
     return missing.round();
   }
 
-  String _hintSummary() {
-    final max = widget.maxQuantity;
-    if (max <= 0) {
-      return 'Approximate missing: N/A (no target set)';
-    }
+  Widget _hintChips(ThemeData theme) {
     final missing = _computedMissing();
-    return 'Approximate missing: $missing of $max';
+    final max = widget.maxQuantity;
+    final fullness = '${_percentFull.round()}% full';
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      children: [
+        _chip(theme, fullness, theme.colorScheme.primary),
+        _chip(theme, 'Missing: $missing of $max', theme.colorScheme.tertiary),
+      ],
+    );
+  }
+
+  Widget _chip(ThemeData theme, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.bodyMedium?.copyWith(color: color),
+      ),
+    );
+  }
+
+  Future<void> _saveHint() async {
+    final inv = Provider.of<InventoryViewModel>(context, listen: false);
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _saving = true);
+    try {
+      await inv.updateRestockHint(
+        widget.productId,
+        _computedMissing(),
+      );
+      if (!mounted) return;
+      navigator.pop();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Restock hint saved')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to save: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 }

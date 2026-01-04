@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../controllers/app_controller.dart';
 import '../../ui/screens/home/home_screen.dart';
@@ -32,6 +33,9 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
     });
     final app = context.read<AppController>();
     try {
+      if (FirebaseAuth.instance.currentUser == null) {
+        await FirebaseAuth.instance.signInAnonymously();
+      }
       await app.signInStaff(
         companyCode: _companyCodeController.text.trim(),
         pin: _pinController.text.trim(),
@@ -48,6 +52,28 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
           (_) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      final message = e.message ?? 'Login failed. Please try again.';
+      final current = FirebaseAuth.instance.currentUser;
+      debugPrint(
+          'StaffLogin error code=${e.code} message=${e.message} uid=${current?.uid ?? 'none'} email=${current?.email?.toLowerCase() ?? ''} companyCode=${_companyCodeController.text.trim().toUpperCase()}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            action: e.code == 'permission-denied'
+                ? SnackBarAction(
+                    label: 'Retry',
+                    onPressed: () {
+                      if (!_loading) {
+                        _submit();
+                      }
+                    },
+                  )
+                : null,
+          ),
         );
       }
     } catch (e) {
@@ -69,7 +95,12 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Staff / Worker Login'),
+        title: GestureDetector(
+          onLongPress: () {
+            _openDebugPanel();
+          },
+          child: const Text('Staff / Worker Login'),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -139,12 +170,82 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // TODO: add "Need help? Contact your manager" link or support CTA.
+                TextButton.icon(
+                  icon: const Icon(Icons.help_outline, size: 18),
+                  label: const Text('Need help? Ask your manager for your code & PIN'),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Reach out to your manager/owner to reset your PIN or code.'),
+                    ));
+                  },
+                ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _openDebugPanel() async {
+    final app = context.read<AppController>();
+    final current = FirebaseAuth.instance.currentUser;
+    String? companyId = app.activeCompany?.id;
+    String? authMapRole;
+    bool authMapExists = false;
+    bool canReadCompany = false;
+    String? debugError;
+    try {
+      final code = _companyCodeController.text.trim().toUpperCase();
+      if ((companyId == null || companyId.isEmpty) && code.isNotEmpty) {
+        final pinDoc = await FirebaseFirestore.instance.collection('staffPins').doc(code).get();
+        companyId = pinDoc.data()?['companyId'] as String?;
+      }
+      if (companyId != null && companyId.isNotEmpty && current != null) {
+        final authMapDoc = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(companyId)
+            .collection('authMap')
+            .doc(current.uid)
+            .get();
+        authMapExists = authMapDoc.exists;
+        authMapRole = (authMapDoc.data() ?? {})['role'] as String?;
+        final companyDoc =
+            await FirebaseFirestore.instance.collection('companies').doc(companyId).get();
+        canReadCompany = companyDoc.exists;
+      }
+    } catch (e) {
+      debugError = e.toString();
+    }
+
+    if (!mounted) return;
+    await showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Debug Access (temporary)', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('uid: ${current?.uid ?? 'none'}'),
+              Text('emailLower: ${current?.email?.toLowerCase() ?? ''}'),
+              Text('companyId: ${companyId ?? 'unknown'}'),
+              Text('authMap exists: $authMapExists'),
+              Text('authMap role: ${authMapRole ?? 'n/a'}'),
+              Text('can read company: $canReadCompany'),
+              if (debugError != null) ...[
+                const SizedBox(height: 8),
+                Text('error: $debugError'),
+              ],
+              const SizedBox(height: 12),
+              const Text('Long press this title later to remove.', style: TextStyle(fontSize: 12)),
+            ],
+          ),
+        );
+      },
     );
   }
 }

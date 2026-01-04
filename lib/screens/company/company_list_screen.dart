@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/app_controller.dart';
 import '../../ui/screens/home/home_screen.dart';
+import '../../ui/screens/owner_super_screen.dart';
+import '../../models/user_role.dart';
 import 'company_create_screen.dart';
 
 class CompanyListScreen extends StatelessWidget {
@@ -17,6 +19,16 @@ class CompanyListScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Select a company'),
         actions: [
+          if ((app.isOwner || app.role == UserRole.manager) && companies.isNotEmpty)
+            TextButton.icon(
+              icon: const Icon(Icons.dashboard_outlined),
+              label: const Text('Open Owner Dashboard'),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const OwnerSuperScreen()),
+                );
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.add_business_outlined),
             onPressed: () {

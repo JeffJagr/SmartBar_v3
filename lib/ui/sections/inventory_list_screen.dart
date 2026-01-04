@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
+import '../../controllers/app_controller.dart';
+import '../../models/order.dart';
+import '../../models/product.dart';
+import '../../ui/widgets/add_to_order_sheet.dart';
 import '../../viewmodels/inventory_view_model.dart';
+import '../../viewmodels/orders_view_model.dart';
 import '../widgets/restock_hint_sheet.dart';
 import '../widgets/product_form_sheet.dart';
 import '../widgets/product_list_item.dart';
@@ -23,6 +29,8 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<InventoryViewModel>();
+    final ordersVm = context.watch<OrdersViewModel?>();
+    final app = context.watch<AppController>();
 
     if (vm.loading) {
       return const Center(child: CircularProgressIndicator());
@@ -34,7 +42,11 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
       return const Center(child: Text('No products yet.'));
     }
 
-    final isOwner = vm.canEditQuantities;
+    final perm = app.currentPermissionSnapshot;
+    final canOrder = app.permissions.canCreateOrders(perm);
+    final canManageProducts = app.permissions.canEditProducts(perm);
+    final canAdjust = vm.canEditQuantities;
+    final company = app.activeCompany;
     final groups = vm.products.map((p) => p.group).toSet().toList()..sort();
     final filtered = vm.products.where((p) {
       final matchesSearch = _search.isEmpty ||
@@ -80,6 +92,46 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                 ],
                 onChanged: (v) => setState(() => _groupFilter = v),
               ),
+              const SizedBox(width: 8),
+              PopupMenuButton<_ExportKind>(
+                tooltip: 'Export / share',
+                onSelected: (kind) async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  try {
+                    final text = kind == _ExportKind.csv
+                        ? await context.read<InventoryViewModel>().exportCsv()
+                        : _buildPrintable(filtered);
+                    await Clipboard.setData(ClipboardData(text: text));
+                    if (!mounted) return;
+                    messenger.showSnackBar(SnackBar(
+                      content: Text(kind == _ExportKind.csv
+                          ? 'Inventory CSV copied'
+                          : 'Printable inventory copied'),
+                    ));
+                  } catch (e) {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text('Export failed: $e')),
+                    );
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: _ExportKind.csv,
+                    child: ListTile(
+                      leading: Icon(Icons.copy_all),
+                      title: Text('Copy CSV'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: _ExportKind.printable,
+                    child: ListTile(
+                      leading: Icon(Icons.picture_as_pdf_outlined),
+                      title: Text('Copy printable (PDF-ready)'),
+                    ),
+                  ),
+                ],
+                icon: const Icon(Icons.ios_share),
+              ),
             ],
           ),
         ),
@@ -114,16 +166,30 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                   threshold > 0 ? p.barQuantity <= threshold : p.barQuantity < p.barMax;
               final lowSecondary =
                   threshold > 0 ? p.warehouseQuantity <= threshold : p.warehouseQuantity < p.warehouseTarget;
+              final activeOrderQty = _activeOrderQtyForProduct(ordersVm, p.id);
+              final barMl = p.trackVolume && (p.unitVolumeMl ?? 0) > 0
+                  ? (p.barVolumeMl ?? (p.barQuantity * (p.unitVolumeMl ?? 0)))
+                  : null;
+              final whMl = p.trackVolume && (p.unitVolumeMl ?? 0) > 0
+                  ? (p.warehouseVolumeMl ?? (p.warehouseQuantity * (p.unitVolumeMl ?? 0)))
+                  : null;
               return ProductListItem(
                 title: p.name,
-                groupText: '${p.group}${p.subgroup != null ? " • ${p.subgroup}" : ""}',
+                groupText: '${p.group}${p.subgroup != null ? " - ${p.subgroup}" : ""}',
+                groupColor: _parseColor(p.groupColor),
                 primaryLabel: 'Bar',
                 primaryValue: '${p.barQuantity}/${p.barMax}',
-                secondaryLabel: 'Warehouse',
-                secondaryValue: '${p.warehouseQuantity}/${p.warehouseTarget}',
+                primarySubValue: barMl != null ? '$barMl ml' : null,
+                secondaryLabel: p.trackWarehouse ? 'Warehouse' : 'Bar only',
+                secondaryValue:
+                    p.trackWarehouse ? '${p.warehouseQuantity}/${p.warehouseTarget}' : '—',
+                secondarySubValue: p.trackWarehouse && whMl != null ? '$whMl ml' : null,
+                trackWarehouse: p.trackWarehouse,
+                showBarOnlyBadge: !p.trackWarehouse,
                 primaryBadgeColor: Theme.of(context).colorScheme.primary,
                 hintValue: hint,
                 hintStatusColor: badgeColor,
+                activeOrderQty: activeOrderQty,
                 lowPrimary: lowPrimary,
                 lowSecondary: lowSecondary,
                 lowPrimaryLabel: 'Low bar stock',
@@ -135,8 +201,8 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                   current: p.barQuantity,
                   max: p.barMax,
                 ),
-                onEdit: isOwner ? () => _openEditSheet(context, p) : null,
-                onDelete: isOwner
+                onEdit: canManageProducts ? () => _openEditSheet(context, p) : null,
+                onDelete: canManageProducts
                     ? () async {
                         final confirmed = await showDialog<bool>(
                           context: context,
@@ -163,10 +229,19 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                               const SnackBar(content: Text('Product deleted')),
                             );
                           }
-                        }
                       }
+                    }
                     : null,
-                showStaffReadOnly: !isOwner,
+                onReorder: ordersVm != null && company != null && canOrder
+                    ? () => _openQuickOrder(
+                          context: context,
+                          product: p,
+                          ordersVm: ordersVm,
+                          app: app,
+                          existingQty: activeOrderQty,
+                        )
+                    : null,
+                showStaffReadOnly: !canAdjust,
               );
             },
           ),
@@ -199,6 +274,39 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
     );
   }
 
+  void _openQuickOrder({
+    required BuildContext context,
+    required Product product,
+    required OrdersViewModel ordersVm,
+    required AppController app,
+    required int existingQty,
+  }) {
+    final defaultQty = _suggestOrderQty(product);
+    showAddToOrderSheet(
+      context: context,
+      app: app,
+      ordersVm: ordersVm,
+      inventory: context.read<InventoryViewModel>().products,
+      initialProduct: product,
+      defaultQuantity: defaultQty,
+    );
+  }
+
+  int _activeOrderQtyForProduct(OrdersViewModel? vm, String productId) {
+    if (vm == null) return 0;
+    return vm.orders
+        .where((o) => o.status == OrderStatus.pending || o.status == OrderStatus.confirmed)
+        .expand((o) => o.items)
+        .where((i) => i.productId == productId)
+        .fold<int>(0, (sum, item) => sum + item.quantityOrdered);
+  }
+
+  int _suggestOrderQty(Product p) {
+    final desired = (p.restockHint != null && p.restockHint! > 0) ? p.restockHint! : p.barMax;
+    final missing = desired - p.barQuantity;
+    return missing > 0 ? missing : 1;
+  }
+
   Color? _badgeColor(BuildContext context, int hint, int target) {
     if (hint <= 0) return null;
     final ratio = target > 0 ? hint / target : 0;
@@ -207,4 +315,31 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
     return Theme.of(context).colorScheme.primary;
   }
 
+  String _buildPrintable(List products) {
+    final buffer = StringBuffer();
+    buffer.writeln('INVENTORY SNAPSHOT');
+    buffer.writeln('========================');
+    for (final p in products) {
+      buffer.writeln(
+          '${p.name} | ${p.group}${p.subgroup != null ? " / ${p.subgroup}" : ""}');
+      buffer.writeln(
+          '  Bar: ${p.barQuantity}/${p.barMax}   Warehouse: ${p.warehouseQuantity}/${p.warehouseTarget}');
+      if ((p.restockHint ?? 0) > 0) buffer.writeln('  Hint: ${p.restockHint}');
+      buffer.writeln('------------------------');
+    }
+    return buffer.toString();
+  }
+
+  Color? _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    try {
+      final cleaned = hex.startsWith('#') ? hex.substring(1) : hex;
+      final value = int.parse(cleaned, radix: 16);
+      return Color(value <= 0xFFFFFF ? 0xFF000000 | value : value);
+    } catch (_) {
+      return null;
+    }
+  }
 }
+
+enum _ExportKind { csv, printable }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/app_controller.dart';
 import '../../models/product.dart';
+import '../../models/note.dart';
 import '../../viewmodels/notes_view_model.dart';
 
 class NotesScreen extends StatefulWidget {
@@ -14,20 +15,28 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> {
   final _contentController = TextEditingController();
-  String _tag = 'TODO';
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _tag = 'TODO'; // default tag label
   String _priority = 'Normal';
   String? _linkedProductId;
   bool _submitting = false;
+  String _search = '';
+  String _tagFilter = 'all';
+  bool _showDone = true;
 
   @override
   void dispose() {
     _contentController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<NotesViewModel>();
+    final app = context.watch<AppController>();
+    final perm = app.currentPermissionSnapshot;
+    final canAdd = app.permissions.canAddNotes(perm);
 
     if (vm.loading) {
       return const Center(child: CircularProgressIndicator());
@@ -40,11 +49,12 @@ class _NotesScreenState extends State<NotesScreen> {
       appBar: AppBar(
         title: const Text('Notes'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add_comment_outlined),
-            onPressed: () => _openAddNote(context, vm.products),
-            tooltip: 'Add Note',
-          ),
+          if (canAdd)
+            IconButton(
+              icon: const Icon(Icons.add_comment_outlined),
+              onPressed: () => _openAddNote(context, vm.products, canAdd: canAdd),
+              tooltip: 'Add Note',
+            ),
         ],
       ),
       body: SafeArea(
@@ -52,9 +62,53 @@ class _NotesScreenState extends State<NotesScreen> {
           onRefresh: () async => vm.init(),
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: vm.notes.length,
+            itemCount: vm.filteredNotes.where(_matchesSearch).length + 1,
             itemBuilder: (context, index) {
-              final note = vm.notes[index];
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: _searchCtrl,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.search),
+                          hintText: 'Search notes, tags, products…',
+                        ),
+                        onChanged: (v) {
+                          setState(() => _search = v.toLowerCase());
+                          vm.setSearch(v);
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          _tagChip('all', 'All'),
+                          _tagChip('todo', 'TODO'),
+                          _tagChip('info', 'Info'),
+                          _tagChip('alert', 'Alert'),
+                          FilterChip(
+                            label: const Text('Show done'),
+                            selected: _showDone,
+                            onSelected: (v) {
+                              setState(() => _showDone = v);
+                              vm.toggleShowDone(v);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }
+              final filtered = vm.filteredNotes.where(_matchesSearch).toList();
+              if (filtered.isEmpty) {
+                return const Center(child: Text('No notes yet'));
+              }
+              final note = filtered[index - 1];
               final priorityIcon = _priorityIcon(note.priority);
               final priorityColor = _priorityColor(note.priority);
               final timestamp = note.timestamp.toLocal();
@@ -120,10 +174,12 @@ class _NotesScreenState extends State<NotesScreen> {
                                 onPressed: () async {
                                   final app = context.read<AppController>();
                                   final doneBy = app.displayName;
-                                  await context.read<NotesViewModel>().markDone(
-                                        id: note.id,
-                                        doneBy: doneBy,
-                                      );
+                                  final vm = context.read<NotesViewModel>();
+                                  await vm.markDone(id: note.id, doneBy: doneBy);
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Note marked done')),
+                                  );
                                 },
                                 child: const Text('Mark done'),
                               ),
@@ -134,7 +190,11 @@ class _NotesScreenState extends State<NotesScreen> {
                                   minimumSize: Size.zero,
                                 ),
                                 onPressed: () async {
-                                  await context.read<NotesViewModel>().deleteNote(note.id);
+                                  final vm = context.read<NotesViewModel>();
+                                  await vm.deleteNote(note.id);
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(content: Text('Note deleted')));
                                 },
                                 child: const Text('Delete'),
                               ),
@@ -149,14 +209,43 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openAddNote(context, vm.products),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: canAdd
+          ? FloatingActionButton(
+              onPressed: () => _openAddNote(context, vm.products, canAdd: canAdd),
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 
-  void _openAddNote(BuildContext context, List<Product> products) {
+  bool _matchesSearch(Note note) {
+    if (_search.isEmpty && _tagFilter == 'all' && _showDone) return true;
+    final haystack =
+        '${note.content} ${note.tag} ${note.linkedProductId ?? ''} ${note.authorName}'.toLowerCase();
+    final tagOk = _tagFilter == 'all' ? true : note.tag.toLowerCase() == _tagFilter;
+    final doneOk = _showDone || !note.isDone;
+    return haystack.contains(_search) && tagOk && doneOk;
+  }
+
+  Widget _tagChip(String value, String label) {
+    final selected = _tagFilter == value;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => setState(() {
+        _tagFilter = value;
+        context.read<NotesViewModel>().setTagFilter(value);
+      }),
+    );
+  }
+
+  void _openAddNote(BuildContext context, List<Product> products, {required bool canAdd}) {
+    if (!canAdd) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You do not have permission to add notes.')),
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -164,6 +253,7 @@ class _NotesScreenState extends State<NotesScreen> {
         final app = ctx.read<AppController>();
         final notesVm = ctx.read<NotesViewModel>();
         final authorId = app.ownerUser?.uid ?? app.currentStaff?.id ?? 'anon';
+        final companyId = app.activeCompany?.id ?? '';
         final authorName = app.displayName;
         return Padding(
           padding: EdgeInsets.only(
@@ -253,6 +343,13 @@ class _NotesScreenState extends State<NotesScreen> {
                         onPressed: _submitting
                             ? null
                             : () async {
+                                if (companyId.isEmpty) {
+                                  ScaffoldMessenger.of(ctx).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('Active company is required to add a note.')),
+                                  );
+                                  return;
+                                }
                                 setState(() => _submitting = true);
                                 try {
                                   await notesVm.addNote(
@@ -262,11 +359,12 @@ class _NotesScreenState extends State<NotesScreen> {
                                     tag: _tag,
                                     linkedProductId: _linkedProductId,
                                     priority: _priority,
+                                    companyId: companyId,
                                   );
                                   _contentController.clear();
                                   _linkedProductId = null;
                                   _priority = 'Normal';
-                                  if (!mounted) return;
+                                  if (!ctx.mounted) return;
                                   Navigator.of(ctx).pop();
                                   ScaffoldMessenger.of(ctx).showSnackBar(
                                     const SnackBar(content: Text('Note saved')),

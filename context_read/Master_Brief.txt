@@ -1,0 +1,91 @@
+SMART BAR STOCK — Project Master Brief
+Version: 1.0  |  Date: 29 Dec 2025  |  Audience: Project owner + contributors
+Purpose: A single, stable source of truth describing the product, architecture, current capabilities, and remaining work. This document is intended to be stored inside the repository and referenced by Codex/AI tools and human contributors.
+1) Product Summary
+Smart Bar Stock is a multi-tenant inventory and ordering system for bars/restaurants. It supports owners/managers and staff working in real time across multiple devices. The platform is built with Flutter (Android, iOS, Web/PWA) and Firebase (Auth + Firestore) on the Blaze plan.
+Primary user roles
+    • Owner/Manager: signs in via email + password (Firebase Auth). Can create and manage companies, configure settings, manage products/groups, orders, staff, history, analytics, notes, exports.
+    • Staff/Worker: signs in via Company Code (Business ID) + PIN. Role-based permissions restrict which actions are visible/enabled.
+Core domains
+    • Inventory: Bar (front-of-house) and Warehouse (back-of-house) stock with fast adjustments and restock transfers.
+    • Ordering: Supplier orders with lifecycle statuses (Pending → Confirmed → Delivered/Received). Quick reorder from product rows.
+    • History/Audit: Append-only event log for all significant actions with actor identity stored.
+    • Notes & Notifications: Notes with tags/search/filters; notification documents emitted on key note events.
+    • Users & Permissions: Staff accounts with PIN and permission flags; admin screens to manage users.
+2) What is Implemented (Current Working Features)
+Authentication & Company Access
+    • Role selection at app start (Owner vs Staff).
+    • Owner login + registration (email/password) and post-auth navigation to Company List / Company Create flow.
+    • Staff login screen (Company Code + PIN) routes directly to the app shell.
+    • Multi-company support for owners: list companies, select active company, create new company.
+Company Settings (Owner/Partner)
+    • Partner invite flow is implemented inside Company Settings: owner enters partner email, app writes lowercased email into company.partnerEmails in Firestore.
+    • Partner visibility at login: companies are fetched where ownerIds contains UID OR partnerEmails contains the user email (lowercased).
+    • Leave company flow with safety confirmation: removes owner UID/email from ownerIds/partnerEmails and returns to Company List.
+    • Legacy drawer invite entry removed; invitations are handled exclusively via Company Settings.
+Inventory & Restock
+    • Bar and Warehouse product lists grouped by categories; reorder support in product tiles.
+    • Adjust quantities with validation and UX confirmations for critical edits.
+    • Restock workflow: move stock from Warehouse → Bar with clamping/validation and history logging.
+    • Low-stock markers supported; restock hints and analytics logging implemented.
+Orders
+    • Order lifecycle implemented: statuses (pending, confirmed, delivered/received) with metadata (createdAt/by, confirmedAt/by, deliveredAt/by).
+    • Sequential order numbers per company (#0001, #0002...) using a company-scoped transactional counter in Firestore.
+    • Quick Order/Reorder action available from Bar/Warehouse product rows (permission gated).
+    • Product list shows an active-order badge with quantity for products present in pending/confirmed orders.
+    • Global orders indicator badge in the app bar with quick navigation to Orders screen.
+Users & Permissions
+    • Users repository supports create/update/activate/deactivate/delete.
+    • Permissions enforced: UI and ViewModel checks (e.g., canManageUsers, createOrders, confirmOrders, viewHistory, editProducts).
+    • Staff PIN captured on creation; permission snapshots used to guard actions.
+History, Analytics, Notes
+    • History entries persist actor identity (performedById/performedByName) to keep audit stable across logout/login.
+    • Statistics service present; basic analytics screens available.
+    • Notes: search, tag chips, show-done toggle implemented; filtering is case-insensitive.
+    • Notes notifications: repository emits notification documents under companies/{companyId}/notifications for note add/mark-done events.
+3) Data Model & Firestore Layout (High Level)
+All reads/writes are company-scoped. Every domain entity is tied to a companyId, and queries are filtered by activeCompanyId. Exact collection names can be adjusted, but the current design follows this pattern:
+    • companies/{companyId} — company profile, settings, ownerIds, partnerEmails, counters (e.g., nextOrderNumber).
+    • companies/{companyId}/products/{productId} — product catalog & group assignment.
+    • companies/{companyId}/inventory/{productId} — barQty, warehouseQty, thresholds, par levels.
+    • companies/{companyId}/orders/{orderId} — order header + items snapshots; status + lifecycle metadata.
+    • companies/{companyId}/history/{historyId} — append-only audit entries.
+    • companies/{companyId}/users/{userId} — staff accounts, PIN hash, permissions, active flag.
+    • companies/{companyId}/notes/{noteId} — notes with tags, author, assigned users.
+    • companies/{companyId}/notifications/{notificationId} — generated notification docs (notes events, future: orders/low-stock).
+4) Architecture (Flutter)
+State management
+Current state management is ChangeNotifier-based (AppController) with ViewModels/Repositories per domain. The app uses Firestore listeners to keep UI real-time.
+Recommended modular structure
+    • lib/core/ — models, services (analytics, permissions, formatting), shared utilities.
+    • lib/data/ — repositories (Firestore implementations, in-memory fakes for tests), DTO mappers.
+    • lib/state/ — AppController/AppState orchestration, session + active company selection, subscriptions.
+    • lib/ui/ — screens + reusable widgets, feature folders (bar, warehouse, restock, orders, notes, users, company).
+5) Known Gaps / What is Still Missing (Next Feature Set)
+Owner Network Screen (NEW) — Cross-company control panel
+New requirement: a dedicated Owner/Manager multi-company dashboard that allows operating on multiple companies without switching context. It should include a cross-company Shopping Cart-style Orders view and global Notes/Stats/History.
+Functional scope
+    • Orders (Network Cart): show all orders across all companies the user owns/partners with; filter by company/supplier/product/status; show totals.
+    • Cross-company cart: build consolidated orders across multiple companies (especially for networks using the same supplier).
+    • Notes (Network): aggregate notes across companies; support @mentions/assignment; surface a user notification when mentioned/assigned.
+    • Stats (Network): compare companies, suppliers, and products across the owner portfolio.
+    • History (Network): global audit log across companies with filtering and search.
+    • Logout entry specific to Owner screen.
+Operational readiness (business-grade)
+    • Release hygiene: privacy policy + terms + account deletion flow (App Store requirement), plus data retention policy.
+    • Crash reporting & monitoring (Crashlytics/Sentry) and structured logs.
+    • Performance: pagination for large collections (history/orders/notifications/users).
+    • Back-office Admin Console: manage companies, owners, subscription entitlement, support actions, and view error logs.
+6) Performance & Scale Considerations
+    • Pagination: required for orders/history/users/notifications when company size grows.
+    • Indexes: maintain Firestore composite indexes for common filters (status+companyId, createdAt+status, supplierId+status, etc.).
+    • Batch writes + transactions: used for order numbering and should be used for stock update flows where atomicity matters.
+    • Offline: Firestore persistence (mobile) + minimal cached state for fast cold start.
+    • Cost control (Blaze): avoid N+1 reads; prefer server-side aggregation where appropriate.
+7) Definition of Done (Business MVP → Product)
+    1. All core flows stable: auth, company selection, inventory, restock, orders lifecycle, users/permissions, notes, analytics.
+    2. Owner Network Screen implemented (cross-company orders/notes/stats/history).
+    3. Monitoring and support: crash reporting + admin console basics.
+    4. App Store readiness: privacy policy, terms, account deletion, data export.
+    5. Performance baselines met: acceptable cold start, smooth scrolling for 1k+ products with groups, pagination for large datasets.
+    6. Release pipeline: CI build, versioning, store metadata, staged rollout.

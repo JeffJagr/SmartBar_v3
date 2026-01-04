@@ -29,13 +29,27 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
     setState(() => _creating = true);
     final app = context.read<AppController>();
     try {
-      await app.createCompany(
+      final result = await app.createCompany(
         name: _nameController.text.trim(),
-        companyCode: _codeController.text.trim().isEmpty
-            ? null
-            : _codeController.text.trim().toUpperCase(),
+        companyCode: _codeController.text.trim().toUpperCase(),
       );
-      // TODO: prompt to invite staff after company creation.
+      if (mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Invite your team'),
+            content: Text(
+              'Company created. Share the company code (${result.companyCode}) and add staff from the Users screen to generate their PINs.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Got it'),
+              ),
+            ],
+          ),
+        );
+      }
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -43,10 +57,15 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
         );
       }
     } catch (e) {
+      final uid = app.ownerUser?.uid ?? 'none';
+      final emailLower = app.ownerUser?.email?.toLowerCase() ?? '';
+      debugPrint(
+        'CompanyCreate error uid=$uid email=$emailLower code=${_codeController.text.trim().toUpperCase()} error=$e',
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not create company: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not create company: $e')));
       }
     } finally {
       if (mounted) setState(() => _creating = false);
@@ -56,9 +75,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create company'),
-      ),
+      appBar: AppBar(title: const Text('Create company')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -91,13 +108,16 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
                   controller: _codeController,
                   textCapitalization: TextCapitalization.characters,
                   decoration: const InputDecoration(
-                    labelText: 'Company code',
+                    labelText: 'Business ID (required)',
                     hintText: 'e.g. BAR-12345',
                     prefixIcon: Icon(Icons.qr_code_2_outlined),
                   ),
                   validator: (value) {
-                    if (value != null && value.isNotEmpty && value.length < 4) {
-                      return 'Code should be at least 4 characters';
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Business ID is required';
+                    }
+                    if (value.trim().length < 4) {
+                      return 'Business ID should be at least 4 characters';
                     }
                     return null;
                   },

@@ -10,6 +10,7 @@ class HistoryViewModel extends ChangeNotifier {
 
   final HistoryRepository _repo;
   List<HistoryEntry> entries = [];
+  List<HistoryEntry> _allEntries = [];
   bool loading = true;
   String? error;
   StreamSubscription<List<HistoryEntry>>? _sub;
@@ -22,7 +23,8 @@ class HistoryViewModel extends ChangeNotifier {
     loading = true;
     notifyListeners();
     _sub = _repo.watchEntries().listen((data) {
-      entries = _applyFilters(data);
+      _allEntries = data;
+      entries = _applyFilters(_allEntries);
       loading = false;
       error = null;
       notifyListeners();
@@ -33,9 +35,26 @@ class HistoryViewModel extends ChangeNotifier {
     });
   }
 
+  Future<void> refresh({int limit = 100}) async {
+    try {
+      loading = true;
+      notifyListeners();
+      final latest = await _repo.fetchLatest(limit: limit);
+      _allEntries = latest;
+      entries = _applyFilters(_allEntries);
+      error = null;
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
   void setFilters({String? action, String? productId}) {
     actionFilter = action;
     productFilter = productId;
+    entries = _applyFilters(_allEntries);
     notifyListeners();
   }
 

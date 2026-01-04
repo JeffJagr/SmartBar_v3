@@ -16,9 +16,8 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        // TODO: add macOS config if we decide to support it.
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macOS.',
+          'DefaultFirebaseOptions not configured for macOS; run FlutterFire CLI to add macOS if needed.',
         );
       case TargetPlatform.windows:
       case TargetPlatform.linux:

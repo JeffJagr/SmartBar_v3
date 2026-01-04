@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_account.dart';
 import '../repositories/users_repository.dart';
 import '../services/permission_service.dart';
+import '../utils/firestore_error_handler.dart';
 
 class UsersViewModel extends ChangeNotifier {
   UsersViewModel(this._repo);
@@ -13,11 +14,23 @@ class UsersViewModel extends ChangeNotifier {
   final UsersRepository _repo;
   PermissionSnapshot? _permissionSnapshot;
   PermissionService? _permissionService;
+  String? get _repoPath {
+    if (_repo is FirestoreUsersRepository) {
+      return _repo.path;
+    }
+    return 'members';
+  }
 
   List<UserAccount> users = [];
   bool loading = true;
   String? error;
   StreamSubscription<List<UserAccount>>? _sub;
+
+  String _friendly(Object e, String op) => FirestoreErrorHandler.friendlyMessage(
+        e,
+        operation: op,
+        path: _repoPath,
+      );
 
   Future<void> init() async {
     _sub?.cancel();
@@ -29,7 +42,7 @@ class UsersViewModel extends ChangeNotifier {
       error = null;
       notifyListeners();
     }, onError: (e) {
-      error = e.toString();
+      error = _friendly(e, 'watchUsers');
       loading = false;
       notifyListeners();
     });
@@ -38,8 +51,8 @@ class UsersViewModel extends ChangeNotifier {
   Future<void> addUser({
     required String displayName,
     required UserRole role,
-    required String email,
-    required String password,
+    String? email,
+    String? password,
     String? pin,
     Map<String, bool> permissions = const {},
   }) async {
@@ -58,12 +71,8 @@ class UsersViewModel extends ChangeNotifier {
     try {
       loading = true;
       notifyListeners();
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      final uid = credential.user?.uid ?? '';
-      if (uid.isEmpty) {
-        throw Exception('Failed to create auth user');
-      }
+      // Staff use PIN-based auth; we do not create a Firebase Auth user here.
+      final uid = 'pin-${DateTime.now().millisecondsSinceEpoch}';
       final user = UserAccount(
         id: uid,
         companyId: '',
@@ -75,8 +84,9 @@ class UsersViewModel extends ChangeNotifier {
         permissions: permissions,
       );
       await _repo.addUser(user);
+      // staffPins doc is written inside FirestoreUsersRepository so PIN login works.
     } catch (e) {
-      error = e.toString();
+      error = _friendly(e, 'addUser');
     } finally {
       loading = false;
       notifyListeners();
@@ -96,7 +106,12 @@ class UsersViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    await _repo.updateRole(userId, role);
+    try {
+      await _repo.updateRole(userId, role);
+    } catch (e) {
+      error = _friendly(e, 'updateRole');
+      notifyListeners();
+    }
   }
 
   Future<void> setActive(String userId, bool active) async {
@@ -112,7 +127,12 @@ class UsersViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    await _repo.deactivate(userId, active);
+    try {
+      await _repo.deactivate(userId, active);
+    } catch (e) {
+      error = _friendly(e, 'deactivate');
+      notifyListeners();
+    }
   }
 
   Future<void> deleteUser(String userId) async {
@@ -128,7 +148,33 @@ class UsersViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    await _repo.deleteUser(userId);
+    try {
+      await _repo.deleteUser(userId);
+    } catch (e) {
+      error = _friendly(e, 'deleteUser');
+      notifyListeners();
+    }
+  }
+
+  Future<void> updatePermissions(String userId, Map<String, bool> permissions) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      error = 'Not authenticated. Please sign in again.';
+      notifyListeners();
+      return;
+    }
+    if (_permissionService != null &&
+        _permissionSnapshot != null &&
+        !_permissionService!.canManageUsers(_permissionSnapshot!)) {
+      error = 'You do not have permission to manage users.';
+      notifyListeners();
+      return;
+    }
+    try {
+      await _repo.updatePermissions(userId, permissions);
+    } catch (e) {
+      error = _friendly(e, 'updatePermissions');
+      notifyListeners();
+    }
   }
 
   void applyPermissionContext({

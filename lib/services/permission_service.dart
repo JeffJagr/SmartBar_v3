@@ -1,6 +1,7 @@
 import '../controllers/app_controller.dart';
 import '../state/app_state.dart';
 import '../models/user_account.dart';
+import '../models/member.dart';
 
 /// Snapshot of the current user's permission context.
 class PermissionSnapshot {
@@ -54,49 +55,62 @@ class PermissionService {
     );
   }
 
+  /// Build a snapshot directly from a membership document.
+  PermissionSnapshot fromMember(Member? member) {
+    final userRole = _roleFromString(member?.role);
+    return PermissionSnapshot(
+      isOwner: userRole == UserRole.owner,
+      role: userRole,
+      flags: member?.permissions ?? const {},
+      roleLabel: member?.role ?? '',
+    );
+  }
+
+  bool hasPermission(PermissionSnapshot snapshot, String key,
+          {bool defaultValue = false}) =>
+      snapshot.flags[key] ?? defaultValue;
+
   bool canEditProducts(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.isManager ||
-      snapshot.flag('editProducts', defaultValue: snapshot.isManager);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('editProducts');
 
   bool canAdjustQuantities(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.isManager ||
-      snapshot.flag('adjustQuantities', defaultValue: snapshot.isManager);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('adjustQuantities');
 
   bool canCreateOrders(PermissionSnapshot snapshot) =>
-    snapshot.isOwner ||
-      snapshot.isManager ||
-      snapshot.flag('createOrders', defaultValue: snapshot.isManager);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('createOrders');
 
   bool canConfirmOrders(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.flag('confirmOrders', defaultValue: snapshot.isManager);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('confirmOrders');
 
   bool canReceiveOrders(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.flag('receiveOrders', defaultValue: true);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('receiveOrders');
 
   bool canManageUsers(PermissionSnapshot snapshot) =>
       snapshot.isOwner || snapshot.flag('manageUsers');
 
   bool canViewHistory(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.isManager ||
-      snapshot.flag('viewHistory', defaultValue: true);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('viewHistory');
 
   bool canSetRestockHint(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.isManager ||
-      snapshot.flag('setRestockHint', defaultValue: true);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('setRestockHint');
 
   bool canTransferStock(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.isManager ||
-      snapshot.flag('transferStock', defaultValue: snapshot.isManager);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('transferStock');
 
   bool canAddNotes(PermissionSnapshot snapshot) =>
-      snapshot.isOwner ||
-      snapshot.isManager ||
-      snapshot.flag('addNotes', defaultValue: true);
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('addNotes');
+
+  bool canManageSuppliers(PermissionSnapshot snapshot) =>
+      snapshot.isOwner || snapshot.isManager || snapshot.flag('manageSuppliers');
+
+  UserRole _roleFromString(String? value) {
+    switch ((value ?? '').toLowerCase()) {
+      case 'owner':
+        return UserRole.owner;
+      case 'manager':
+        return UserRole.manager;
+      default:
+        return UserRole.staff;
+    }
+  }
 }

@@ -11,6 +11,10 @@ class Note {
     this.doneBy,
     this.doneAt,
     this.priority, // optional priority/color/emoji marker
+    this.companyId = '',
+    this.assigneeIds = const [],
+    this.mentionIds = const [],
+    this.readBy = const {},
   });
 
   final String id;
@@ -24,6 +28,10 @@ class Note {
   final String? doneBy;
   final DateTime? doneAt;
   final String? priority;
+  final String companyId;
+  final List<String> assigneeIds;
+  final List<String> mentionIds;
+  final Map<String, DateTime> readBy;
 
   Note copyWith({
     String? id,
@@ -37,6 +45,10 @@ class Note {
     String? doneBy,
     DateTime? doneAt,
     String? priority,
+    String? companyId,
+    List<String>? assigneeIds,
+    List<String>? mentionIds,
+    Map<String, DateTime>? readBy,
   }) {
     return Note(
       id: id ?? this.id,
@@ -50,6 +62,10 @@ class Note {
       doneBy: doneBy ?? this.doneBy,
       doneAt: doneAt ?? this.doneAt,
       priority: priority ?? this.priority,
+      companyId: companyId ?? this.companyId,
+      assigneeIds: assigneeIds ?? this.assigneeIds,
+      mentionIds: mentionIds ?? this.mentionIds,
+      readBy: readBy ?? this.readBy,
     );
   }
 }

@@ -6,6 +6,9 @@ class Company {
     required this.name,
     required this.companyCode,
     required this.ownerIds,
+    this.notificationLowStock = true,
+    this.notificationOrderApprovals = true,
+    this.notificationStaff = false,
     required this.createdAt,
   });
 
@@ -13,6 +16,9 @@ class Company {
   final String name;
   final String companyCode;
   final List<String> ownerIds;
+  final bool notificationLowStock;
+  final bool notificationOrderApprovals;
+  final bool notificationStaff;
   final DateTime createdAt;
 
   factory Company.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -20,14 +26,23 @@ class Company {
   }
 
   factory Company.fromMap(String id, Map<String, dynamic> data) {
+    final map = Map<String, dynamic>.from(data);
+    final ownerIdsRaw = map['ownerIds'];
+    final List<String> parsedOwnerIds = ownerIdsRaw is List
+        ? ownerIdsRaw.whereType<String>().toList()
+        : (map['ownerId'] is String ? [map['ownerId'] as String] : <String>[]);
+
     return Company(
       id: id,
-      name: data['name'] as String? ?? '',
-      companyCode: data['companyCode'] as String? ??
-          data['code'] as String? ?? // fallback for legacy field
+      name: map['name'] as String? ?? '',
+      companyCode: map['companyCode'] as String? ??
+          map['code'] as String? ?? // fallback for legacy field
           '',
-      ownerIds: (data['ownerIds'] as List<dynamic>? ?? []).cast<String>(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      ownerIds: parsedOwnerIds,
+      notificationLowStock: map['notificationLowStock'] as bool? ?? true,
+      notificationOrderApprovals: map['notificationOrderApprovals'] as bool? ?? true,
+      notificationStaff: map['notificationStaff'] as bool? ?? false,
+      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
@@ -36,6 +51,9 @@ class Company {
       'name': name,
       'companyCode': companyCode,
       'ownerIds': ownerIds,
+      'notificationLowStock': notificationLowStock,
+      'notificationOrderApprovals': notificationOrderApprovals,
+      'notificationStaff': notificationStaff,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

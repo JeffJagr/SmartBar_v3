@@ -18,6 +18,7 @@ class ProductListItem extends StatelessWidget {
     this.onDelete,
     this.onTransfer,
     this.onReorder,
+    this.supplierName,
     this.activeOrderQty,
     this.primaryBadgeColor,
     this.hintStatusColor,
@@ -27,6 +28,12 @@ class ProductListItem extends StatelessWidget {
     this.lowSecondary = false,
     this.lowPrimaryLabel,
     this.lowSecondaryLabel,
+    this.onTap,
+    this.trackWarehouse = true,
+    this.primarySubValue,
+    this.secondarySubValue,
+    this.showBarOnlyBadge = false,
+    this.groupColor,
   });
 
   final String title;
@@ -43,6 +50,8 @@ class ProductListItem extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onTransfer;
   final VoidCallback? onReorder;
+  /// Supplier name preferred for ordering; used to show a badge.
+  final String? supplierName;
   final int? activeOrderQty;
   final Color? primaryBadgeColor;
   final Color? hintStatusColor;
@@ -52,140 +61,167 @@ class ProductListItem extends StatelessWidget {
   final bool lowSecondary;
   final String? lowPrimaryLabel;
   final String? lowSecondaryLabel;
+  final VoidCallback? onTap;
+  final bool trackWarehouse;
+  final String? primarySubValue;
+  final String? secondarySubValue;
+  final bool showBarOnlyBadge;
+  final Color? groupColor;
 
   @override
   Widget build(BuildContext context) {
     final lowPrimaryLabelText = lowPrimaryLabel ?? 'Low';
     final lowSecondaryLabelText = lowSecondaryLabel ?? 'Low';
     return Card(
-      color: hintStatusColor?.withValues(alpha: 0.08),
+      color: hintStatusColor?.withValues(alpha: 0.05),
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        title: Text(title),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(groupText),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                _primaryQuantity(
-                  context,
-                  label: primaryLabel,
-                  value: primaryValue,
-                  color: primaryBadgeColor ?? Theme.of(context).colorScheme.primary,
-                ),
-                if (lowPrimary)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: _badge(context, lowPrimaryLabelText, Colors.red),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap ?? onSetHint,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 12,
+                    backgroundColor:
+                        (groupColor ?? Theme.of(context).colorScheme.primary).withValues(alpha: 0.85),
+                    child: Text(
+                      title.isNotEmpty ? title[0].toUpperCase() : '?',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
                   ),
-              ],
-            ),
-            Row(
-              children: [
-                _secondaryQuantity(
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (showBarOnlyBadge)
+                    _badge(context, 'Bar only', Theme.of(context).colorScheme.outline),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                groupText,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              _quantityRow(
+                context,
+                label: primaryLabel,
+                value: primaryValue,
+                subValue: primarySubValue,
+                color: primaryBadgeColor ?? Theme.of(context).colorScheme.primary,
+                low: lowPrimary ? lowPrimaryLabelText : null,
+              ),
+              if (trackWarehouse)
+                _quantityRow(
                   context,
                   label: secondaryLabel,
                   value: secondaryValue,
+                  subValue: secondarySubValue,
+                  color: Theme.of(context).colorScheme.secondary,
+                  low: lowSecondary ? lowSecondaryLabelText : null,
+                  muted: true,
                 ),
-                if (lowSecondary)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: _badge(context, lowSecondaryLabelText, Colors.orange),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if ((activeOrderQty ?? 0) > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if ((supplierName ?? '').isNotEmpty)
+                    _chip(
+                      context,
+                      'Supplier: $supplierName',
+                      color: Theme.of(context).colorScheme.primary,
+                      icon: Icons.storefront_outlined,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.shopping_cart_outlined, size: 16, color: Colors.blue),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$activeOrderQty in orders',
-                          style:
-                              const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
-                        ),
-                      ],
+                  if ((activeOrderQty ?? 0) > 0)
+                    _chip(
+                      context,
+                      '$activeOrderQty in orders',
+                      color: Colors.blue,
+                      icon: Icons.shopping_cart_outlined,
                     ),
-                  ),
-                if (hintValue > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: hintStatusColor?.withValues(alpha: 0.2) ??
-                          Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                  if (hintValue > 0)
+                    _chip(
+                      context,
+                      'Hint: $hintValue',
+                      color: hintStatusColor ?? Theme.of(context).colorScheme.tertiary,
+                      icon: Icons.lightbulb_outline,
+                      trailing: IconButton(
+                        iconSize: 16,
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.clear, size: 16),
+                        tooltip: 'Clear hint',
+                        onPressed: onClearHint,
+                      ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('⚠️'),
-                        const SizedBox(width: 4),
-                        Text('Hint: $hintValue'),
-                        IconButton(
-                          iconSize: 18,
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(Icons.clear, size: 16),
-                          tooltip: 'Clear hint',
-                          onPressed: onClearHint,
-                        ),
-                      ],
-                    ),
-                  ),
-                TextButton(
-                  onPressed: onSetHint,
-                  child: const Text('Set restock hint'),
-                ),
-                if (onReorder != null)
-                  TextButton(
-                    onPressed: onReorder,
-                    child: const Text('Order / Reorder'),
-                  ),
-                if (onTransfer != null)
-                  TextButton(
-                    onPressed: onTransfer,
-                    child: const Text('Transfer to bar'),
-                  ),
-                if (onAdjust != null)
-                  TextButton(
-                    onPressed: onAdjust,
-                    child: const Text('Adjust qty'),
-                  ),
-                if (onEdit != null)
-                  TextButton(
-                    onPressed: onEdit,
-                    child: const Text('Edit'),
-                  ),
-                if (onDelete != null)
-                  IconButton(
-                    tooltip: 'Delete',
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: onDelete,
-                  ),
-              ],
-            ),
-            if (showStaffReadOnly)
-              Text(
-                staffMessage ?? 'Staff: read-only quantities',
-                style: Theme.of(context).textTheme.bodySmall,
+                  if (lowPrimary)
+                    _badge(context, lowPrimaryLabelText, Colors.red),
+                  if (lowSecondary)
+                    _badge(context, lowSecondaryLabelText, Colors.orange),
+                ],
               ),
-          ],
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  TextButton.icon(
+                    onPressed: onSetHint,
+                    icon: const Icon(Icons.lightbulb_outline),
+                    label: const Text('Set restock hint'),
+                  ),
+                  if (onReorder != null)
+                    TextButton.icon(
+                      onPressed: onReorder,
+                      icon: const Icon(Icons.shopping_cart_checkout_outlined),
+                      label: const Text('Order / Reorder'),
+                    ),
+                  if (onTransfer != null)
+                    TextButton.icon(
+                      onPressed: onTransfer,
+                      icon: const Icon(Icons.swap_horiz),
+                      label: const Text('Transfer to bar'),
+                    ),
+                  if (onAdjust != null)
+                    TextButton.icon(
+                      onPressed: onAdjust,
+                      icon: const Icon(Icons.tune),
+                      label: const Text('Adjust qty'),
+                    ),
+                  if (onEdit != null)
+                    TextButton.icon(
+                      onPressed: onEdit,
+                      icon: const Icon(Icons.edit_outlined),
+                      label: const Text('Edit'),
+                    ),
+                  if (onDelete != null)
+                    TextButton.icon(
+                      onPressed: onDelete,
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Delete'),
+                    ),
+                ],
+              ),
+              if (showStaffReadOnly) ...[
+                const SizedBox(height: 4),
+                Text(
+                  staffMessage ?? 'Staff: read-only quantities',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ],
+          ),
         ),
-        onTap: onSetHint,
       ),
     );
   }
@@ -204,62 +240,91 @@ class ProductListItem extends StatelessWidget {
     );
   }
 
-  Widget _primaryQuantity(BuildContext context,
-      {required String label, required String value, required Color color}) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
+  Widget _quantityRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+    String? subValue,
+    required Color color,
+    String? low,
+    bool muted = false,
+  }) {
+    final textColor =
+        muted ? Theme.of(context).colorScheme.onSurfaceVariant : Theme.of(context).colorScheme.onSurface;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: muted ? 0.08 : 0.18),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
+          ),
+          if (subValue != null) ...[
+            const SizedBox(width: 6),
+            Text(
+              subValue,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
+            ),
+          ],
+          if (low != null) ...[
+            const SizedBox(width: 6),
+            _badge(context, low, Colors.red),
+          ],
+        ],
+      ),
     );
   }
 
-  Widget _secondaryQuantity(BuildContext context,
-      {required String label, required String value}) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          decoration: BoxDecoration(
-            color:
-                Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
+  Widget _chip(
+    BuildContext context,
+    String label, {
+    required Color color,
+    IconData? icon,
+    Widget? trailing,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+          ],
+          Text(
             label,
-            style: Theme.of(context)
-                .textTheme
-                .labelSmall
-                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(color: color, fontWeight: FontWeight.w600),
           ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          value,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-      ],
+          if (trailing != null) ...[
+            const SizedBox(width: 4),
+            trailing,
+          ],
+        ],
+      ),
     );
   }
 }

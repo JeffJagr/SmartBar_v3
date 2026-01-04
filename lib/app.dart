@@ -7,8 +7,9 @@ import 'repositories/inventory_repository.dart';
 import 'repositories/note_repository.dart';
 import 'repositories/orders_repository.dart';
 import 'repositories/product_repository.dart';
-import 'repositories/layout_repository.dart';
 import 'repositories/users_repository.dart';
+import 'repositories/layout_repository.dart';
+import 'repositories/group_repository.dart';
 import 'screens/auth/role_selection_screen.dart';
 import 'screens/company/company_list_screen.dart';
 import 'ui/screens/home/home_screen.dart';
@@ -32,20 +33,25 @@ class SmartBarApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AppController>.value(value: appState),
         ProxyProvider<AppController, InventoryRepository>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreInventoryRepository(companyId: app.activeCompany!.id)
               : InMemoryInventoryRepository(),
           dispose: (_, repo) {
             if (repo is InMemoryInventoryRepository) repo.dispose();
           },
         ),
+        ProxyProvider<AppController, GroupRepository?>(
+          update: (context, app, previous) => app.activeCompany != null
+              ? FirestoreGroupRepository(companyId: app.activeCompany!.id)
+              : InMemoryGroupRepository(),
+        ),
         ProxyProvider<AppController, HistoryRepository?>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreHistoryRepository(companyId: app.activeCompany!.id)
               : null,
         ),
         ProxyProvider<AppController, NoteRepository>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreNoteRepository(companyId: app.activeCompany!.id)
               : InMemoryNoteRepository(),
           dispose: (_, repo) {
@@ -53,48 +59,57 @@ class SmartBarApp extends StatelessWidget {
           },
         ),
         ProxyProvider<AppController, ProductRepository>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreProductRepository(companyId: app.activeCompany!.id)
               : InMemoryProductRepository(),
           dispose: (_, repo) {
             if (repo is InMemoryProductRepository) repo.dispose();
           },
         ),
-        ChangeNotifierProxyProvider2<InventoryRepository, AppController,
+        ChangeNotifierProxyProvider3<InventoryRepository, GroupRepository?, HistoryRepository?,
             InventoryViewModel>(
-          create: (ctx) =>
-              InventoryViewModel(ctx.read<InventoryRepository>())..init(),
-          update: (ctx, repo, app, vm) {
-            vm ??= InventoryViewModel(repo);
+          create: (ctx) => InventoryViewModel(
+                ctx.read<InventoryRepository>(),
+                ctx.read<GroupRepository?>(),
+                ctx.read<HistoryRepository?>(),
+              )..init(),
+          update: (ctx, repo, groupRepo, historyRepo, vm) {
+            vm ??= InventoryViewModel(repo, groupRepo, historyRepo);
             vm.replaceRepository(repo);
             vm.applyPermissionContext(
-              snapshot: app.permissionSnapshot(app.permissions),
-              service: app.permissions,
+              snapshot: ctx.read<AppController>().permissionSnapshot(
+                    ctx.read<AppController>().permissions,
+                  ),
+              service: ctx.read<AppController>().permissions,
             );
             return vm;
           },
         ),
-        ChangeNotifierProxyProvider2<NoteRepository, ProductRepository, NotesViewModel>(
-          create: (ctx) =>
-              NotesViewModel(ctx.read<NoteRepository>(), ctx.read<ProductRepository>())..init(),
-          update: (ctx, noteRepo, productRepo, vm) {
-            vm ??= NotesViewModel(noteRepo, productRepo);
+        ChangeNotifierProxyProvider3<NoteRepository, ProductRepository, HistoryRepository?,
+            NotesViewModel>(
+          create: (ctx) => NotesViewModel(
+                ctx.read<NoteRepository>(),
+                ctx.read<ProductRepository>(),
+                ctx.read<HistoryRepository?>(),
+              )..init(),
+          update: (ctx, noteRepo, productRepo, historyRepo, vm) {
+            vm ??= NotesViewModel(noteRepo, productRepo, historyRepo);
             vm.replaceRepository(noteRepo);
             return vm;
           },
         ),
         ProxyProvider<AppController, UsersRepository?>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreUsersRepository(companyId: app.activeCompany!.id)
               : null,
         ),
         ProxyProvider<AppController, LayoutRepository?>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreLayoutRepository(companyId: app.activeCompany!.id)
               : null,
         ),
         ProxyProvider<AppController, HistoryRepository?>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreHistoryRepository(companyId: app.activeCompany!.id)
               : null,
         ),
@@ -135,7 +150,7 @@ class SmartBarApp extends StatelessWidget {
           },
         ),
         ProxyProvider<AppController, OrdersRepository?>(
-          update: (_, app, __) => app.activeCompany != null
+          update: (context, app, previous) => app.activeCompany != null
               ? FirestoreOrdersRepository(companyId: app.activeCompany!.id)
               : null,
         ),
@@ -170,7 +185,7 @@ class SmartBarApp extends StatelessWidget {
             final repo = ctx.read<LayoutRepository?>();
             if (repo == null) return null;
             final app = ctx.read<AppController>();
-            final vm = LayoutViewModel(repo)..init(scope: 'bar');
+            final vm = LayoutViewModel(repo);
             vm.applyPermissionContext(
               snapshot: app.permissionSnapshot(app.permissions),
               service: app.permissions,
@@ -180,7 +195,7 @@ class SmartBarApp extends StatelessWidget {
           update: (ctx, repo, app, vm) {
             if (repo == null) return null;
             vm ??= LayoutViewModel(repo);
-            vm.init(scope: 'bar');
+            vm.replaceRepository(repo);
             vm.applyPermissionContext(
               snapshot: app.permissionSnapshot(app.permissions),
               service: app.permissions,

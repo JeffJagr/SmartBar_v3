@@ -54,3 +54,153 @@ Entries are chronological, newest at bottom.
 - Orders UX: product rows now show shopping-cart badge with qty in active orders; AppBar shows red badge for pending/confirmed orders and navigates to Orders on tap. Snackbars after order creation were already in place.
 
 - Order receive flow: marking an order as received now increments warehouse quantities, shows a snackbar, and writes history entries (order_received) per product. OrdersViewModel accepts optional HistoryRepository; DI updated.
+- Relaxed model constructors for safety: Company and OrderModel now default createdAt to DateTime.now() when omitted, preventing missing-argument errors during instantiation while still stamping creation time.
+- Staff login hardened: client hashes PINs with SHA-256 (companyCode salt) before lookup, legacy plaintext kept as fallback; Firestore rules now expose read-only staffPins for signed-in users and owner-only writes; crypto dep added (run flutter pub get).
+- Staff PIN verification moved server-side: new callable verifyStaffPin hashes companyCode::PIN and returns staff session data; client AuthService now calls the function and no longer queries Firestore directly. Added backfill_staff_pin_hashes admin endpoint (token-protected) to populate pinHash for legacy docs. Updated dependencies: cloud_functions/crypto in app, firebase-admin in functions.
+- Added functions target to firebase.json (source=functions) so firebase deploy --only "functions" works after the accidental overwrite.
+- Staff login now falls back to client-side hashed Firestore lookup if the callable is unavailable (useful on the free plan); AuthService reintroduced Firestore+crypto hashing while still preferring the verifyStaffPin callable when deployed.
+- Hardened to Blaze-only flow: AuthService now requires the verifyStaffPin callable (no Firestore fallback); Firestore rules deny direct staffPins reads (only owner/manager write).
+- Rebuilt functions/main.py with lazy Firestore init, callable verifyStaffPin hashes PINs and strips plaintext, backfill endpoint also removes legacy pin fields.
+- History logging added for inventory actions: restock hints set/cleared, quantity updates, transfers to bar, product add/update/delete now write HistoryEntry; InventoryViewModel wired with HistoryRepository. History screen now renders a basic list of entries (with action/actor/time) instead of placeholder.
+- History UI polished: filters by action chip, refresh, relative timestamps, details chips, and backfilled HistoryViewModel filtering/refresh logic.
+- Product form now supports selecting existing groups via chips and creating new groups inline; group creation uses a visible color palette and saves group metadata. Group management sheet updated with palette selection (no hex typing) and color handling.
+- Orders UX fixes: add-line guard when inventory empty, default qty=1, safer dropdown fallback, bullet formatting; order create button disables without products. Cart icon now switches to Orders without popping the route.
+- Orders screen rebuilt (fixed bad characters): safe nullable OrdersViewModel usage, clean item bullets, removable lines, and defensive dropdown/quantity handling to avoid crashes when adding products.
+- Inventory list now shows active order badges and quick Order/Reorder bottom sheet (with permission checks and duplicate-order confirmation), so ordered items are marked inline. Cart icon shows a pending dot for unconfirmed orders. Hint badge icon switched to a lightbulb. OrdersViewModel clears stale errors before actions.
+- Firestore rules expanded to allow order counter meta, history, notes, and staffSessions writes for signed-in users; should stop order creation permission errors.
+- Firestore rules now include /groups (read for all, write for manager/owner) to keep group creates/updates from failing silently.
+- FirestoreService now reads products/orders/history under companies/{companyId}/..., matching our rules and repos to stop permission-denied reverts when adding items or orders.
+- Firestore rules temporarily relaxed: products and groups can now be created/updated/deleted by any signed-in user (was manager/owner only) to stop permission-denied reverts while roles are being hydrated. TODO tighten once roles are synced.
+- Firestore rules further relaxed: company users and orders update/delete allowed for any signed-in user to unblock staff role edits and order confirm/receive flows. TODO tighten once roles are reliably stored.
+- Firestore rules fully relaxed for now: company catch-all read/write for any signed-in user; staffPins and global users also open. This unblocks order confirm/receive and staff role changes while we debug role storage.
+- Built missing screens: Restock (low/hint items with hint controls and quick order), Statistics (counts for products/low/hints/orders), Print/Export (inventory CSV copy to clipboard preview).
+- Knocked out TODOs: refresh section now reattaches streams; company create shows invite-teammate prompt; staff login has help CTA; added refreshActiveCompany helper.
+- Added quick notes: restock list shows low/hint items only; rules file marks temporary catch-all/staffPins relax for later tightening.
+- Permissions UX: Users list now shows roles/allowed actions; tap to edit role/active status and toggle friendly permission labels; add user uses same picker. Users repo updates global /users when role/permissions change.
+- Permission hydration: AppState now fetches company-scoped user role/permissions on company attach for accurate UI gating.
+- History UI improved: search + quick time filters, colored action chips, DD/Mon/YY HH:MM timestamps, details chips styled, filters apply locally.
+- Orders UI: search by order #/creator/products, time filter, formatted timestamps (no seconds).
+- Tightened Firestore rules back to role-based (manager/owner for writes; staff can create orders; staffPins locked; global /users scoped to self).
+- Cleaned async-context warnings and moved items-to-group flow to use mounted guards; adjust sheet and notes dialogs now safe.
+- Orders screen now shows consistent DD/Mon/YY HH:MM timestamps for confirmations (removed raw DateTime print) and cleaned the search placeholder text.
+- Fixed analyzer errors: Clipboard import/usage in Restock screen, safe messenger use, and consistent post-await context guards across history, inventory list, restock hint, and warehouse flows.
+- Cleaned warehouse layout warnings (removed unused helpers, updated drag callbacks, modern surface colors).
+- Resolved flutter analyze warnings: tightened async context guards in warehouse flows, pre-fetched providers to avoid context after awaits, and cleaned drag target null check. Analyze now passes cleanly.
+- Added CSV export buttons on Bar and Warehouse lists (copied with badges intact), including order-qty columns; imports/clipboard handling updated.
+- Tightened Firestore rules to check company membership/manager/owner (orders/history/notes/groups/products/users/meta), kept staffSessions create open for auth; owners now auto-added to company users for permission hydration.
+- Expanded Statistics: time-range selector (today/7d/30d/all), current vs previous period comparison, and summary/products CSV export with cleaned text.
+- Company settings now has cards for plan info, notifications toggles, and data export helpers (copy company ID/code), with copy actions for code.
+- Restock: added select-all for flagged items and bulk transfer uses cached messenger; history already logged via InventoryViewModel.
+- Staff sign-in now stamps company user records (role/permissions/displayName) and global profile with permissions; hydration aligns with tightened rules.
+- Staff login now consumes role/permissions from verifyStaffPin, hydrates company by ID, and writes company user records for staff; added Firestore fetchCompanyById helper.
+- Staff auth now surfaces a clear error if Anonymous sign-in is disabled (firebase_auth/admin-restricted-operation), prompting enabling Anonymous in Firebase Auth.
+- Updated staff creation form to only require display name + 4-6 digit PIN (email optional) and removed password/auth user creation; staff login stays PIN-based.
+- Staff creation now seeds staffPins with pinHash (business ID used as code), role, permissions, displayName; added shared pin_hasher util; user creation remains PIN-only.
+- Added staff PIN fallback: if verifyStaffPin callable fails, client looks up hashed PIN in Firestore (staffPins); enabled signed-in read of staffPins (hashed only).
+- Staff auth: callable errors now fall back to Firestore pinHash/legacy pin lookup; added legacy backfill. staffPins creation uses companyCode (business ID) fetched from company doc. Function still primary path.
+- Enforced Business ID: company creation now requires an explicit business code (min 4 chars, uppercased) with uniqueness check; staff PIN seeding and logins use that code.
+- Permission chips in user edit sheet now update immediately (StatefulBuilder).
+- Firestore rules now allow product updates for staff with permissions (adjustQuantities/editProducts/transferStock), enabling warehouse?bar transfers when flags are set.
+- Permission chips restyled with choice-chip + icons for clearer selection feedback in user management.
+- Fixed staff permission persistence: company user doc no longer overwritten on login; permissions now rehydrated from company user record; authMap/staffSessions still written for membership.
+- Permission hydration now checks company user records by staffId first (then auth uid), so staff permission edits take effect in UI/actions.
+- User role defaults wired: add/edit sheets now reset permissions per role (Owner all, Manager almost all, Staff gets adjust/transfer/order/receive/hint/notes), with live chip updates.
+- Firestore rules now resolve company user via authMap->staffId, so staff permissions/roles apply even when auth uid differs from staffId; product writes respect those flags.
+- Updating roles/permissions now also updates staffPins to keep Cloud Function/FireStore fallback in sync with UI changes.
+- Added default permission fallback in AppState (per role) so staff/manager capabilities apply even when company user flags are empty; permission snapshot now uses these defaults.
+- Rules now fall back to roles/permissions from authMap or staffSessions when company user doc is missing; manager/member checks use effectiveRole/permissions for staff auth.
+- Staff login now writes company user records under both staffId and authUid and hydrates permissions from either to ensure flags apply; authMap/staffSessions remain for membership.
+- Normalized permissions to the auth UID: sign-in now writes company users under authUid, updates propagate to company users/users/staffPins, and rules resolve via authMap/company users for the signed-in UID.
+- Simplified permissions to auth UID: staff sign-in now uses authUid as canonical user id, writes company user/authMap/staffSessions for that uid, and hydrates perms from that doc. Updates propagate to company users/users/staffPins.
+- Temporarily relaxed Firestore rules: any company member can create/update/delete products and orders to unblock staff transfers/adjustments while permission plumbing is stabilized.
+- Restored strict rules: writes require manager or explicit permissions (editProducts/adjustQuantities/transferStock; confirm/receive for orders); effectivePermissions resolves from company user/authMap/staffSessions.
+- Warehouse screen now respects permission snapshots for group management (no owner-only hardcode) and cleans up unused owner flag.
+- Restock screen shows transfer-to-bar buttons (per-item and bulk) when permission allows, with validation so staff can move stock from warehouse to bar.
+- Fixed warehouse screen permission gating: pass canAdjust into item tiles and removed owner-only gating, enabling transfer/edit controls for permitted staff.
+- Restock screen: added mounted check and kept new transfer buttons; lints now clean (flutter analyze passes).
+- Staff login no longer creates a new company user doc on every sign-in: we now write the company user using the stable staffId (from Cloud Function) and map the ephemeral authUid via authMap, preventing duplicate staff rows in user management.
+- Staff login now writes the global user profile using the stable staffId (not the ephemeral auth UID) and stores that id in the company user doc to prevent duplicate staff records on each login.
+- Added tools/dedupe_staff.js: a dry-run/apply script to merge duplicate staff records by stable staffId (merges permissions/role/displayName, deletes authUid-created duplicates, updates staffPins/users/company users).
+- Users screen now shows an audit-friendly card (role chip, active status color, permission summary from role defaults + overrides, and staff ID), uses effective permissions for display/edit, and keeps todo for pagination.
+- Clearing restock hints automatically when transferring warehouse -> bar (in-memory and Firestore repos) so hint badges disappear after a successful move.
+- Restock hints now decrement by the transferred quantity (e.g., hint 20 minus transfer 5 -> 15); hints clear only when fully satisfied. Applied in both in-memory and Firestore transfer logic.
+- Notes screen now enforces add-note permission: add buttons hidden/blocked without addNotes, and saves use the guarded entry point.
+- PermissionService now respects flags for adjustQuantities/transferStock (no automatic staff bypass), allowing owners to disable these actions for specific staff if needed.
+- HomeScreen now reapplies permission snapshots to InventoryViewModel (instead of owner-only), so adjust/transfer/edit buttons truly follow permissions; Notes VM still sets delete rights via isOwner.
+- Orders screen hides the new-order FAB and blocks order creation when createOrders is disabled, with a clear snackbar.
+- AdjustQuantitySheet adds sliders alongside +/- and numeric input (with max from barMax/warehouseTarget), clamps values, and accepts barMax/warehouseTarget params.
+- Adjust shortcuts: added inline adjust icon next to product names in Bar and Warehouse; adjust buttons now pass capacity targets to slider sheet.
+- Adjust sheet UI polish: shows current/target (value/max) beside labels, slider uses capped divisions for smoother control.
+- Adjust sheet sliders now include tick-bar visual and color feedback (green?orange?red as you approach max), plus value/max inline.
+- Adjust slider color scale reversed: low (<50%) shows red, mid orange, high near max green.
+- Added volume-tracking options to products (trackVolume, unitVolumeMl, minVolumeThresholdMl) with UI toggle/fields in product form; low-stock logic respects volume thresholds; adjust sliders already use provided targets.
+- Product form: added volume tracking toggle + unitVolumeMl/minVolumeThresholdMl fields, and a 'Track warehouse stock' toggle to avoid false low warnings when bar-only.
+- Low-stock logic now uses volume thresholds when trackVolume is on (converts quantities via unitVolumeMl) and ignores warehouse lows if trackWarehouse is off.
+- Adjust sheet still clamped and now supports ml display via new product fields; bar/warehouse adjust shortcuts pass volume/warehouse-tracking info.
+- Adjust sheet now shows ml totals when volume tracking is on (unitVolumeMl), and accepts trackVolume flag; bar/warehouse adjust shortcuts pass these flags.
+- Adjust sheet hides warehouse row when trackWarehouse is off; ml line still shown for volume-tracked products; adjust shortcuts pass trackWarehouse flag.
+- Bar/Warehouse cards now show 'Bar only' badge when warehouse tracking is off, and bar/warehouse lines include ml equivalents for volume-tracked items.
+- Adjust sheet: for volume-tracked items, added dedicated ml controls (stepper, text input, slider) with color/tick bar; warehouse row hides when trackWarehouse=false; bar/warehouse labels show ml equivalents and 'Bar only' when applicable.
+- Adjust sheet now treats volume-tracked products as ml directly (separate ml controls; bar qty not tied to units), while non-volume products keep unit-based controls.
+- Volume tracking refinement: added barVolumeMl/warehouseVolumeMl fields; adjust sheet edits ml independently from bottle counts; Inventory repo/updateQuantities support ml fields; low ml adjustments no longer alter bottle counts.
+- Orders UI polish: pending status chip highlights if user can confirm; confirm/receive buttons upgraded (filled/outlined) and gated by permissions; snackbar copy retained.
+- Warehouse UI: hides transfer-to-bar action for bar-only items (trackWarehouse=false), keeping restock hints/ml logic intact.
+- Notifications: added per-user notification preferences screen (role-aware defaults/labels) and wired it into Home navigation; company/user docs store prefs for later delivery hooks.
+- Notification prefs now sync FCM topics per company and persist token; saving toggles subscribes/unsubscribes accordingly.
+- Cloud Functions: added send_company_notification callable (token-protected) to broadcast to company/topic c_<companyId>_<event> for notification prefs; firebase_admin added to functions requirements.
+- Added per-screen export/share menus for Orders, History, and Inventory (CSV or printable text) with clipboard copy.
+- Inventory/Warehouse UI refreshed: consistent product cards with colored group dots, bar-only badges, ml lines, and improved chips/buttons; inventory cards now show volume and warehouse tracking inline.
+- Low markers now show at threshold (<=) on individual product rows, matching group-level low indicators in Bar/Warehouse.
+- Added inline low-stock dots on product rows in Bar and Warehouse to mirror group low markers.
+- Added 50% stock markers: amber dots on products and group chips counting half-full items; bar uses bar fill, warehouse uses warehouse fill (ml-aware).
+- Tuned stock markers: low triggers below 50% (or threshold), half shows between 50-70% fill (ml-aware); group chips now count half-full items accordingly.
+- Warehouse low marker simplified: only ratio-based low (<50%) remains; hints/half markers unchanged.
+- Warehouse group low badges now consider warehouse fill/threshold only (or bar for bar-only items), so minor bar shortages no longer mark the group as low.
+- Added screen-change animation: Home body now uses AnimatedSwitcher keyed by section for a visible transition when switching screens.
+- Added on-page section label: every screen now shows a styled pill with icon/title for the current section (overlaid via AnimatedSwitcher).
+- Section label repositioned: styled banner now sits above content (no overlay on filters/search) with icon/title for the current screen.
+- Removed sort dropdowns from Bar/Warehouse filters and fixed overflow; kept default sort static.
+- Removed Expand all button from Warehouse to prevent mobile overflow; verified with analyzer.
+- Product form UI refreshed: sectioned cards (Basics/Tracking/Targets), icon-leading fields, tidy switches, and grouped quantity rows for a clearer, friendlier add/edit experience.
+- Group manager UI revamped: safe-area padded card layout, animated color chips, full-width save + reload, and card-styled group list to avoid overflow and improve readability.
+- Group manager: constrained height + scroll to prevent bottom overflow; default color now saved (palette first) and edit picks existing color for consistency with Bar/Warehouse badges.
+- Product save now stores groupColor (using selected or existing group hex) so colors match in bar/warehouse; group manager scroll padding adds inset to avoid bottom overflow.
+- Group manager redesign: top card only for new group; editing happens inline per row with popup color picker; saving/editing also migrates colors to existing products. Keyboard-safe scroll; analyzer clean.
+- Group manager UX: create card uses 'Create'; per-row inline editing with palette and 'Save changes' saves name+color and migrates colors to products; bottom inset scroll retained.
+- Group manager rebuilt cleanly: create card on top; inline rows let you edit name + color with per-row Save; saves migrate colors/names to products; scrolling constrained to avoid overflow.
+- Added more elegant colors to group palette (violet/blue/jade/saffron/wine/silver/midnight) for better variety.
+- Orders UI/logic upgraded: cancel/edit before confirmation; partial receive with per-item quantities + comment and display of received/ordered, attention flag, comment, and confirmed/received by; added canceled status and partial receipt handling.
+- Orders UI now shows partial receipts: received vs ordered per item with warning, note (or '(no comment)'), receiver name on received chip, and a 'Receive remaining' action to finish partial deliveries.
+- Orders: warning icon now appears next to order number for partial receipts; confirmed/received chips show user names.
+- Orders UI: warning icon next to order number for partial receipts; confirm/receive chips now show who did it.
+- Suppliers feature: supplier repo fixed, screen shows product counts, add/edit/delete uses company repo; product form can pick supplier; order creation/confirmation prompts for supplier (list or manual), saved to orders/export/history.
+- Added supplier-aware filters for History (dropdown + detail filter) and Statistics (supplier filter, per-product supplier display, CSV includes supplier). Statistics strings cleaned.
+- Fixed analyzer warnings in Orders screen: mounted checks after async gaps and cleaned supplier controller dispose.
+- Order items now carry supplierName; new orders let you pick supplier per line (default from product) including 'Store purchase'; Orders screen groups lines by supplier inside each order.
+- Orders: received-by now captured for full/partial receipts and displayed on order cards.
+- Confirm modal now seeds supplier from order or first item supplier when present; manual prefill matches product supplier.
+- Unified ‘Add to order’ flow: Bar, Warehouse, Inventory, and Restock now open the shared add_to_order_sheet with suggested qty from bar targets/restock hints, supplier badges, existing-order selection, and product/supplier search.
+- add_to_order_sheet fixes: removed deprecated value usage, replaced missing copyWith call, added mounted guard after async fetch, simplified trailing badge logic; analyzer now clean.
+- Orders confirm flow now handles mixed suppliers: shows detected supplier chips, lets you keep per-line suppliers, or optionally set a single supplier/manual only when desired; mixed orders display as 'Mixed suppliers' on cards.
+- Orders confirm flow refined: managers can keep mixed suppliers, or apply a chosen/manual supplier only to empty lines; mixed orders show a 'Supplier TBD' badge when lines lack suppliers; order header shows Mixed/TBD appropriately.
+- Orders creation no longer asks for supplier; preferred supplier auto-attaches if set, otherwise left TBD for managers.
+- Confirm modal now shows per-line preferred supplier dropdowns (with manual/none options), badges TBD, and updates only missing lines; order supplier is set only if all lines align.
+- Low-stock detection for volume-tracked items now uses actual bar/warehouse ml (barVolumeMl/warehouseVolumeMl) with thresholds, so ml-based lows trigger correctly.
+- Adjust sheet UI refactored to avoid overflow: slider/stepper/text fields in compact rows with badges; controllers keyed; analyzer clean.
+- Registration hardened: email/password validated (format + length), friendly errors surfaced; owner profile creation wrapped with auth error handling.
+- UsersViewModel TODO resolved: staff PIN doc handled in FirestoreUsersRepository; addUser now notes that pins are written for PIN login.
+- Notes TODOs: added search/tag filter + show-done toggle using NotesViewModel.filteredNotes; empty state added; chip helper implemented.
+- Notes repos TODOs: in-memory filter matches case-insensitive tags; Firestore filter documents index hint; notifications TODO remains open.
+- Notes notifications: FirestoreNoteRepository now writes a notifications doc for note add/done events (best-effort), keeping filters case-insensitive; index hint documented.
+- Inventory TODO placeholder remains (supplier linkage/export/restock integration) — left unchanged this round.
+- Inventory: added low-stock detection logging (bar volume/count thresholds) when quantities drop; Product.empty factory added; unused watcher removed; analyzer clean.
+- Clarified macOS Firebase config message (unsupported unless added via FlutterFire).
+- Inventory: low-stock detection now also writes a notifications doc under companies/{id}/notifications (best-effort) when an item first drops below threshold; analyzer clean.
+- Inventory: added supplier update + CSV export methods to repos (in-memory + Firestore); groundwork for supplier linkage/export, analyzer clean.
+- Inventory export hook added: InventoryViewModel exposes exportCsv via repository (in-memory & Firestore support suppliers).
+- Export/share added: Bar and Warehouse now offer CSV/printable export (supplier included) via repo export; printable shows tidy table-like text with bar/wh and ml when tracked.
+- TODOs triaged: restock hint change now notes future FCM push; remaining TODOs consolidated for later (pagination, invite flow, etc.).
+- Restock hints now emit notifications docs (type restock_hint) on set/clear alongside history logging; TODO removed.
+- TODO tidy: clarified inventory fallbacks/notifications (low-stock and restock hint notifications now documented), supplier/order flow integration noted; notes notifications handled via repo; demo seed comment updated.
+- Invite flow: added AppBar invite button that copies a ready-to-send Business ID/PIN onboarding message to clipboard.
+- Drawer cleanup: removed Invite Partner Owner entry; invites now live in Company Settings only.

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/product.dart';
+import '../utils/firestore_error_handler.dart';
 
 /// Abstraction for inventory data access.
 abstract class InventoryRepository {
@@ -14,6 +15,8 @@ abstract class InventoryRepository {
     required String itemId,
     int? barQuantity,
     int? warehouseQuantity,
+    int? barVolumeMl,
+    int? warehouseVolumeMl,
   });
   Future<void> addWarehouseStock({
     required String itemId,
@@ -25,8 +28,13 @@ abstract class InventoryRepository {
   });
   Future<void> addProduct(Product product);
   Future<void> updateProduct(String itemId, Map<String, dynamic> data);
+  Future<void> updateSupplier({
+    required String itemId,
+    String? supplierId,
+    String? supplierName,
+  });
+  Future<String> exportCsv();
   Future<void> deleteProduct(String itemId);
-  // TODO: add supplier linkage, restock transfer operations, and export support.
 }
 
 /// In-memory stub implementation. Replace with Firestore-backed repo later.
@@ -65,12 +73,16 @@ class InMemoryInventoryRepository implements InventoryRepository {
     required String itemId,
     int? barQuantity,
     int? warehouseQuantity,
+    int? barVolumeMl,
+    int? warehouseVolumeMl,
   }) async {
     _items = _items.map((p) {
       if (p.id == itemId) {
         return p.copyWith(
           barQuantity: barQuantity ?? p.barQuantity,
           warehouseQuantity: warehouseQuantity ?? p.warehouseQuantity,
+          barVolumeMl: barVolumeMl ?? p.barVolumeMl,
+          warehouseVolumeMl: warehouseVolumeMl ?? p.warehouseVolumeMl,
         );
       }
       return p;
@@ -112,6 +124,9 @@ class InMemoryInventoryRepository implements InventoryRepository {
           companyId: p.companyId,
           name: (data['name'] as String?) ?? p.name,
           group: (data['group'] as String?) ?? p.group,
+          groupId: (data['groupId'] as String?) ?? p.groupId,
+          groupColor: (data['groupColor'] as String?) ?? p.groupColor,
+          groupMetadata: (data['groupMetadata'] as Map<String, dynamic>?) ?? p.groupMetadata,
           subgroup: p.subgroup,
           unit: (data['unit'] as String?) ?? p.unit,
           barQuantity: (data['barQuantity'] as int?) ?? p.barQuantity,
@@ -123,6 +138,12 @@ class InMemoryInventoryRepository implements InventoryRepository {
           flagNeedsRestock: p.flagNeedsRestock,
           minimalStockThreshold:
               (data['minimalStockThreshold'] as int?) ?? p.minimalStockThreshold,
+          trackVolume: (data['trackVolume'] as bool?) ?? p.trackVolume,
+          unitVolumeMl: (data['unitVolumeMl'] as int?) ?? p.unitVolumeMl,
+          minVolumeThresholdMl: (data['minVolumeThresholdMl'] as int?) ?? p.minVolumeThresholdMl,
+          trackWarehouse: (data['trackWarehouse'] as bool?) ?? p.trackWarehouse,
+          barVolumeMl: (data['barVolumeMl'] as int?) ?? p.barVolumeMl,
+          warehouseVolumeMl: (data['warehouseVolumeMl'] as int?) ?? p.warehouseVolumeMl,
         );
       }
       return p;
@@ -146,9 +167,12 @@ class InMemoryInventoryRepository implements InventoryRepository {
       if (p.id == itemId) {
         final newWh = (p.warehouseQuantity - quantity).clamp(0, 1 << 30);
         final newBar = p.barQuantity + quantity;
+        final newHint = ((p.restockHint ?? 0) - quantity).clamp(0, 1 << 30);
         return p.copyWith(
           warehouseQuantity: newWh,
           barQuantity: newBar,
+          // Reduce hint by the transferred amount; clear it when satisfied.
+          restockHint: newHint,
         );
       }
       return p;
@@ -170,7 +194,7 @@ class InMemoryInventoryRepository implements InventoryRepository {
   }
 
   List<Product> _seed() {
-    // TODO: replace with Firestore fetch per company.
+    // Fallback demo seed used only when no Firestore data is available.
     return [
       Product(
         id: 'i1',
@@ -202,6 +226,34 @@ class InMemoryInventoryRepository implements InventoryRepository {
   void dispose() {
     _controller.close();
   }
+
+  @override
+  Future<void> updateSupplier({
+    required String itemId,
+    String? supplierId,
+    String? supplierName,
+  }) async {
+    _items = _items.map((p) {
+      if (p.id == itemId) {
+        return p.copyWith(
+          supplierId: supplierId,
+          supplierName: supplierName,
+        );
+      }
+      return p;
+    }).toList();
+    _controller.add(_items);
+  }
+
+  @override
+  Future<String> exportCsv() async {
+    final buffer = StringBuffer('Name,Group,BarQty/Max,WHQty/Target,Supplier\n');
+    for (final p in _items) {
+      buffer.writeln(
+          '${p.name},${p.group},${p.barQuantity}/${p.barMax},${p.warehouseQuantity}/${p.warehouseTarget},${p.supplierName ?? ''}');
+    }
+    return buffer.toString();
+  }
 }
 
 /// Firestore implementation scoped by company.
@@ -214,13 +266,21 @@ class FirestoreInventoryRepository implements InventoryRepository {
   final FirebaseFirestore _firestore;
   final String companyId;
 
+  String get path => _col.path;
+
   CollectionReference<Map<String, dynamic>> get _col =>
       _firestore.collection('companies').doc(companyId).collection('products');
 
   @override
-  Future<List<Product>> getItems() async {
-    final snap = await _col.orderBy('name').get();
-    return snap.docs.map((d) => Product.fromMap(d.id, d.data())).toList();
+  Future<List<Product>> getItems() {
+    return FirestoreErrorHandler.guard(
+      operation: 'getItems',
+      path: path,
+      run: () async {
+        final snap = await _col.orderBy('name').get();
+        return snap.docs.map((d) => Product.fromMap(d.id, d.data())).toList();
+      },
+    );
   }
 
   @override
@@ -232,44 +292,89 @@ class FirestoreInventoryRepository implements InventoryRepository {
 
   @override
   Future<void> updateRestockHint(String itemId, int? hintValue) {
-    return _col.doc(itemId).update({'restockHint': hintValue});
+    return FirestoreErrorHandler.guard(
+      operation: 'updateRestockHint',
+      path: '$path/$itemId',
+      run: () => _col.doc(itemId).update({'restockHint': hintValue}),
+    );
   }
 
   @override
   Future<void> clearRestockHint(String itemId) => updateRestockHint(itemId, 0);
-  // TODO: add stock movement history logging and low-stock notifications via FCM.
 
   @override
   Future<void> updateQuantities({
     required String itemId,
     int? barQuantity,
     int? warehouseQuantity,
+    int? barVolumeMl,
+    int? warehouseVolumeMl,
   }) {
-    final data = <String, dynamic>{};
-    if (barQuantity != null) data['barQuantity'] = barQuantity;
-    if (warehouseQuantity != null) data['warehouseQuantity'] = warehouseQuantity;
-    return _col.doc(itemId).update(data);
+    return FirestoreErrorHandler.guard(
+      operation: 'updateQuantities',
+      path: '$path/$itemId',
+      run: () {
+        final data = <String, dynamic>{};
+        if (barQuantity != null) data['barQuantity'] = barQuantity;
+        if (warehouseQuantity != null) data['warehouseQuantity'] = warehouseQuantity;
+        if (barVolumeMl != null) data['barVolumeMl'] = barVolumeMl;
+        if (warehouseVolumeMl != null) data['warehouseVolumeMl'] = warehouseVolumeMl;
+        return _col.doc(itemId).update(data);
+      },
+    );
   }
 
   @override
   Future<void> addProduct(Product product) {
-    return _col.add(product.toMap());
+    return FirestoreErrorHandler.guard(
+      operation: 'addProduct',
+      path: path,
+      run: () => _col.add(product.toMap()),
+    );
   }
 
   @override
   Future<void> updateProduct(String itemId, Map<String, dynamic> data) {
-    return _col.doc(itemId).update(data);
+    return FirestoreErrorHandler.guard(
+      operation: 'updateProduct',
+      path: '$path/$itemId',
+      run: () => _col.doc(itemId).update(data),
+    );
+  }
+
+  @override
+  Future<void> updateSupplier({
+    required String itemId,
+    String? supplierId,
+    String? supplierName,
+  }) {
+    return FirestoreErrorHandler.guard(
+      operation: 'updateSupplier',
+      path: '$path/$itemId',
+      run: () => _col.doc(itemId).update({
+        'supplierId': supplierId,
+        'supplierName': supplierName,
+      }),
+    );
   }
 
   @override
   Future<void> deleteProduct(String itemId) {
-    return _col.doc(itemId).delete();
+    return FirestoreErrorHandler.guard(
+      operation: 'deleteProduct',
+      path: '$path/$itemId',
+      run: () => _col.doc(itemId).delete(),
+    );
   }
 
   @override
   Future<void> addWarehouseStock({required String itemId, required int delta}) async {
     if (delta == 0) return;
-    await _col.doc(itemId).update({'warehouseQuantity': FieldValue.increment(delta)});
+    await FirestoreErrorHandler.guard(
+      operation: 'addWarehouseStock',
+      path: '$path/$itemId',
+      run: () => _col.doc(itemId).update({'warehouseQuantity': FieldValue.increment(delta)}),
+    );
   }
 
   @override
@@ -278,24 +383,57 @@ class FirestoreInventoryRepository implements InventoryRepository {
     required int quantity,
   }) async {
     if (quantity <= 0) return;
-    await _firestore.runTransaction((txn) async {
-      final docRef = _col.doc(itemId);
-      final snap = await txn.get(docRef);
-      if (!snap.exists) {
-        throw StateError('Product not found');
-      }
-      final data = snap.data()!;
-      final currentBar = (data['barQuantity'] as num?)?.toInt() ?? 0;
-      final currentWh = (data['warehouseQuantity'] as num?)?.toInt() ?? 0;
-      if (currentWh < quantity) {
-        throw StateError('Not enough in warehouse');
-      }
-      final newWh = currentWh - quantity;
-      final newBar = currentBar + quantity;
-      txn.update(docRef, {
-        'warehouseQuantity': newWh,
-        'barQuantity': newBar,
-      });
-    });
+    await FirestoreErrorHandler.guard(
+      operation: 'transferToBar',
+      path: '$path/$itemId',
+      run: () => _firestore.runTransaction((txn) async {
+        final docRef = _col.doc(itemId);
+        final snap = await txn.get(docRef);
+        if (!snap.exists) {
+          throw FirebaseException(
+            plugin: 'cloud_firestore',
+            code: 'not-found',
+            message: 'Product not found',
+          );
+        }
+        final data = snap.data()!;
+        final currentBar = (data['barQuantity'] as num?)?.toInt() ?? 0;
+        final currentWh = (data['warehouseQuantity'] as num?)?.toInt() ?? 0;
+        final currentHint = (data['restockHint'] as num?)?.toInt() ?? 0;
+        if (currentWh < quantity) {
+          throw FirebaseException(
+            plugin: 'cloud_firestore',
+            code: 'failed-precondition',
+            message: 'Not enough in warehouse',
+          );
+        }
+        final newWh = currentWh - quantity;
+        final newBar = currentBar + quantity;
+        final newHint = (currentHint - quantity);
+        txn.update(docRef, {
+          'warehouseQuantity': newWh,
+          'barQuantity': newBar,
+          // Reduce the restock hint by transferred amount; clear when satisfied.
+          if (currentHint > 0) 'restockHint': newHint > 0 ? newHint : 0,
+        });
+      }),
+    );
+  }
+
+  @override
+  Future<String> exportCsv() {
+    return FirestoreErrorHandler.guard(
+      operation: 'exportCsv',
+      path: path,
+      run: () async {
+        final items = await getItems();
+        final buffer = StringBuffer('Name,Group,BarQty/Max,WHQty/Target,Supplier\n');
+        for (final p in items) {
+          buffer.writeln(
+              '${p.name},${p.group},${p.barQuantity}/${p.barMax},${p.warehouseQuantity}/${p.warehouseTarget},${p.supplierName ?? ''}');
+        }
+        return buffer.toString();
+      },
+    );
   }
 }

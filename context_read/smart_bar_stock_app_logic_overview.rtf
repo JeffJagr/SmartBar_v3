@@ -1,0 +1,910 @@
+{\rtf1\ansi\deff3\adeflang1025
+{\fonttbl{\f0\froman\fprq2\fcharset0 Times New Roman;}{\f1\froman\fprq2\fcharset2 Symbol;}{\f2\fswiss\fprq2\fcharset0 Arial;}{\f3\froman\fprq2\fcharset0 Liberation Serif{\*\falt Times New Roman};}{\f4\fswiss\fprq2\fcharset0 Liberation Sans{\*\falt Arial};}{\f5\froman\fprq2\fcharset0 Arial;}{\f6\fnil\fprq2\fcharset0 Microsoft YaHei;}{\f7\fnil\fprq2\fcharset0 Lucida Sans;}{\f8\fswiss\fprq0\fcharset0 Lucida Sans;}}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue255;\red0\green255\blue255;\red0\green255\blue0;\red255\green0\blue255;\red255\green0\blue0;\red255\green255\blue0;\red255\green255\blue255;\red0\green0\blue128;\red0\green128\blue128;\red0\green128\blue0;\red128\green0\blue128;\red128\green0\blue0;\red128\green128\blue0;\red128\green128\blue128;\red192\green192\blue192;}
+{\stylesheet{\s0\snext0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052 Normal;}
+{\s15\sbasedon0\snext16\rtlch\af7\afs28 \ltrch\hich\af4\loch\sb240\sa120\keepn\f4\fs28\dbch\af6 Heading;}
+{\s16\sbasedon0\snext16\loch\sl276\slmult1\sb0\sa140 Body Text;}
+{\s17\sbasedon16\snext17\rtlch\af8 \ltrch List;}
+{\s18\sbasedon0\snext18\rtlch\af8\afs24\ai \ltrch\loch\sb120\sa120\noline\fs24\i caption;}
+{\s19\sbasedon0\snext19\rtlch\af8 \ltrch\loch\noline Index;}
+}{\*\generator LibreOffice/25.2.5.2$Windows_X86_64 LibreOffice_project/03d19516eb2e1dd5d4ccd751a0d6f35f35e08022}{\info{\creatim\yr0\mo0\dy0\hr0\min0}{\revtim\yr2025\mo12\dy16\hr18\min16}{\printim\yr0\mo0\dy0\hr0\min0}}{\*\userprops}\deftab720
+\hyphauto1\viewscale100\formshade\paperh15840\paperw12240\margl1440\margr1440\margt1440\margb1440\sectd\sbknone\sftnnar\saftnnrlc\sectunlocked1\pgwsxn12240\pghsxn15840\marglsxn1440\margrsxn1440\margtsxn1440\margbsxn1440\ftnbj\ftnstart1\ftnrstcont\ftnnar\fet\aftnrstcont\aftnstart1\aftnnrlc
+{\*\ftnsep\chftnsep}\pgndec\pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\ql\ltrpar{\hich\af5\loch\cf8\fs24\b\f5\loch
+Smart Bar Stock -- Functional and Logic Overview}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\ql\ltrpar\hich\af5\loch\cf8\fs24\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b\f5\loch
+1. Purpose and Concept}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+Smart Bar Stock is a multi-tenant inventory and order management system for bars and restaurants. It is designed to:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Track stock levels in the bar and in the warehouse.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Manage restocking flows between warehouse and bar.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Create and manage orders to suppliers.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Keep a clear history of changes and provide simple statistics.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Support multiple independent companies (bars/restaurants) in one backend.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Allow owners/managers and staff to work simultaneously from multiple devices with real-time updates.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+The key design principles are: simplicity, speed, clear separation of roles, and predictable logic (no \u226\'e2\u8364\'80\u339\'9cmagic\u226\'e2\u8364\'80\u61853\'9d behaviour).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b\f5\loch
+2. Technology Stack and Backend Architecture}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Frontend: Flutter (Dart), mobile-first UI, compiled for Android, iOS, and Web (PWA for desktop usage).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Backend: Firebase:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Firebase Auth -- owner/manager login with email + password.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Firestore -- main data storage for companies, products, groups, staff, inventory, orders, history, statistics data.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Firestore security rules -- enforce isolation between companies by companyId.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- State management: central controller / notifier (AppController / AppState) which:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Holds the current session (owner or staff).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Stores the active company (activeCompanyId).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Provides access to in-memory lists of products, groups, inventory items, orders, history entries, statistics, etc.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\b0\f5\loch
+- Subscribes to Firestore streams (.snapshots) and updates AppState on changes.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b0\f5\loch
+All business data objects include companyId and are always queried by this ID. This ensures full multi-tenancy.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\b\f5\loch
+3. Roles and Permissions}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+3.1 Owner / Manager}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Authenticates via Firebase Auth with email and password.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Can create and manage one or more companies.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- For each company can:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Configure company name and Business ID (company code).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Manage products, groups, subgroups.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Manage staff: add/edit staff members, assign roles, reset PIN codes.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Perform all inventory operations (bar, warehouse, restock, orders).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- View history and statistics.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Invite a partner owner to the same company (multi-owner scenario).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Has access to company-level settings and export/print tools.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+3.2 Staff / Worker}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Logs in using Business ID (company code) + PIN, without email/password.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Works only within one company at a time (the one linked to the Business ID).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Can:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- See bar and warehouse inventory.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Adjust bar levels via sliders / numeric input with confirmation.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Participate in restock flows (depending on role and permissions). }
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- See and work with orders (e.g., request orders, mark delivered depending on role).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Cannot change company settings, staff roles, or global configuration.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Permissions are enforced both in the UI (what is visible) and in the backend (security rules and checks in controllers).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b\f5\loch
+4. Application Flow -- Screen by Screen}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.1 Launch and Role Selection}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+When the app launches, the user sees a clean login landing screen:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- No inventory data, search, statistics, or menus are shown yet.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The screen contains only:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- A choice between two paths: \u226\'e2\u8364\'80\u339\'9cOwner / Manager\u226\'e2\u8364\'80\u61853\'9d and \u226\'e2\u8364\'80\u339\'9cStaff / Worker\u226\'e2\u8364\'80\u61853\'9d.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.2 Owner / Manager Login}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+When the user taps \u226\'e2\u8364\'80\u339\'9cOwner / Manager\u226\'e2\u8364\'80\u61853\'9d:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The app shows an email/password login form:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Email field.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Password field.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cLogin\u226\'e2\u8364\'80\u61853\'9d button.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cRegister new owner account\u226\'e2\u8364\'80\u61853\'9d button.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Registration flow:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Asks for email, password, and owner display name.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Creates a Firebase Auth user and a profile entry (with display name) in Firestore.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Optionally, immediately leads to the \u226\'e2\u8364\'80\u339\'9cCreate Company\u226\'e2\u8364\'80\u61853\'9d screen.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+After successful login:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- AppController stores currentUser.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The app navigates either to:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cMy Companies\u226\'e2\u8364\'80\u61853\'9d screen (if multiple companies are associated with the owner).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Or directly to the last-used company, if remembered.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.3 Company Selection and Creation (Owner)}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+\u226\'e2\u8364\'80\u339\'9cMy Companies\u226\'e2\u8364\'80\u61853\'9d screen:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Lists existing companies where this owner is registered (owner or manager).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- For each company shows:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Company name.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Business ID (company code).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Role of this user (Owner/Manager).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Actions:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cOpen\u226\'e2\u8364\'80\u61853\'9d -- activates this company and switches AppState.activeCompanyId.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cCreate New Company\u226\'e2\u8364\'80\u61853\'9d -- opens a company creation form.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Company creation form:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Fields:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Company name.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Business ID (company code).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Logic:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Checks that Business ID is unique (no company with same code exists).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Creates a new company document with:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- companyId,}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- companyCode,}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- primary owner (current user),}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- initial settings.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- After creation, this company becomes active and the main app UI is shown with this company selected.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.4 Staff / Worker Login}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+When the user taps \u226\'e2\u8364\'80\u339\'9cStaff / Worker\u226\'e2\u8364\'80\u61853\'9d on the landing screen:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The app shows fields:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Business ID (company code).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- PIN.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cLogin\u226\'e2\u8364\'80\u61853\'9d button.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- On login:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The app looks up the company by Business ID.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Validates the PIN against a staff member entry.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- If valid, sets:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- currentStaffMember,}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- activeCompanyId.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Navigates directly into the main app UI for that company with limited permissions.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.5 Common Layout After Login (Owner / Staff)}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Once the user is logged in and an activeCompanyId is set:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The top-level UI changes:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Top AppBar shows company context (company name) and a minimal set of icons.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Most navigation is handled via a side menu (Drawer) or a structured main menu.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Main menu structure (example):}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Company section:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Company Settings.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Switch Company.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Invite Owner/Partner (Owner only).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Operations section:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Bar.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Warehouse.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Restock.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Orders.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Analytics section:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Statistics.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- History.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Tools section:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Print/Export.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Sync/Refresh (rare, as realtime streams are the main mechanism).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Account section:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Staff Management (Owner/Manager).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Logout.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+The menu is role-aware:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Staff see only operations relevant to them.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Owners/Managers see company-level and staff management entries.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.6 Bar Screen}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: represent the \u226\'e2\u8364\'80\u339\'9cfront-of-house\u226\'e2\u8364\'80\u61853\'9d bar stock levels (bottles/components on the bar).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Layout:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- List of Groups (e.g. Whisky, Wine, Beer, Cocktails, Ingredients) with color and icon.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Each Group row:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Full-width tappable header (name, icon, color stripe, maybe count).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Tap toggles expand/collapse of that group.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Inside expanded Group:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Optional Subgroups (e.g. Bourbon, Scotch) also collapsible.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Product rows, compact by default.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Product row (collapsed state):}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Status indicator (color: green / yellow / red based on stock level).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Product name.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Optional small badges: \u226\'e2\u8364\'80\u339\'9cOn order\u226\'e2\u8364\'80\u61853\'9d, \u226\'e2\u8364\'80\u339\'9cIngredient\u226\'e2\u8364\'80\u61853\'9d, \u226\'e2\u8364\'80\u339\'9cLow\u226\'e2\u8364\'80\u61853\'9d.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Short bar quantity display.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Quick actions (if allowed): \u226\'e2\u8364\'80\u339\'9cOrder\u226\'e2\u8364\'80\u61853\'9d, \u226\'e2\u8364\'80\u339\'9cRestock\u226\'e2\u8364\'80\u61853\'9d buttons.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Product row (expanded state):}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Detailed bar quantity.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Slider representing currentBar / maxBar.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Numeric input for precise bar level.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Action to confirm changes:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- When user drags slider and releases, a dialog appears:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+\u226\'e2\u8364\'80\u339\'9cChange bar level from X to Y?\u226\'e2\u8364\'80\u61853\'9d [OK] [Cancel].}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Only on OK:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- New bar level is written to Firestore.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- History entry is created (single entry, no spam).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+All changes in the Bar screen are written under the companyId and immediately synced to other devices via Firestore streams.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.7 Warehouse Screen}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: show stock levels in the warehouse (back-of-house).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Layout:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Similar group/subgroup structure as Bar, but focused on warehouse quantities.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- More compact rows to fit more items on screen.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Product row:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Shows warehouse quantity, target max, and status (OK/Low/Critical).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- May allow editing of warehouse quantities for owner/manager.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Supports drag-and-drop reordering of products/groups, with separate drag handle (not overlapping expand arrow).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Changes to warehouse quantities are also written to Firestore and logged in history (depending on action type).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.8 Restock Screen}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: manage transfer of quantities from warehouse to bar.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Layout:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Compact list of products needing attention or selected for restock.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- For each product:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Bar current value, bar max, and warehouse availability.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cUse suggestion\u226\'e2\u8364\'80\u61853\'9d button which suggests how much to add to reach target level.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Logic:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Base variables:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- barCurrent, barMax, warehouseAvailable, requestedAdd.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- If requestedAdd > warehouseAvailable:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The app warns: \u226\'e2\u8364\'80\u339\'9cNot enough stock in warehouse. Available: X, requested: Y.\u226\'e2\u8364\'80\u61853\'9d}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- The app may clamp to available stock or require manual adjustment.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- If barCurrent + requestedAdd <= barMax (with small epsilon):}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Restock is allowed without changing max.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- If barCurrent + requestedAdd > barMax:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- A confirmation dialog appears:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+\u226\'e2\u8364\'80\u339\'9cTo fully apply this restock, max will be increased from oldMax to newMax. Proceed?\u226\'e2\u8364\'80\u61853\'9d}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- On OK: max is adjusted to the minimal value covering the new level.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- On Cancel: restock is not applied.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Restock operations update both warehouse and bar quantities and create history entries.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.9 Orders Screen}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: manage purchase orders to suppliers.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Layout:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- List of orders with statuses: Pending, Confirmed, Delivered (and optionally Cancelled).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Filters by status and date.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Search and order history with details.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Order creation:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- From Bar or Restock or Warehouse, user can add product to an order with a chosen quantity.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Each order line includes:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- productId, productName, type (alcohol/ingredient), companyId,}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- quantityOrdered.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Order lifecycle:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Pending \u226\'e2\u8224\'86\u8217\'92 Confirmed \u226\'e2\u8224\'86\u8217\'92 Delivered.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Confirming order:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Should never alter quantityOrdered.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Only updates status, confirmedBy, confirmedAt.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Marking as delivered:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Updates deliveredBy, deliveredAt.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- May optionally adjust warehouse stock if the app is configured that way.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Order History:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Keeps track of who created, confirmed, delivered each order.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Useful for audit and statistics.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.10 History Screen}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: chronological list of significant events.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Each HistoryEntry includes:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- companyId.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- timestamp.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- actionType: e.g. create_product, update_bar_level, update_max_level, restock, create_order, etc.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- itemName (product name) and possibly group/subgroup.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- performedById and performedByName.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- details map, e.g. oldBar: X, newBar: Y.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+UI:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Shows rows like:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cBar level for Jim Beam: 3 \u226\'e2\u8224\'86\u8217\'92 5 (by OwnerName)\u226\'e2\u8364\'80\u61853\'9d}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- \u226\'e2\u8364\'80\u339\'9cCreated product: Gin Tonic (by ManagerName)\u226\'e2\u8364\'80\u61853\'9d}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Allows filtering by date range and action type.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.11 Statistics / Analytics Screen}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: provide simple, actionable statistics.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Metrics (examples):}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- How many bar updates in current period vs previous.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- How many orders created/confirmed/delivered.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Total restocked volume.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Logic:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Period (e.g. last 7 days) vs previous period (7 days before that).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Queries History and Orders for the active company and date range.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Calculates current value, previous value, and change (absolute or percentage).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+UI:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Card per metric showing:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Current value.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Previous value.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Arrow up/down/flat and color (green/red/grey).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.12 Staff Management Screen (Owner)}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: allow owner/manager to manage staff access.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Each staff member row shows:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Staff display name.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Role (Worker, Manager).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Option to view or reset PIN.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Actions:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Edit name and role.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Regenerate and show new PIN (only once).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Activate/deactivate staff accounts.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+All changes update Firestore under the company\u226\'e2\u8364\'80\u8482\'99s staff collection.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.13 Company Settings & Invite Partner}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: configure company and invite additional owners.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Company Settings:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Change company name.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- View/Edit Business ID (if allowed).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Change owner display name.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Invite Partner Owner:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Owner can enter partner email.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- An invite is created linking partner to this company.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- When partner logs in/accepts, they gain owner/manager role in this company.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.14 Print and Export}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Purpose: send reports or printouts.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Print/Export actions can be called from Bar, Warehouse, Orders, Restock, History.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- A central Print/Export service builds a clean table (PDF or similar):}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Columns appropriate for context.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Color coding by status (OK/Low/Critical).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Export to PDF/file; file can be shared via email, messengers, etc.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+4.15 Logout and Session Handling}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- A single central logout method:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Clears currentUser/currentStaffMember.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Clears activeCompanyId.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Cancels Firestore subscriptions.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Returns to login landing.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Auto-logout timer:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- After a period of inactivity, shows a warning and then logs the user out.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b\f5\loch
+5. Core Logic and Algorithms}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+5.1 Multi-Tenant Isolation}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Every document in Firestore related to business operations includes companyId.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- All queries filter by companyId.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Security rules ensure request.auth.uid is allowed to access only company documents they belong to.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+5.2 Real-Time Sync}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- AppController subscribes to Firestore snapshots for:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Products & groups.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Inventory.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Orders.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- History (optionally limited by time).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- On snapshot update:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- AppState lists are replaced or updated.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- UI rebuilds via ChangeNotifier/ValueListenable.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Manual Sync buttons are secondary and mainly used for troubleshooting.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+5.3 Bar Level Slider Logic}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Slider represents ratio: sliderValue = barCurrent / barMax.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- When barMax changes, sliderValue is recomputed so visual position stays correct.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- When user moves slider:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Only local pending value changes.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- On confirm dialog OK, the value is committed to Firestore and logged.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- On Cancel, pending value is discarded.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+5.4 Restock Algorithm}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Inputs:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- barCurrent, barMax, warehouseAvailable, requestedAdd.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Cases:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- If warehouseAvailable < requestedAdd:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Warn user, optionally clamp to available.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- If barCurrent + requestedAdd <= barMax + epsilon:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Apply restock without changing max.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- If barCurrent + requestedAdd > barMax + epsilon:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Ask user whether to increase max.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5
+\u8198\'20 \u8198\'20 \u8198\'20 \u8198\'20 }{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Apply only on confirmation.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+5.5 Order Lifecycle and Quantity Integrity}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Each OrderLine has quantityOrdered as the single source of truth.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Order creation sets quantityOrdered exactly to the user\u226\'e2\u8364\'80\u8482\'99s input.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Confirming an order never changes quantityOrdered, only sets metadata (status, confirmedBy, confirmedAt).}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Delivering an order sets delivered status; appropriate stock adjustments are done once.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+5.6 History Logging}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- When significant events occur, the app creates HistoryEntry.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Each entry stores enough context to render human-readable text later.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Entries are immutable logs for audit and statistics.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ul\ulc0\b0\f5\loch
+5.7 Statistics Computation}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Simple, robust metrics computed by querying History and Orders.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Avoids over-complex analytics; focuses on what bar owners actually need.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b\f5\loch
+6. Overall Idea and Vision}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Smart Bar Stock is designed to:}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Replace chaotic Excel sheets and paper notes.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Give bar and restaurant owners a real-time, multi-device way to track stock.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Make staff actions transparent and accountable.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+- Stay simple and intuitive enough that training takes minutes, not hours.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Backend: Firebase (Auth + Firestore) with strict company-based isolation.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Frontend: Flutter app that works on Android, iOS, and Web, with a compact and role-based UI.}
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+
+\par \pard\plain \s0\rtlch\af7\afs24\alang1081 \ltrch\lang2057\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\aspalpha\ltrpar\cf0\f3\fs24\lang2057\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af5\loch\cf8\fs24\ulnone\ulc0\b0\f5\loch
+Future work includes further UI simplification, additional reporting, and fine-tuned performance, but the core logic is already oriented around real-world bar operations and speed of daily use.}
+\par }

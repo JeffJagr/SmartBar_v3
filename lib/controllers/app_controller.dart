@@ -6,6 +6,7 @@ import '../services/firestore_service.dart';
 import '../services/messaging_service.dart';
 import '../services/permission_service.dart';
 import '../state/app_state.dart';
+import '../repositories/membership_repository.dart';
 
 /// AppController wraps the shared AppState and exposes semantic getters
 /// requested for global access to auth/session data.
@@ -15,6 +16,7 @@ class AppController extends AppState {
           authService: AuthService(),
           firestoreService: FirestoreService(),
           messagingService: MessagingService(),
+          membershipRepository: FirestoreMembershipRepository(),
         );
 
   final PermissionService permissions = const PermissionService();

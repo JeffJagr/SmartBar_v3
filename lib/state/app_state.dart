@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../models/company.dart';
@@ -15,19 +16,24 @@ import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../services/messaging_service.dart';
 import '../services/permission_service.dart';
+import '../repositories/membership_repository.dart';
 
 class AppState extends ChangeNotifier {
   AppState({
     required AuthService authService,
     required FirestoreService firestoreService,
     required MessagingService messagingService,
-  })  : _authService = authService,
-        _firestoreService = firestoreService,
-        _messagingService = messagingService;
+    MembershipRepository? membershipRepository,
+  }) : _authService = authService,
+       _firestoreService = firestoreService,
+       _messagingService = messagingService,
+       _membershipRepository =
+           membershipRepository ?? FirestoreMembershipRepository();
 
   final AuthService _authService;
   final FirestoreService _firestoreService;
   final MessagingService _messagingService;
+  final MembershipRepository _membershipRepository;
 
   User? ownerUser;
   StaffSession? staffSession;
@@ -50,29 +56,59 @@ class AppState extends ChangeNotifier {
 
   bool get isAuthenticated => ownerUser != null || staffSession != null;
   bool get isOwner => ownerUser != null;
+  MessagingService get messagingService => _messagingService;
   UserRole get role {
     if (isOwner) return UserRole.owner;
-    final roleLower = (currentUserRole ?? currentStaff?.role ?? '').toLowerCase();
+    final roleLower = (currentUserRole ?? currentStaff?.role ?? '')
+        .toLowerCase();
     if (roleLower.contains('manager')) return UserRole.manager;
     if (roleLower.contains('owner')) return UserRole.owner;
     return UserRole.staff;
   }
 
+  /// Re-attach company streams (products/orders/history) for the active company.
+  Future<void> refreshActiveCompany() async {
+    final id = activeCompany?.id;
+    if (id == null || id.isEmpty) return;
+    await _attachCompanyStreams(id);
+    notifyListeners();
+  }
+
   String get roleLabel {
     if (isOwner) return 'owner';
-    if (currentUserRole != null && currentUserRole!.isNotEmpty) return currentUserRole!;
+    if (currentUserRole != null && currentUserRole!.isNotEmpty)
+      return currentUserRole!;
     if (currentStaff?.role.isNotEmpty == true) return currentStaff!.role;
     return 'staff';
   }
+
   String get displayName =>
       ownerUser?.email ?? staffSession?.displayName ?? 'Guest';
 
   PermissionSnapshot permissionSnapshot(PermissionService service) {
-    // TODO: fetch and hydrate explicit permissions from user/company docs.
-    return service.fromApp(app: this, explicitFlags: currentUserPermissions);
+    final perms = currentUserPermissions.isNotEmpty
+        ? currentUserPermissions
+        : _defaultsForRole(role);
+    return service.fromApp(app: this, explicitFlags: perms);
   }
 
   Future<void> bootstrap() async {
+    final existing = FirebaseAuth.instance.currentUser;
+    if (existing != null && existing.isAnonymous) {
+      await _authService.signOut();
+    }
+    // Defensive: ensure we never start owner flows under anonymous/stale sessions.
+    if (FirebaseAuth.instance.currentUser?.isAnonymous == true) {
+      await _authService.signOut();
+    }
+    try {
+      final opts = Firebase.app().options;
+      debugPrint(
+        '[AppStart] projectId=${opts.projectId} uid=${FirebaseAuth.instance.currentUser?.uid ?? 'none'} isAnon=${FirebaseAuth.instance.currentUser?.isAnonymous ?? false}',
+      );
+    } catch (_) {
+      // best-effort diagnostics
+    }
     await _messagingService.init();
     await _messagingService.requestPermission();
     await _messagingService.fetchToken();
@@ -94,7 +130,10 @@ class AppState extends ChangeNotifier {
         companies = [];
         activeCompany = null;
       } else {
-        companies = await _firestoreService.fetchCompaniesForOwner(ownerUser!.uid);
+        companies = await _firestoreService.fetchCompaniesForUser(
+          ownerId: ownerUser!.uid,
+          email: ownerUser!.email,
+        );
         if (companies.isNotEmpty) {
           await setActiveCompany(activeCompany ?? companies.first);
         } else {
@@ -108,31 +147,65 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> registerOwner(String email, String password,
-      {String? displayName}) async {
-    final credential =
-        await _authService.registerOwner(email: email, password: password);
-    final user = credential.user;
-    final name = (displayName?.trim().isNotEmpty ?? false)
-        ? displayName!.trim()
-        : email;
-
-    if (user != null) {
-      await user.updateDisplayName(name);
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'displayName': name,
-        'email': email,
-        'role': 'owner',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+  Future<void> registerOwner(
+    String email,
+    String password, {
+    String? displayName,
+  }) async {
+    final trimmedEmail = email.trim();
+    final trimmedPassword = password.trim();
+    final current = FirebaseAuth.instance.currentUser;
+    if (current != null && current.isAnonymous) {
+      await _authService.signOut();
     }
-    // TODO: add better error handling and validation for registration inputs.
+    if (trimmedEmail.isEmpty) {
+      throw FormatException('Email is required');
+    }
+    final emailValid = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailValid.hasMatch(trimmedEmail)) {
+      throw FormatException('Enter a valid email address');
+    }
+    if (trimmedPassword.length < 8) {
+      throw FormatException('Password must be at least 8 characters');
+    }
+
+    try {
+      final credential = await _authService.registerOwner(
+        email: trimmedEmail,
+        password: trimmedPassword,
+      );
+      final user = credential.user;
+      final name = (displayName?.trim().isNotEmpty ?? false)
+          ? displayName!.trim()
+          : trimmedEmail;
+
+      if (user != null) {
+        await user.updateDisplayName(name);
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'displayName': name,
+          'email': trimmedEmail,
+          'role': 'owner',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message ?? 'Registration failed');
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> signInOwner(String email, String password) async {
+    // If currently signed in anonymously (e.g., after staff use), sign out first.
+    final current = FirebaseAuth.instance.currentUser;
+    if (current != null && current.isAnonymous) {
+      await _authService.signOut();
+    }
     await _authService.signInOwner(email: email, password: password);
-    await _ensureUserProfile(FirebaseAuth.instance.currentUser?.uid,
-        fallbackRole: 'owner');
+    await _ensureUserProfile(
+      FirebaseAuth.instance.currentUser?.uid,
+      fallbackRole: 'owner',
+    );
     // Auth listener will populate companies and active company.
   }
 
@@ -140,65 +213,127 @@ class AppState extends ChangeNotifier {
     required String companyCode,
     required String pin,
   }) async {
-    // TODO: Replace this lookup with a Cloud Function + hashed PIN storage.
-    staffSession = await _authService.signInStaff(
-      companyCode: companyCode,
-      pin: pin,
-    );
-    activeCompany ??= await _firestoreService.fetchCompanyByCode(companyCode) ??
-        _sampleCompany(staffSession!.staffId);
-    companies = activeCompany != null ? [activeCompany!] : [];
-    final companyId = (staffSession?.companyId.isNotEmpty ?? false)
-        ? staffSession!.companyId
-        : activeCompany?.id ?? '';
-    final anonCred = await FirebaseAuth.instance.signInAnonymously();
-    final anonUid = anonCred.user?.uid ?? '';
-    currentStaff = await _fetchStaffMember(companyId, pin) ??
-        StaffMember(
-          id: staffSession?.staffId ?? anonUid,
-          companyId: companyId,
-          name: staffSession?.displayName ?? 'Staff',
-          pin: pin,
-          role: 'Worker',
-          permissions: const {},
-        );
-    currentUserPermissions = currentStaff?.permissions ?? {};
-    // Persist a session doc keyed by auth.uid so Firestore rules can validate staff access.
-    if (anonUid.isNotEmpty && companyId.isNotEmpty) {
-      await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .collection('staffSessions')
-          .doc(anonUid)
-          .set({
-        'companyId': companyId,
-        'staffId': currentStaff!.id,
-        'role': currentStaff!.role,
-        'permissions': currentStaff!.permissions,
-        'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    }
-    // Try to hydrate permissions from session doc (in case staff record has flags).
     try {
-      if (anonUid.isNotEmpty && companyId.isNotEmpty) {
-        final sessionDoc = await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(companyId)
-            .collection('staffSessions')
-            .doc(anonUid)
-            .get();
-        if (sessionDoc.exists) {
-          final data = sessionDoc.data() ?? {};
-          currentUserPermissions =
-              (data['permissions'] as Map?)?.cast<String, bool>() ??
-                  currentUserPermissions;
-        }
+      staffSession = await _authService.signInStaff(
+        companyCode: companyCode,
+        pin: pin,
+      );
+      final companyId = staffSession?.companyId ?? '';
+      final authUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final staffDocId = staffSession?.staffId.isNotEmpty == true
+          ? staffSession!.staffId
+          : authUid;
+      if (companyId.isEmpty) {
+        throw FirebaseAuthException(
+          code: 'missing-company',
+          message:
+              'No company found for this PIN. Ask your manager to recreate the staff code.',
+        );
       }
-    } catch (_) {
-      // keep defaults
+      if (authUid.isEmpty) {
+        throw FirebaseAuthException(
+          code: 'no-auth-uid',
+          message: 'Could not establish authentication for staff login.',
+        );
+      }
+
+      currentStaff = StaffMember(
+        id: staffDocId,
+        companyId: companyId,
+        name: staffSession?.displayName ?? 'Staff',
+        pin: pin,
+        role: staffSession?.role ?? 'staff',
+        permissions: (staffSession?.permissions ?? {}).map(
+          (k, v) => MapEntry(k, v == true),
+        ),
+      );
+      currentUserPermissions = (currentStaff?.permissions ?? {});
+      currentUserRole = currentUserRole ?? currentStaff?.role;
+      if (currentUserPermissions.isEmpty) {
+        currentUserPermissions = _defaultsForRole(role);
+      }
+
+      // Fetch company after membership docs exist so rules pass.
+      activeCompany = companyId.isNotEmpty
+          ? await _firestoreService.fetchCompanyById(companyId)
+          : null;
+      companies = activeCompany != null ? [activeCompany!] : [];
+
+      // Clear company-scoped data to avoid leaking previous company state.
+      products = [];
+      orders = [];
+      history = [];
+      notifyListeners();
+
+      if (activeCompany == null && companyId.isNotEmpty) {
+        activeCompany = Company(
+          id: companyId,
+          name: staffSession?.displayName ?? 'Company',
+          companyCode: companyCode,
+          ownerIds: const [],
+          createdAt: DateTime.now(),
+        );
+      }
+
+      await _attachCompanyStreams(companyId);
+      await _hydrateMemberPermissions(companyId);
+      notifyListeners();
+    } on FirebaseException catch (e) {
+      debugPrint(
+        'Staff login FirebaseException: code=${e.code} message=${e.message}',
+      );
+      rethrow;
+    } catch (e) {
+      debugPrint('Staff login error: $e');
+      rethrow;
     }
-    await _attachCompanyStreams(companyId);
-    notifyListeners();
+  }
+
+  Map<String, bool> _defaultsForRole(UserRole role) {
+    switch (role) {
+      case UserRole.owner:
+        return {
+          'editProducts': true,
+          'adjustQuantities': true,
+          'createOrders': true,
+          'confirmOrders': true,
+          'receiveOrders': true,
+          'transferStock': true,
+          'setRestockHint': true,
+          'viewHistory': true,
+          'addNotes': true,
+          'manageUsers': true,
+          'manageSuppliers': true,
+        };
+      case UserRole.manager:
+        return {
+          'editProducts': true,
+          'adjustQuantities': true,
+          'createOrders': true,
+          'confirmOrders': true,
+          'receiveOrders': true,
+          'transferStock': true,
+          'setRestockHint': true,
+          'viewHistory': true,
+          'addNotes': true,
+          'manageUsers': false,
+          'manageSuppliers': true,
+        };
+      case UserRole.staff:
+        return {
+          'editProducts': false,
+          'adjustQuantities': false,
+          'createOrders': true,
+          'confirmOrders': false,
+          'receiveOrders': false,
+          'transferStock': false,
+          'setRestockHint': true,
+          'viewHistory': false,
+          'addNotes': true,
+          'manageUsers': false,
+          'manageSuppliers': false,
+        };
+    }
   }
 
   Future<void> signOut() async {
@@ -220,6 +355,13 @@ class AppState extends ChangeNotifier {
   Future<void> setActiveCompany(Company company) async {
     if (activeCompany?.id == company.id) return;
     activeCompany = company;
+    // Clear stale data before reattaching streams.
+    products = [];
+    orders = [];
+    history = [];
+    notifyListeners();
+    await _ensureCompanyMembershipDoc(company.id);
+    await _hydrateMemberPermissions(company.id);
     await _attachCompanyStreams(company.id);
     notifyListeners();
   }
@@ -228,31 +370,47 @@ class AppState extends ChangeNotifier {
     await _closeCompanyStreams();
     if (companyId.isEmpty) return;
 
-    _productsSubscription =
-        _firestoreService.productsStream(companyId).listen((data) {
-      products = data;
-      notifyListeners();
-    }, onError: (_) {
-      products = _sampleProducts(companyId);
-      notifyListeners();
-    });
+    _productsSubscription = _firestoreService
+        .productsStream(companyId)
+        .listen(
+          (data) {
+            products = data;
+            notifyListeners();
+          },
+          onError: (_) {
+            products = _sampleProducts(companyId);
+            notifyListeners();
+          },
+        );
 
-    _ordersSubscription = _firestoreService.ordersStream(companyId).listen((data) {
-      orders = data;
-      notifyListeners();
-    }, onError: (_) {
-      orders = _sampleOrders(companyId);
-      notifyListeners();
-    });
+    _ordersSubscription = _firestoreService
+        .ordersStream(companyId)
+        .listen(
+          (data) {
+            orders = data;
+            notifyListeners();
+          },
+          onError: (_) {
+            orders = _sampleOrders(companyId);
+            notifyListeners();
+          },
+        );
 
-    _historySubscription =
-        _firestoreService.historyStream(companyId).listen((data) {
-      history = data;
-      notifyListeners();
-    }, onError: (_) {
-      history = _sampleHistory(companyId);
-      notifyListeners();
-    });
+    _historySubscription = _firestoreService
+        .historyStream(companyId)
+        .listen(
+          (data) {
+            history = data;
+            notifyListeners();
+          },
+          onError: (_) {
+            history = _sampleHistory(companyId);
+            notifyListeners();
+          },
+        );
+
+    // Hydrate role/permissions from membership doc for UI/permission checks.
+    await _hydrateMemberPermissions(companyId);
   }
 
   Future<void> _closeCompanyStreams() async {
@@ -305,31 +463,21 @@ class AppState extends ChangeNotifier {
     ];
   }
 
-  Company _sampleCompany(String ownerId) {
-    return Company(
-      id: 'demo-company',
-      name: 'Demo Bar',
-      companyCode: 'DEMO-001',
-      ownerIds: [ownerId],
-      createdAt: DateTime.now(),
-    );
-  }
-
   Future<Company> createCompany({
     required String name,
-    String? companyCode,
+    required String companyCode,
   }) async {
-    if (ownerUser == null) {
-      throw StateError('Only owners can create companies.');
+    if (ownerUser == null || ownerUser!.isAnonymous) {
+      throw StateError('Only signed-in owners can create companies.');
     }
-    final company = await _firestoreService.createCompany(
+    final result = await _firestoreService.createCompany(
       name: name,
       ownerId: ownerUser!.uid,
       companyCode: companyCode,
     );
-    companies = [...companies, company];
-    await setActiveCompany(company);
-    return company;
+    companies = [...companies, result];
+    await setActiveCompany(result);
+    return result;
   }
 
   List<OrderModel> _sampleOrders(String companyId) {
@@ -396,53 +544,63 @@ class AppState extends ChangeNotifier {
     ];
   }
 
-  Future<StaffMember?> _fetchStaffMember(String companyId, String pin) async {
-    if (companyId.isEmpty) return null;
+  // Deprecated legacy staff lookup kept for reference.
+  // ignore: unused_element
+  Future<StaffMember?> _fetchStaffMember(String companyId, String pin) async =>
+      null;
+
+  Future<void> _hydrateMemberPermissions(String companyId) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-      final central = await firestore
-          .collection('staff')
-          .where('companyId', isEqualTo: companyId)
-          .where('pin', isEqualTo: pin)
-          .limit(1)
-          .get();
-      if (central.docs.isNotEmpty) {
-        return StaffMember.fromFirestore(central.docs.first);
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null || uid.isEmpty) return;
+      final member = await _membershipRepository.getMember(
+        companyId: companyId,
+        uid: uid,
+      );
+      if (member != null) {
+        currentUserPermissions = member.permissions;
+        currentUserRole = member.role;
+      } else {
+        currentUserPermissions = {};
+        currentUserRole = null;
       }
-      final sub = await firestore
-          .collection('companies')
-          .doc(companyId)
-          .collection('staff')
-          .where('pin', isEqualTo: pin)
-          .limit(1)
-          .get();
-      if (sub.docs.isNotEmpty) {
-        return StaffMember.fromFirestore(sub.docs.first);
-      }
-    } catch (_) {
-      debugPrint('Staff lookup failed for $companyId');
+      notifyListeners();
+    } catch (e) {
+      debugPrint(
+        'Hydrate member permissions failed for company $companyId: $e',
+      );
     }
-    return null;
   }
 
-  Future<void> _ensureUserProfile(String? uid,
-      {String fallbackRole = 'staff'}) async {
+  Future<void> _ensureCompanyMembershipDoc(String companyId) async {
+    if (ownerUser == null || companyId.isEmpty) return;
+    try {
+      final uid = ownerUser!.uid;
+      await _membershipRepository.upsertMemberSelf(
+        companyId: companyId,
+        uid: uid,
+        role: 'owner',
+        permissions: _defaultsForRole(UserRole.owner),
+        displayName: ownerUser?.displayName ?? ownerUser?.email ?? 'Owner',
+      );
+    } catch (_) {
+      // best effort; rules still allow owner via ownerIds
+    }
+  }
+
+  Future<void> _ensureUserProfile(
+    String? uid, {
+    String fallbackRole = 'staff',
+  }) async {
     if (uid == null) return;
     try {
       final ref = FirebaseFirestore.instance.collection('users').doc(uid);
       final doc = await ref.get();
-      if (doc.exists) {
-        final data = doc.data() ?? {};
-        currentUserPermissions =
-            (data['permissions'] as Map?)?.cast<String, bool>() ?? {};
-        currentUserRole = data['role'] as String? ?? fallbackRole;
-      } else {
+      if (!doc.exists) {
         await ref.set({
           'role': fallbackRole,
           'createdAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-        currentUserPermissions = {};
-        currentUserRole = fallbackRole;
       }
     } catch (_) {
       // ignore profile load errors

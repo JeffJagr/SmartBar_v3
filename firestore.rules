@@ -1,67 +1,128 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
+
+    function signedIn() { return request.auth != null; }
+
+    function emailLower() {
+      return signedIn() && request.auth.token.email != null
+        ? request.auth.token.email.toLowerCase()
+        : null;
     }
-    function userDoc(uid) {
-      return get(/databases/$(database)/documents/users/$(uid));
+
+    function companyDoc(companyId) {
+      return get(/databases/$(database)/documents/companies/$(companyId));
     }
-    function userRole(uid) {
-      return userDoc(uid).data.role;
+
+    function isOwner(companyId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/companies/$(companyId))
+        && (
+          (request.auth.uid in companyDoc(companyId).data.ownerIds)
+          || companyDoc(companyId).data.ownerId == request.auth.uid // legacy single ownerId
+          || companyDoc(companyId).data.createdBy == request.auth.uid // creation fallback
+          || (isAuthMapped(companyId)
+            && (role(companyId) == "owner" || role(companyId) == "manager"))
+        );
     }
-    function isOwner() {
-      return isSignedIn() && userDoc(request.auth.uid).exists
-        && userRole(request.auth.uid) == 'owner';
+
+    function isPartner(companyId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/companies/$(companyId))
+        && emailLower() != null
+        && (emailLower() in companyDoc(companyId).data.partnerEmails);
     }
-    function isManagerOrOwner() {
-      return isSignedIn() && userDoc(request.auth.uid).exists
-        && (userRole(request.auth.uid) in ['owner','manager']);
+
+    function isAuthMapped(companyId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/companies/$(companyId)/authMap/$(request.auth.uid));
     }
-    function isStaff() {
-      return isSignedIn() && userDoc(request.auth.uid).exists
-        && userRole(request.auth.uid) == 'staff';
+
+    function role(companyId) {
+      return isAuthMapped(companyId)
+        ? get(/databases/$(database)/documents/companies/$(companyId)/authMap/$(request.auth.uid)).data.role
+        : null;
+    }
+
+    function isManager(companyId) {
+      return isOwner(companyId) || isPartner(companyId) || role(companyId) == "manager";
+    }
+
+    function canReadCompany(companyId) {
+      return isOwner(companyId) || isPartner(companyId) || isAuthMapped(companyId);
+    }
+
+    /* staffPins: used to resolve companyCode -> companyId + PIN check */
+    match /staffPins/{companyCode} {
+      allow read: if signedIn();
+      // Writes ONLY by managers of the linked companyId.
+      // Requires staffPins docs to contain companyId.
+      allow create, update, delete: if signedIn()
+        && request.resource.data.companyId is string
+        && isManager(request.resource.data.companyId);
+    }
+
+    /* users: each user can read/write only own profile */
+    match /users/{uid} {
+      allow get, create, update: if signedIn() && request.auth.uid == uid;
+      allow list, delete: if false;
     }
 
     match /companies/{companyId} {
-      allow create: if isOwner();            // only owner can create companies
-      allow read: if isSignedIn();
-      allow update, delete: if isOwner();
 
-      // Layouts (bar/warehouse). Only owner/manager can write; all signed-in can read.
-      match /layouts/{layoutId} {
-        allow read: if isSignedIn();
-        allow create, update, delete: if isManagerOrOwner();
+      allow get: if canReadCompany(companyId);
+
+      // Allow list for signed in; the get rule still enforces doc-level access.
+      // Ensure the app only queries with ownerIds/partnerEmails filters.
+      allow list: if signedIn();
+
+      // Create company: signed-in user
+      allow create: if signedIn();
+
+      // Update/delete company settings: managers
+      allow update, delete: if isManager(companyId);
+
+      /* authMap membership */
+      match /authMap/{uid} {
+        // Read own membership, managers can list
+        allow get: if signedIn() && request.auth.uid == uid && canReadCompany(companyId);
+        allow list: if isManager(companyId);
+
+        // Create:
+        // - managers can create any
+        // - user can create their own doc with role "staff" (MVP staff join)
+        allow create: if signedIn()
+          && (
+            isManager(companyId)
+            || (request.auth.uid == uid && request.resource.data.role == "staff")
+          );
+
+        // Update:
+        // - managers can update
+        // - user can update own doc but cannot change role
+        allow update: if signedIn()
+          && (
+            isManager(companyId)
+            || (request.auth.uid == uid && request.resource.data.role == resource.data.role)
+          );
+
+        allow delete: if isManager(companyId);
       }
 
-      match /users/{userId} {
-        allow read: if isSignedIn();
-        allow create, update, delete: if isManagerOrOwner();
-      }
+      /* Company subcollections (orders/notes/history/groups/products/etc.) */
+      match /{coll}/{docId} {
+        allow read: if canReadCompany(companyId);
 
-      match /products/{productId} {
-        allow read: if isSignedIn();
-        allow create, update, delete: if isManagerOrOwner();
-      }
-
-      match /orders/{orderId} {
-        allow read: if isSignedIn();
-        allow create: if isSignedIn();              // staff can create orders
-        allow update, delete: if isManagerOrOwner(); // status changes restricted
-      }
-
-      match /notes/{noteId} {
-        allow read: if isSignedIn();
-        allow create: if isSignedIn();
-        allow update, delete: if isManagerOrOwner();
+        // Create/Update allowed for any member (staff included) — MVP operational.
+        // Delete only managers.
+        allow create, update: if canReadCompany(companyId);
+        allow delete: if isManager(companyId);
       }
     }
 
-    // Global users collection for roles/permissions lookup.
-    match /users/{uid} {
-      allow read: if isSignedIn() && request.auth.uid == uid;
-      allow create: if isSignedIn() && request.auth.uid == uid;
-      allow update, delete: if isSignedIn() && request.auth.uid == uid;
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

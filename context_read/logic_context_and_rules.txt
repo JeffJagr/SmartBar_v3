@@ -1,0 +1,45 @@
+SMART BAR STOCK — Codex Logic Context & Working Rules
+Version: 1.0  |  Date: 29 Dec 2025  |  Audience: Codex / AI coding assistant
+Purpose: Provide stable context, coding rules, and operating procedures so Codex can work consistently across separate chats with limited memory.
+A) One-Paragraph Context (Paste First)
+You are working on Smart Bar Stock, a production-focused Flutter app (Android/iOS/Web) for multi-tenant bar inventory and supplier ordering. Backend is Firebase on Blaze (Firebase Auth + Cloud Firestore). The app supports Owner/Manager (email/password) and Staff (company code + PIN) with granular permissions. The app is real-time via Firestore listeners. Existing features include inventory (bar/warehouse), restock, orders with lifecycle and sequential numbers, history/audit, notes with notifications, users/permissions, partner invite via company settings, and multi-company selection.
+B) Non-Negotiable Rules (Codex Must Follow)
+    1. Do not break existing features. Prefer additive changes behind feature flags or new screens/routes.
+    2. Always keep Firestore multi-tenancy isolation: every query/write is scoped to activeCompanyId (or an explicit list of allowed companyIds for the new Owner Network Screen).
+    3. Never bypass permission checks. Enforce permissions in UI + ViewModel/Controller and keep Firestore rules aligned.
+    4. Do not introduce large architectural rewrites mid-feature. If refactor is required, do it in a dedicated refactor phase with a clear migration plan.
+    5. Keep analyzer clean. Fix lint warnings introduced by your changes.
+    6. When adding new Firestore fields, include backward compatibility/migrations for existing documents (null-safe reads, defaults).
+    7. Prefer small, reviewable commits: one functional change set per commit with clear message.
+C) Coding Standards
+    • Flutter: Material 3, mobile-first UI, responsive for web/desktop; avoid heavy layouts on small screens.
+    • State: current baseline is ChangeNotifier/AppController + domain ViewModels/Repositories. Keep consistency unless a planned migration stage says otherwise.
+    • Models: immutable-ish DTOs with fromJson/toJson; keep Firestore snapshots in order items to avoid broken UI if products are deleted.
+    • Error handling: show user-friendly SnackBars/Dialogs; log technical details (and later forward to Crashlytics).
+    • Performance: use ListView.builder, caching, and pagination. Avoid reading entire collections when not needed.
+D) Firestore Conventions
+    • All company-scoped collections live under companies/{companyId}/...
+    • Use server timestamps for createdAt/updatedAt where consistency matters.
+    • Use transactions for counters (order numbers) and for atomic stock updates when receiving orders.
+    • Create/maintain composite indexes for any compound filters (supplier+status+createdAt etc.).
+E) Feature Under Active Development: Owner Network Screen
+Goal
+Implement a new Owner Network Screen that provides cross-company management without switching company context.
+Minimum deliverables
+    8. Network Orders (Cart): aggregated orders across all owned/partnered companies with filters (company/supplier/product/status/date) and totals.
+    9. Cross-company cart creation: allow building one supplier order that contains line items for multiple companies (internally stored as a network order referencing company orders, or generated into per-company orders).
+    10. Network Notes: aggregated notes across companies with assignment/@mentions and notification docs.
+    11. Network Stats and Network History: cross-company aggregation views with pagination.
+F) How Codex Should Work in Each Chat
+    12. Start each chat by restating which phase/step you are implementing and list the files you plan to touch.
+    13. Before coding, outline the data model changes (if any) and the UI flow in 5–10 bullets.
+    14. Implement with minimal surface area; keep public APIs stable.
+    15. After implementation, list manual test cases (happy path + 2–3 edge cases).
+    16. Finish with a concise diff summary and any follow-up notes.
+G) Acceptance Checklist (Definition of Done for a Step)
+    • Build succeeds on at least one target (Android or Web).
+    • No new analyzer errors/warnings introduced.
+    • Permission gates are enforced in UI and in logic.
+    • Firestore reads/writes are scoped correctly (company or allowed company list).
+    • UX includes loading states and user-facing errors.
+    • History/audit logging is updated where relevant.

@@ -18,6 +18,7 @@ import '../../sections/print_export_screen.dart';
 import '../../sections/restock_screen.dart';
 import '../../sections/statistics_screen.dart';
 import '../../sections/users_screen.dart';
+import '../../sections/suppliers_screen.dart';
 import '../../sections/warehouse_screen.dart';
 import 'package:smart_bar_app_v3/ui/sections/notes_screen.dart';
 import '../../sections/inventory_list_screen.dart';
@@ -25,6 +26,8 @@ import '../../widgets/product_form_sheet.dart';
 import '../../sections/notifications_screen.dart';
 import 'package:smart_bar_app_v3/screens/auth/role_selection_screen.dart';
 import 'package:smart_bar_app_v3/screens/company/company_list_screen.dart';
+import '../owner_super_screen.dart';
+import '../../../models/user_role.dart';
 
 enum _HomeSection {
   bar,
@@ -35,6 +38,7 @@ enum _HomeSection {
   history,
   statistics,
   users,
+  suppliers,
   companySettings,
   printExport,
   syncRefresh,
@@ -88,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final permSnapshot = app.currentPermissionSnapshot;
     final canManageProducts = app.permissions.canEditProducts(permSnapshot);
     final isOwner = app.isOwner;
+    final isOwnerOrManager = app.isOwner || app.role == UserRole.manager;
     // Keep VMs in sync with current permission snapshot instead of owner-only.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final invVm = context.read<InventoryViewModel>();
@@ -129,13 +134,18 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: app.toggleThemeMode,
             tooltip: 'Toggle theme',
           ),
-          Consumer<OrdersViewModel?>(
-            builder: (context, vm, _) {
+          Consumer2<OrdersViewModel?, NotesViewModel?>(
+            builder: (context, ordersVm, notesVm, _) {
               final pendingCount =
-                  vm?.orders.where((o) => o.status == OrderStatus.pending).length ?? 0;
-              final activeCount = vm?.orders
+                  ordersVm?.orders.where((o) => o.status == OrderStatus.pending).length ?? 0;
+              final activeCount = ordersVm?.orders
                       .where((o) =>
                           o.status == OrderStatus.pending || o.status == OrderStatus.confirmed)
+                      .length ??
+                  0;
+              final userId = app.ownerUser?.uid ?? app.currentStaff?.id ?? '';
+              final assignedCount = notesVm?.notes
+                      .where((n) => n.assigneeIds.contains(userId) && !n.readBy.containsKey(userId))
                       .length ??
                   0;
               return Stack(
@@ -175,19 +185,94 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
+                  Positioned(
+                    right: 48,
+                    top: 6,
+                    child: IconButton(
+                      tooltip: 'Assigned notes',
+                      onPressed: () => _selectSection(_HomeSection.notes, closeDrawer: false),
+                      icon: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(Icons.mark_email_unread_outlined),
+                          if (assignedCount > 0)
+                            Positioned(
+                              right: -2,
+                              top: -2,
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepPurple,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  assignedCount.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 10),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               );
             },
           ),
         ],
       ),
-      drawer: _buildDrawer(app, company, isOwner),
+      drawer: _buildDrawer(app, company, isOwner, isOwnerOrManager),
       body: _buildBody(),
       floatingActionButton: _buildFab(canManageProducts),
     );
   }
 
   Widget _buildBody() {
+    final title = _sectionTitle(_selected);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.07),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(_sectionIcon(_selected),
+                    size: 18, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Expanded(child: _buildSection()),
+      ],
+    );
+  }
+
+  Widget _buildSection() {
     switch (_selected) {
       case _HomeSection.bar:
         return const BarScreen();
@@ -205,6 +290,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return const StatisticsScreen();
       case _HomeSection.users:
         return const UsersScreen();
+      case _HomeSection.suppliers:
+        return const SuppliersScreen();
       case _HomeSection.companySettings:
         return const CompanySettingsScreen();
       case _HomeSection.printExport:
@@ -222,6 +309,72 @@ class _HomeScreenState extends State<HomeScreen> {
         return const NotesScreen();
       case _HomeSection.notifications:
         return const NotificationsScreen();
+    }
+  }
+
+  String _sectionTitle(_HomeSection section) {
+    switch (section) {
+      case _HomeSection.bar:
+        return 'Bar';
+      case _HomeSection.warehouse:
+        return 'Warehouse';
+      case _HomeSection.inventory:
+        return 'Inventory';
+      case _HomeSection.restock:
+        return 'Restock';
+      case _HomeSection.orders:
+        return 'Orders';
+      case _HomeSection.history:
+        return 'History';
+      case _HomeSection.statistics:
+        return 'Statistics';
+      case _HomeSection.users:
+        return 'Users';
+      case _HomeSection.suppliers:
+        return 'Suppliers';
+      case _HomeSection.companySettings:
+        return 'Company Settings';
+      case _HomeSection.printExport:
+        return 'Print / Export';
+      case _HomeSection.syncRefresh:
+        return 'Sync / Refresh';
+      case _HomeSection.notes:
+        return 'Notes';
+      case _HomeSection.notifications:
+        return 'Notifications';
+    }
+  }
+
+  IconData _sectionIcon(_HomeSection section) {
+    switch (section) {
+      case _HomeSection.bar:
+        return Icons.local_bar;
+      case _HomeSection.warehouse:
+        return Icons.warehouse_outlined;
+      case _HomeSection.inventory:
+        return Icons.list_alt_outlined;
+      case _HomeSection.restock:
+        return Icons.swap_vert;
+      case _HomeSection.orders:
+        return Icons.shopping_cart_outlined;
+      case _HomeSection.history:
+        return Icons.history;
+      case _HomeSection.statistics:
+        return Icons.insights_outlined;
+      case _HomeSection.users:
+        return Icons.group_outlined;
+      case _HomeSection.suppliers:
+        return Icons.storefront_outlined;
+      case _HomeSection.companySettings:
+        return Icons.settings_outlined;
+      case _HomeSection.printExport:
+        return Icons.print_outlined;
+      case _HomeSection.syncRefresh:
+        return Icons.refresh;
+      case _HomeSection.notes:
+        return Icons.note_alt_outlined;
+      case _HomeSection.notifications:
+        return Icons.notifications_outlined;
     }
   }
 
@@ -245,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Drawer _buildDrawer(AppController app, Company? company, bool isOwner) {
+  Drawer _buildDrawer(AppController app, Company? company, bool isOwner, bool isOwnerOrManager) {
     return Drawer(
       child: SafeArea(
         child: ListView(
@@ -279,15 +432,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
               ),
-            if (isOwner)
+            if (isOwnerOrManager)
               _drawerItem(
-                icon: Icons.group_add_outlined,
-                label: 'Invite Partner Owner',
+                icon: Icons.public,
+                label: 'Owner Dashboard',
                 onTap: () {
-                  // TODO: implement invite partner flow.
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invite flow coming soon')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const OwnerSuperScreen()),
                   );
                 },
               ),
@@ -338,6 +489,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.note_alt_outlined,
               label: 'Notes',
               onTap: () => _selectSection(_HomeSection.notes),
+            ),
+            _drawerItem(
+              icon: Icons.storefront_outlined,
+              label: 'Suppliers',
+              onTap: () => _selectSection(_HomeSection.suppliers),
             ),
             _drawerItem(
               icon: Icons.notifications,
