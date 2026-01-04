@@ -22,6 +22,7 @@ import '../../sections/warehouse_screen.dart';
 import 'package:smart_bar_app_v3/ui/sections/notes_screen.dart';
 import '../../sections/inventory_list_screen.dart';
 import '../../widgets/product_form_sheet.dart';
+import '../../sections/notifications_screen.dart';
 import 'package:smart_bar_app_v3/screens/auth/role_selection_screen.dart';
 import 'package:smart_bar_app_v3/screens/company/company_list_screen.dart';
 
@@ -38,6 +39,7 @@ enum _HomeSection {
   printExport,
   syncRefresh,
   notes,
+  notifications,
 }
 
 class HomeScreen extends StatefulWidget {
@@ -72,9 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _selectSection(_HomeSection section) {
+  void _selectSection(_HomeSection section, {bool closeDrawer = true}) {
     setState(() => _selected = section);
-    Navigator.of(context).pop(); // close drawer
+    if (closeDrawer) {
+      Navigator.of(context).pop(); // close drawer
+    }
   }
 
   @override
@@ -84,9 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final permSnapshot = app.currentPermissionSnapshot;
     final canManageProducts = app.permissions.canEditProducts(permSnapshot);
     final isOwner = app.isOwner;
-    // Update permissions for VMs based on role.
+    // Keep VMs in sync with current permission snapshot instead of owner-only.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<InventoryViewModel>().setPermissions(isOwner: isOwner);
+      final invVm = context.read<InventoryViewModel>();
+      invVm.applyPermissionContext(
+        snapshot: permSnapshot,
+        service: app.permissions,
+      );
       context.read<NotesViewModel>().setPermissions(isOwner: isOwner);
     });
     if (company == null) {
@@ -99,15 +107,14 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(company?.name ?? 'No company'),
-            if (company != null)
-              Text(
-                'Code: ${company.companyCode}',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Theme.of(context).colorScheme.primary),
-              ),
+            Text(company.name),
+            Text(
+              'Code: ${company.companyCode}',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+            ),
           ],
         ),
         actions: [
@@ -124,6 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Consumer<OrdersViewModel?>(
             builder: (context, vm, _) {
+              final pendingCount =
+                  vm?.orders.where((o) => o.status == OrderStatus.pending).length ?? 0;
               final activeCount = vm?.orders
                       .where((o) =>
                           o.status == OrderStatus.pending || o.status == OrderStatus.confirmed)
@@ -134,9 +143,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   IconButton(
                     tooltip: 'Orders',
-                    onPressed: () => _selectSection(_HomeSection.orders),
+                    onPressed: () => _selectSection(_HomeSection.orders, closeDrawer: false),
                     icon: const Icon(Icons.shopping_cart_outlined),
                   ),
+                  if (pendingCount > 0)
+                    Positioned(
+                      right: 6,
+                      top: 8,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.amber,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
                   if (activeCount > 0)
                     Positioned(
                       right: 10,
@@ -188,10 +210,18 @@ class _HomeScreenState extends State<HomeScreen> {
       case _HomeSection.printExport:
         return const PrintExportScreen();
       case _HomeSection.syncRefresh:
-        // TODO: implement a real refresh (re-attach streams or trigger data reload).
-        return const Center(child: Text('Sync / Refresh coming soon'));
+        final app = context.watch<AppController>();
+        return Center(
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh data'),
+            onPressed: () => app.refreshActiveCompany(),
+          ),
+        );
       case _HomeSection.notes:
         return const NotesScreen();
+      case _HomeSection.notifications:
+        return const NotificationsScreen();
     }
   }
 
@@ -308,6 +338,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.note_alt_outlined,
               label: 'Notes',
               onTap: () => _selectSection(_HomeSection.notes),
+            ),
+            _drawerItem(
+              icon: Icons.notifications,
+              label: 'Notifications',
+              onTap: () => _selectSection(_HomeSection.notifications),
             ),
             _drawerItem(
               icon: Icons.refresh_outlined,
